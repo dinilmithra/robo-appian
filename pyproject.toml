@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "robo-appian"
+version = "0.1.0"
+description = "Reusable Playwright components for Appian automation"
+authors = []
+packages = [{ include = "robo_appian" }]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+playwright = "1.58.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.4,<9.0"
+black = "25.1.0"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py39", "py310", "py311", "py312"]
