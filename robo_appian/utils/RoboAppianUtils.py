@@ -1,13 +1,7 @@
 """Cross-component utility helpers for the robo_appian package."""
 
-try:
-    import tomllib  # Python 3.11+
-except ModuleNotFoundError:
-    try:
-        import tomli as tomllib  # type: ignore[no-redef]  # pip install tomli
-    except ModuleNotFoundError:
-        tomllib = None  # type: ignore[assignment]
 from pathlib import Path
+import tomllib
 
 
 class RoboAppianUtils:
