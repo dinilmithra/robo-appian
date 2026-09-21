@@ -55,7 +55,7 @@ class ComponentUtils:
         expect(visible_locator).to_be_visible()
         expect(visible_locator).to_be_enabled()
 
-        logger.info("Click target ready; dispatching Playwright click.")
+        logger.info("Before button/element click: Playwright target is visible and enabled.")
 
         try:
             visible_locator.click()
@@ -74,7 +74,7 @@ class ComponentUtils:
             logger.info("Forced Playwright click completed after pointer interception.")
             return
 
-        logger.info("Playwright click completed successfully.")
+        logger.info("After button/element click: Playwright click completed successfully.")
 
     @staticmethod
     def click_by_text(page: Page, text: str, exact: bool = True) -> None:
@@ -128,7 +128,7 @@ class ComponentUtils:
         Args:
             scope: Appian page or locator associated with the triggered action.
         """
-        logger.info("Appian processing check started.")
+        logger.info("Before wait_for_appian_action_completed.")
 
         processing = scope.locator(
             "#appian-nprogress, #appian-working-indicator-hidden"
@@ -141,6 +141,7 @@ class ComponentUtils:
             )
         except PlaywrightTimeoutError:
             logger.info("No Appian global processing indicator was detected.")
+            logger.info("After wait_for_appian_action_completed: no processing cycle detected.")
             return
 
         expect(
@@ -151,6 +152,7 @@ class ComponentUtils:
         logger.info(
             "Appian processing completed: global processing indicators absent."
         )
+        logger.info("After wait_for_appian_action_completed: processing completed.")
 
     @staticmethod
     def wait_until_visible(scope: Scope, message: str = None) -> None:

@@ -219,9 +219,9 @@ class Button:
             button, f"Button '{label}' was not rendered and visible."
         ).to_be_visible()
         expect(button, f"Button '{label}' was visible but not enabled.").to_be_enabled()
-        logger.info("Button click requested: label='%s'.", label)
+        logger.info("Before button click: label='%s'.", label)
         ComponentUtils.click(button)
-        logger.info("Button click returned: label='%s'.", label)
+        logger.info("After button click: label='%s'.", label)
 
     @staticmethod
     def click(
@@ -230,7 +230,7 @@ class Button:
         exact: bool = True,
     ) -> None:
         """Wait for a native HTML button to be actionable, then click it."""
-        logger.info("Button click requested: label='%s'.", label)
+        logger.info("Before button click: label='%s'.", label)
 
         button = Button.wait_until_ready(
             scope,
@@ -240,7 +240,7 @@ class Button:
 
         ComponentUtils.click(button)
 
-        logger.info("Button click returned: label='%s'.", label)
+        logger.info("After button click: label='%s'.", label)
 
     @staticmethod
     def wait_until_hidden(
