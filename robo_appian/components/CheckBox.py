@@ -1,6 +1,6 @@
 """Generic helpers for checkbox interaction and state validation."""
 
-from typing import Tuple
+from typing import Optional
 
 from playwright.sync_api import Locator, Page, expect
 
@@ -8,163 +8,143 @@ from robo_appian.utils.ComponentUtils import ComponentUtils
 
 
 class CheckBox:
-    """
-    Utility class for interacting with Appian checkbox controls.
-
-    Appian may re-render a checkbox after selection and regenerate dynamic
-    element IDs. Hidden responsive copies are ignored by resolving the
-    currently visible label first and then following its ``for`` attribute
-    to the native checkbox input.
-    """
+    """Utility class for interacting with Appian checkbox controls."""
 
     @staticmethod
-    def __find_controls(page: Page, text: str) -> Tuple[Locator, Locator]:
-        """
-        Locate the currently visible label and its linked checkbox input.
+    def __checkbox_locator(page: Page, text: str) -> Locator:
+        """Return one locator that supports labeled and Appian boolean checkboxes.
 
-        The native input itself is not required to be visible because Appian
-        may visually hide/minimize it while making the associated label the
-        interactive control.
-        """
-        label_text = text.strip()
-        if not label_text:
-            raise ValueError("Checkbox label text cannot be empty.")
+        Appian checkbox markup is observed in two common forms:
+        1. A visible option ``label`` whose ``for`` attribute points directly to
+           the native ``input[type='checkbox']``.
+        2. A boolean field label (for example ``IT``) whose ``id`` is referenced
+           by a ``role='group'`` element through ``aria-labelledby``; the group
+           contains the native checkbox input.
 
-        safe_text = ComponentUtils.xpath_literal(label_text)
-        label = (
-            page.locator(f"xpath=//label[@for and contains(., {safe_text})]")
-            .filter(visible=True)
-            .first
-        )
-        expect(
-            label,
-            f"Visible checkbox label for '{label_text}' was not found",
-        ).to_be_visible()
+        Args:
+            page: Appian page containing the checkbox.
+            text: Visible checkbox option label or boolean field label.
 
-        checkbox_id = label.get_attribute("for")
-        if not checkbox_id:
-            raise ValueError(
-                f"Checkbox label for '{label_text}' has no 'for' attribute."
-            )
+        Returns:
+            Locator resolving the matching native checkbox input.
 
-        safe_checkbox_id = ComponentUtils.xpath_literal(checkbox_id)
-        checkbox = page.locator(
-            f"xpath=//input[@type='checkbox' and @id={safe_checkbox_id}]"
-        ).first
-        expect(
-            checkbox,
-            f"Checkbox labeled '{label_text}' was not found",
-        ).to_be_attached()
-
-        return checkbox, label
-
-    @staticmethod
-    def is_visible(page: Page, text: str) -> bool:
-        """Return whether a visible checkbox label exists for the supplied text."""
-        label_text = str(text or "").strip()
-        if not label_text:
-            return False
-
-        safe_text = ComponentUtils.xpath_literal(label_text)
-        label = (
-            page.locator(f"xpath=//label[@for and contains(., {safe_text})]")
-            .filter(visible=True)
-            .first
-        )
-        return label.count() > 0
-
-    @staticmethod
-    def is_checked(page: Page, text: str) -> bool:
-        """Return the checked state for an Appian checkbox field.
-
-        Supports both conventional checkboxes with visible option labels and
-        Appian boolean fields whose option label is visually blank (for
-        example, the ``IT`` field). For blank-option fields, the field label's
-        ID is linked to the checkbox group through ``aria-labelledby``.
+        Raises:
+            ValueError: If ``text`` is blank.
         """
         field_text = str(text or "").strip()
         if not field_text:
             raise ValueError("Checkbox field text cannot be empty.")
 
         safe_text = ComponentUtils.xpath_literal(field_text)
+        xpath = (
+            "xpath=("
+            "//input[@type='checkbox' and "
+            f"@id = //label[@for and normalize-space(.)={safe_text}]/@for]"
+            " | "
+            "//*[@role='group' and "
+            f"@aria-labelledby = //*[self::span or self::label][@id and normalize-space(.)={safe_text}]/@id]"
+            "//input[@type='checkbox']"
+            ")[1]"
+        )
+        return page.locator(xpath)
 
-        # First support the conventional visible option-label relationship.
-        option_label = (
-            page.locator(f"xpath=//label[@for and normalize-space(.)={safe_text}]")
+    @staticmethod
+    def __label_for_checkbox(page: Page, checkbox: Locator, text: str) -> Locator:
+        """Return the visible Appian label associated with a checkbox input."""
+        checkbox_id = checkbox.get_attribute("id")
+        if not checkbox_id:
+            raise ValueError(f"Checkbox '{text}' has no id attribute.")
+
+        safe_checkbox_id = ComponentUtils.xpath_literal(checkbox_id)
+        return (
+            page.locator(f"xpath=//label[@for={safe_checkbox_id}]")
             .filter(visible=True)
             .first
         )
-        if option_label.count() > 0:
-            checkbox_id = option_label.get_attribute("for")
-            if checkbox_id:
-                checkbox = page.locator(
-                    f'input[type="checkbox"][id="{checkbox_id}"]'
-                ).first
-                expect(checkbox).to_be_attached()
-                return checkbox.is_checked()
 
-        # Appian boolean fields may have a blank option label. Resolve the
-        # field label, then follow the checkbox group's aria-labelledby link.
-        field_label = (
-            page.locator(
-                f"xpath=//*[self::span or self::label]"
-                f"[@id and normalize-space(.)={safe_text}]"
-            )
-            .filter(visible=True)
-            .first
-        )
-        expect(
-            field_label,
-            f"Visible checkbox field label '{field_text}' was not found",
-        ).to_be_visible()
+    @staticmethod
+    def is_visible(page: Page, text: str) -> bool:
+        """Return whether the requested Appian checkbox is present."""
+        return CheckBox.__checkbox_locator(page, text).count() > 0
 
-        label_id = field_label.get_attribute("id")
-        if not label_id:
-            raise ValueError(
-                f"Checkbox field label '{field_text}' has no id attribute."
-            )
+    @staticmethod
+    def is_checked(
+        page: Page,
+        text: str,
+        timeout: Optional[float] = None,
+    ) -> bool:
+        """Return whether an Appian checkbox reaches the checked state.
 
-        group = page.locator(
-            f'[role="group"][aria-labelledby="{label_id}"]'
-        ).first
-        expect(
-            group,
-            f"Checkbox group for field '{field_text}' was not found",
-        ).to_be_attached()
+        A single checkbox XPath supports both conventional labeled options and
+        Appian boolean fields whose visible field label is linked to a checkbox
+        group through ``aria-labelledby``.
 
-        checkbox = group.locator('input[type="checkbox"]').first
-        expect(
+        When ``timeout`` is supplied, wait up to that many seconds for the
+        checkbox to become checked before returning ``False``. When omitted,
+        inspect the current state immediately.
+
+        Args:
+            page: Appian page containing the checkbox.
+            text: Visible option label or boolean field label.
+            timeout: Optional timeout in seconds to wait for a checked state.
+
+        Returns:
+            ``True`` when the checkbox is checked within the requested window;
+            otherwise ``False``.
+        """
+        field_text = str(text or "").strip()
+        checkbox = CheckBox.__checkbox_locator(page, field_text)
+        timeout_ms = None if timeout is None else max(0.0, float(timeout)) * 1000
+
+        assertion = expect(
             checkbox,
-            f"Checkbox input for field '{field_text}' was not found",
-        ).to_be_attached()
-        return checkbox.is_checked()
+            f"Checkbox '{field_text}' was not found.",
+        )
+        if timeout_ms is None:
+            assertion.to_be_attached()
+            return checkbox.is_checked()
+
+        assertion.to_be_attached(timeout=timeout_ms)
+        try:
+            expect(
+                checkbox,
+                f"Checkbox '{field_text}' did not become checked.",
+            ).to_be_checked(timeout=timeout_ms)
+            return True
+        except AssertionError:
+            return False
 
     @staticmethod
     def select(page: Page, text: str, selected: bool = True) -> None:
-        """
-        Selects or deselects a checkbox safely by clicking its visible label.
+        """Select or deselect an Appian checkbox using its visible label.
 
         The checkbox is re-resolved after clicking because Appian may replace
-        the control during a SAIL re-render. Final state validation uses an
-        immediate ``is_checked()`` probe instead of waiting for the full
-        framework assertion timeout on a stale locator.
+        the control during a SAIL re-render.
 
         Args:
-            page: Playwright Page instance.
-            text: Visible checkbox label text.
-            selected: True to check, False to uncheck.
+            page: Playwright page containing the checkbox.
+            text: Visible checkbox option label or boolean field label.
+            selected: ``True`` to check, ``False`` to uncheck.
         """
-        label_text = text.strip()
-        checkbox, label = CheckBox.__find_controls(page, label_text)
-        current_state = checkbox.is_checked()
+        label_text = str(text or "").strip()
+        checkbox = CheckBox.__checkbox_locator(page, label_text)
+        expect(
+            checkbox,
+            f"Checkbox '{label_text}' was not found.",
+        ).to_be_attached()
 
-        if current_state == selected:
+        if checkbox.is_checked() == selected:
             return
 
+        label = CheckBox.__label_for_checkbox(page, checkbox, label_text)
+        expect(
+            label,
+            f"Visible checkbox label for '{label_text}' was not found.",
+        ).to_be_visible()
         label.scroll_into_view_if_needed()
         label.click()
 
-        checkbox, _ = CheckBox.__find_controls(page, label_text)
+        checkbox = CheckBox.__checkbox_locator(page, label_text)
         expect(
             checkbox,
             f"Checkbox '{label_text}' did not reach selected={selected}.",

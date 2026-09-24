@@ -3,6 +3,8 @@
 Keep application-specific labels, values, and workflow decisions outside this module.
 """
 
+from typing import Optional
+
 from playwright.sync_api import Page, expect
 
 from robo_appian.components.Dropdown import Dropdown
@@ -19,6 +21,7 @@ class SearchDropdown:
         accessible_name: str,
         option_text: str,
         exact_label: bool = True,
+        timeout: Optional[float] = None,
     ) -> None:
         """Search for and click an option in a labeled Appian combobox.
 
@@ -33,6 +36,9 @@ class SearchDropdown:
             exact_label: When True, require the rendered Appian label to match
                 exactly. When False, also accept Appian's trailing required
                 marker variants (``Label*`` and ``Label *``).
+            timeout: Optional timeout in seconds for dropdown/listbox/search/option
+                visibility and final selection assertions. When omitted,
+                Playwright's configured expectation timeout is used.
 
         Raises:
             AssertionError: If required ARIA linkage is missing or the combobox,
@@ -40,6 +46,35 @@ class SearchDropdown:
         """
         normalized_name = str(accessible_name or "").strip()
         normalized_option = str(option_text or "").strip()
+        timeout_ms = None if timeout is None else max(0.0, float(timeout)) * 1000
+
+        def _expect_visible(locator, message: str | None = None) -> None:
+            assertion = expect(locator, message) if message else expect(locator)
+            if timeout_ms is None:
+                assertion.to_be_visible()
+            else:
+                assertion.to_be_visible(timeout=timeout_ms)
+
+        def _expect_hidden(locator) -> None:
+            assertion = expect(locator)
+            if timeout_ms is None:
+                assertion.to_be_hidden()
+            else:
+                assertion.to_be_hidden(timeout=timeout_ms)
+
+        def _expect_attribute(locator, name: str, value: str) -> None:
+            assertion = expect(locator)
+            if timeout_ms is None:
+                assertion.to_have_attribute(name, value)
+            else:
+                assertion.to_have_attribute(name, value, timeout=timeout_ms)
+
+        def _expect_contains_text(locator, value: str) -> None:
+            assertion = expect(locator)
+            if timeout_ms is None:
+                assertion.to_contain_text(value)
+            else:
+                assertion.to_contain_text(value, timeout=timeout_ms)
         if not normalized_name:
             raise ValueError(
                 "Search dropdown accessible name cannot be empty or whitespace."
@@ -50,17 +85,28 @@ class SearchDropdown:
         # Reuse Dropdown's XPath label-to-aria-labelledby relationship.
         # Dropdown centrally handles Appian's optional trailing required
         # marker, so SearchDropdown does not maintain a second label rule.
-        dropdown = Dropdown._get_dropdown(
-            page,
-            normalized_name,
-            exact=True,
-            allow_required_marker=not exact_label,
+        dropdown = (
+            Dropdown._dropdown_locator(
+                page,
+                normalized_name,
+                exact=True,
+                allow_required_marker=not exact_label,
+            )
+            .filter(visible=True)
+            .first
+        )
+        _expect_visible(
+            dropdown,
+            f"Search dropdown '{normalized_name}' was not visible.",
         )
 
         if dropdown.get_attribute("aria-expanded") != "true":
-            dropdown.click()
+            if timeout_ms is None:
+                dropdown.click()
+            else:
+                dropdown.click(timeout=timeout_ms)
 
-        expect(dropdown).to_have_attribute("aria-expanded", "true")
+        _expect_attribute(dropdown, "aria-expanded", "true")
 
         aria_labelledby = dropdown.get_attribute("aria-labelledby")
         if not aria_labelledby:
@@ -89,27 +135,30 @@ class SearchDropdown:
             .filter(visible=True)
             .first
         )
-        expect(listbox).to_be_visible()
+        _expect_visible(listbox)
 
         dropdown_panel = listbox.locator("xpath=parent::*")
         search_input = (
             dropdown_panel.get_by_label("Search", exact=True).filter(visible=True).first
         )
-        expect(search_input).to_be_visible()
+        _expect_visible(search_input)
         InputText.fill_by_locator(search_input, normalized_option)
 
         visible_options = listbox.get_by_role("option").filter(visible=True)
-        expect(visible_options.first).to_be_visible()
+        _expect_visible(visible_options.first)
         option = (
             listbox.get_by_role("option", name=normalized_option, exact=True)
             .filter(visible=True)
             .first
         )
-        expect(option).to_be_visible()
-        option.click()
-        expect(listbox).to_be_hidden()
-        expect(dropdown).to_have_attribute("aria-expanded", "false")
-        expect(dropdown).to_contain_text(normalized_option)
+        _expect_visible(option)
+        if timeout_ms is None:
+            option.click()
+        else:
+            option.click(timeout=timeout_ms)
+        _expect_hidden(listbox)
+        _expect_attribute(dropdown, "aria-expanded", "false")
+        _expect_contains_text(dropdown, normalized_option)
 
     @staticmethod
     def verify_selected_value(

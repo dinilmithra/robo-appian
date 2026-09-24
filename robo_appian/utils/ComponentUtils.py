@@ -121,9 +121,9 @@ class ComponentUtils:
     def wait_for_appian_action_completed(scope: Scope) -> None:
         """Wait until Appian global processing indicators are absent.
 
-        A short Playwright wait is used only to detect whether Appian starts a
-        processing cycle. Once processing is detected, the completion assertion
-        uses the configured Playwright expectation timeout.
+        The completion assertion uses the configured Playwright expectation
+        timeout and returns only after Appian global processing indicators are
+        absent.
 
         Args:
             scope: Appian page or locator associated with the triggered action.
@@ -133,16 +133,6 @@ class ComponentUtils:
         processing = scope.locator(
             "#appian-nprogress, #appian-working-indicator-hidden"
         )
-
-        try:
-            processing.first.wait_for(
-                state="attached",
-                timeout=2_000,
-            )
-        except PlaywrightTimeoutError:
-            logger.info("No Appian global processing indicator was detected.")
-            logger.info("After wait_for_appian_action_completed: no processing cycle detected.")
-            return
 
         expect(
             processing,
