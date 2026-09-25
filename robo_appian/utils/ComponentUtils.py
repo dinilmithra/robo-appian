@@ -117,6 +117,241 @@ class ComponentUtils:
         expect(active_locator).to_be_visible()
         active_locator.click()
 
+
+    @staticmethod
+    def is_visible_by_xpath(scope: Scope, xpath: str) -> bool:
+        """Return whether at least one XPath match is currently visible.
+
+        Args:
+            scope: Appian page or locator to search.
+            xpath: XPath expression without application-specific CSS classes.
+
+        Returns:
+            ``True`` when at least one matching element is visible.
+        """
+        expression = str(xpath or "").strip()
+        if not expression:
+            raise ValueError("XPath cannot be empty or whitespace.")
+
+        return scope.locator(f"xpath={expression}").filter(visible=True).count() > 0
+
+
+    @staticmethod
+    def is_visible_by_attribute(
+        scope: Scope,
+        attribute: str,
+        value: str,
+    ) -> bool:
+        """Return whether an element with an exact attribute value is visible.
+
+        Args:
+            scope: Appian page or locator to search.
+            attribute: HTML attribute name to match.
+            value: Exact attribute value to match.
+
+        Returns:
+            ``True`` when at least one matching element is visible.
+        """
+        attribute_name = str(attribute or "").strip()
+        if not attribute_name:
+            raise ValueError("Attribute cannot be empty or whitespace.")
+
+        value_literal = ComponentUtils.xpath_literal(str(value or ""))
+        return ComponentUtils.is_visible_by_xpath(
+            scope,
+            f"//*[@{attribute_name}={value_literal}]",
+        )
+
+    @staticmethod
+    def get_component_by_attribute(
+        scope: Scope,
+        attribute: str,
+        value: str,
+        visible_only: bool = False,
+    ) -> Optional[Locator]:
+        """Return the first component matching an exact attribute value.
+
+        Args:
+            scope: Appian page or locator to search.
+            attribute: HTML attribute name used to locate the component.
+            value: Exact attribute value used to locate the component.
+            visible_only: When true, require the component to be visible.
+
+        Returns:
+            The first matching Playwright locator, or ``None`` when no matching
+            component exists.
+        """
+        attribute_name = str(attribute or "").strip()
+        if not attribute_name:
+            raise ValueError("Attribute cannot be empty or whitespace.")
+
+        value_literal = ComponentUtils.xpath_literal(str(value or ""))
+        components = scope.locator(
+            f"xpath=//*[@{attribute_name}={value_literal}]"
+        )
+        if visible_only:
+            components = components.filter(visible=True)
+
+        if components.count() == 0:
+            return None
+        return components.first
+
+    @staticmethod
+    def get_ancestor_attribute_value(
+        component: Locator,
+        attribute: str,
+    ) -> str:
+        """Read an attribute from the nearest ancestor that defines it.
+
+        Args:
+            component: Playwright locator whose ancestors are searched.
+            attribute: HTML attribute to read from the nearest matching ancestor.
+
+        Returns:
+            The normalized attribute value, or an empty string when no matching
+            ancestor or value exists.
+        """
+        attribute_name = str(attribute or "").strip()
+        if not attribute_name:
+            raise ValueError("Attribute cannot be empty or whitespace.")
+
+        ancestor = component.locator(
+            f"xpath=ancestor::*[@{attribute_name}][1]"
+        )
+        if ancestor.count() == 0:
+            return ""
+
+        return str(
+            ancestor.first.get_attribute(attribute_name) or ""
+        ).strip()
+
+    @staticmethod
+    def get_descendant_texts_by_component_id(
+        scope: Scope,
+        component_id: str,
+        descendant_xpath: str,
+        visible_only: bool = False,
+    ) -> list[str]:
+        """Read descendant text under the component with the supplied DOM ID.
+
+        Args:
+            scope: Appian page or locator to search.
+            component_id: Exact DOM ``id`` of the parent component.
+            descendant_xpath: Relative XPath selecting descendants, for example
+                ``.//p``.
+            visible_only: When true, read only visible descendant matches.
+
+        Returns:
+            Unique non-empty normalized text values in DOM order.
+        """
+        component_id_value = str(component_id or "").strip()
+        relative_xpath = str(descendant_xpath or "").strip()
+        if not component_id_value:
+            raise ValueError("Component ID cannot be empty or whitespace.")
+        if not relative_xpath:
+            raise ValueError("Descendant XPath cannot be empty or whitespace.")
+
+        component_id_literal = ComponentUtils.xpath_literal(component_id_value)
+        parent_xpath = f"//*[@id={component_id_literal}]"
+        descendant = relative_xpath
+        if descendant.startswith(".//"):
+            descendant = descendant[1:]
+        elif not descendant.startswith("/"):
+            descendant = f"//{descendant}"
+
+        return ComponentUtils.get_texts_by_xpath(
+            scope,
+            f"({parent_xpath}){descendant}",
+            visible_only=visible_only,
+        )
+
+    @staticmethod
+    def get_texts_by_xpath(
+        scope: Scope,
+        xpath: str,
+        visible_only: bool = False,
+    ) -> list[str]:
+        """Return unique normalized text from elements matching XPath.
+
+        Args:
+            scope: Appian page or locator to search.
+            xpath: XPath expression without application-specific CSS classes.
+            visible_only: When true, read only currently visible matches.
+
+        Returns:
+            Unique non-empty text values in DOM order.
+        """
+        expression = str(xpath or "").strip()
+        if not expression:
+            raise ValueError("XPath cannot be empty or whitespace.")
+
+        matches = scope.locator(f"xpath={expression}")
+        if visible_only:
+            matches = matches.filter(visible=True)
+
+        values: list[str] = []
+        for index in range(matches.count()):
+            try:
+                raw_text = (
+                    matches.nth(index).inner_text()
+                    if visible_only
+                    else matches.nth(index).text_content()
+                )
+                text = " ".join((raw_text or "").split())
+            except Exception:
+                text = ""
+            if text and text not in values:
+                values.append(text)
+        return values
+
+    @staticmethod
+    def get_visible_texts_by_xpath(scope: Scope, xpath: str) -> list[str]:
+        """Return unique normalized text from visible XPath matches."""
+        return ComponentUtils.get_texts_by_xpath(
+            scope,
+            xpath,
+            visible_only=True,
+        )
+
+    @staticmethod
+    def get_attribute_values_by_xpath(
+        scope: Scope,
+        xpath: str,
+        attribute: str,
+        visible_only: bool = False,
+    ) -> list[str]:
+        """Return unique non-empty attribute values from XPath matches.
+
+        Args:
+            scope: Appian page or locator to search.
+            xpath: XPath expression without application-specific CSS classes.
+            attribute: Attribute name to read from each matching element.
+            visible_only: When true, inspect only currently visible matches.
+
+        Returns:
+            Unique non-empty attribute values in DOM order.
+        """
+        expression = str(xpath or "").strip()
+        if not expression:
+            raise ValueError("XPath cannot be empty or whitespace.")
+
+        attribute_name = str(attribute or "").strip()
+        if not attribute_name:
+            raise ValueError("Attribute cannot be empty or whitespace.")
+
+        matches = scope.locator(f"xpath={expression}")
+        if visible_only:
+            matches = matches.filter(visible=True)
+
+        values: list[str] = []
+        for index in range(matches.count()):
+            value = str(
+                matches.nth(index).get_attribute(attribute_name) or ""
+            ).strip()
+            if value and value not in values:
+                values.append(value)
+        return values
+
     @staticmethod
     def wait_for_appian_action_completed(scope: Scope) -> None:
         """Wait until Appian global processing indicators are absent.
