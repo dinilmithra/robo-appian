@@ -46,12 +46,21 @@ def main() -> int:
     print(f"Bootstrap Python: {sys.executable}")
     print(f"Python version: {sys.version.split()[0]}")
 
-    if VENV_DIR.exists():
-        print(f"Removing existing virtual environment: {VENV_DIR}")
-        shutil.rmtree(VENV_DIR)
+    target_active = False
+    try:
+        target_active = Path(sys.prefix).resolve() == VENV_DIR.resolve()
+    except OSError:
+        target_active = False
 
-    print(f"Creating virtual environment: {VENV_DIR}")
-    venv.EnvBuilder(with_pip=True, clear=True).create(VENV_DIR)
+    if target_active:
+        print(f"Reusing active virtual environment: {VENV_DIR}")
+    else:
+        if VENV_DIR.exists():
+            print(f"Removing existing virtual environment: {VENV_DIR}")
+            shutil.rmtree(VENV_DIR)
+        print(f"Creating virtual environment: {VENV_DIR}")
+        venv.EnvBuilder(with_pip=True, clear=True).create(VENV_DIR)
+
     python = _venv_python()
 
     _run([str(python), "-m", "pip", "install", "--upgrade", "pip"])
@@ -60,7 +69,6 @@ def main() -> int:
     env = os.environ.copy()
     env["POETRY_VIRTUALENVS_CREATE"] = "false"
     _run([str(python), "-m", "poetry", "install"], env=env)
-    _run([str(python), "-m", "pytest", "--version"])
     _run([str(python), "-m", "poetry", "--version"])
 
     print("\nrobo-appian virtual environment is ready.")

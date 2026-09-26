@@ -21,7 +21,7 @@ Create a dedicated Python 3.12 environment inside `robo-appian/.venv` from the p
 python .\robo-appian\tools\setup_venv.py
 ```
 
-The setup script recreates `robo-appian/.venv`, installs Poetry 2.5.1 into that environment, installs the project and development dependencies, and verifies both pytest and Poetry. The `.venv` directory is ignored by Git and is not packaged.
+The setup script recreates `robo-appian/.venv`, installs Poetry 2.5.1 into that environment, installs the project and development dependencies, and verifies Poetry. The `.venv` directory is ignored by Git and is not packaged.
 
 ### VS Code automatic activation
 
@@ -47,7 +47,7 @@ Publishing tooling is kept under `robo-appian/tools/` but excluded from the publ
 python .\robo-appian\tools\publish_robo_appian.py
 ```
 
-Use `--build-only` to validate and build without uploading. The command reads `PYPI_TOKEN` (or `POETRY_PYPI_TOKEN_PYPI`) for PyPI authentication.
+Use `--build-only` to validate and build without uploading. The publisher increments the patch version by default, removes any existing `dist/` directory before building, and keeps the incremented version after a successful build-only run. Pass an explicit Poetry version rule/version to override the default patch increment. The command reads `PYPI_TOKEN` (or `POETRY_PYPI_TOKEN_PYPI`) for PyPI authentication.
 
 ### PyPI token
 
