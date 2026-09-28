@@ -6,6 +6,41 @@ This package intentionally contains only generic Appian interaction behavior.
 Application-specific labels, workflows, waits, and business rules belong in the
 consuming application's facade layer.
 
+## Installation
+
+```bash
+pip install robo-appian
+playwright install chromium
+```
+
+## Documentation
+
+The public documentation is built with MkDocs Material and generated API pages
+from the Python source/docstrings.
+
+After GitHub Pages is enabled for the repository, the project site will normally
+be available at:
+
+```text
+https://<github-owner>.github.io/robo-appian/
+```
+
+Documentation source is maintained under `docs/` on `main`. GitHub Actions
+validates documentation on pull requests and publishes generated HTML to the
+`gh-pages` branch after documentation-related changes are merged to `main`.
+
+Build and preview the documentation locally:
+
+```powershell
+python -m pip install -r docs\requirements.txt
+mkdocs build --strict
+mkdocs serve
+```
+
+See `docs/guides/publishing-docs.md` for the GitHub Pages branch configuration.
+
+## Local CORE development
+
 For local CORE development the sibling `core-automation` project references this
 package with a Poetry path dependency:
 
@@ -39,7 +74,7 @@ If you are using an existing terminal, activate it manually once:
 .\robo-appian\.venv\Scripts\Activate.ps1
 ```
 
-## Publishing
+## Publishing to PyPI
 
 Publishing tooling is kept under `robo-appian/tools/` but excluded from the published package. After opening the standalone workspace or activating `robo-appian/.venv`, run from `core-automation-project`:
 
