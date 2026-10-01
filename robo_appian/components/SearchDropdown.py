@@ -161,6 +161,160 @@ class SearchDropdown:
         _expect_contains_text(dropdown, normalized_option)
 
     @staticmethod
+    def select_by_index(
+        page: Page,
+        accessible_name: str,
+        option_index: int,
+        exact_label: bool = True,
+        timeout: Optional[float] = None,
+    ) -> None:
+        """Select a searchable Appian dropdown option by one-based index.
+
+        Index 1 selects the first real selectable option, index 2 the second,
+        and so on. Placeholder entries such as ``Select a Value`` are excluded.
+        This variant is useful when searchable option text is dynamic but the
+        option ordering is stable.
+
+        Args:
+            page: Appian page containing the searchable dropdown.
+            accessible_name: Accessible combobox name to match.
+            option_index: One-based index of the selectable option.
+            exact_label: When True, require the rendered Appian label to match
+                exactly. When False, also accept Appian's trailing required
+                marker variants (``Label*`` and ``Label *``).
+            timeout: Optional timeout in seconds for dropdown/listbox/option
+                visibility and final selection assertions. When omitted,
+                Playwright's configured expectation timeout is used.
+
+        Raises:
+            ValueError: If the accessible name is blank or ``option_index`` is
+                less than 1.
+            AssertionError: If the dropdown/listbox or requested option does
+                not become available.
+        """
+        normalized_name = str(accessible_name or "").strip()
+        if not normalized_name:
+            raise ValueError(
+                "Search dropdown accessible name cannot be empty or whitespace."
+            )
+        if option_index < 1:
+            raise ValueError(
+                "Search dropdown option index must be 1 or greater."
+            )
+
+        timeout_ms = None if timeout is None else max(0.0, float(timeout)) * 1000
+
+        def _expect_visible(locator, message: str | None = None) -> None:
+            assertion = expect(locator, message) if message else expect(locator)
+            if timeout_ms is None:
+                assertion.to_be_visible()
+            else:
+                assertion.to_be_visible(timeout=timeout_ms)
+
+        def _expect_hidden(locator) -> None:
+            assertion = expect(locator)
+            if timeout_ms is None:
+                assertion.to_be_hidden()
+            else:
+                assertion.to_be_hidden(timeout=timeout_ms)
+
+        def _expect_attribute(locator, name: str, value: str) -> None:
+            assertion = expect(locator)
+            if timeout_ms is None:
+                assertion.to_have_attribute(name, value)
+            else:
+                assertion.to_have_attribute(name, value, timeout=timeout_ms)
+
+        def _expect_contains_text(locator, value: str) -> None:
+            assertion = expect(locator)
+            if timeout_ms is None:
+                assertion.to_contain_text(value)
+            else:
+                assertion.to_contain_text(value, timeout=timeout_ms)
+
+        dropdown = (
+            Dropdown._dropdown_locator(
+                page,
+                normalized_name,
+                exact=True,
+                allow_required_marker=not exact_label,
+            )
+            .filter(visible=True)
+            .first
+        )
+        _expect_visible(
+            dropdown,
+            f"Search dropdown '{normalized_name}' was not visible.",
+        )
+
+        if dropdown.get_attribute("aria-expanded") != "true":
+            if timeout_ms is None:
+                dropdown.click()
+            else:
+                dropdown.click(timeout=timeout_ms)
+
+        _expect_attribute(dropdown, "aria-expanded", "true")
+
+        aria_labelledby = dropdown.get_attribute("aria-labelledby")
+        if not aria_labelledby:
+            raise AssertionError(
+                f"Search dropdown '{normalized_name}' does not have an "
+                "aria-labelledby attribute."
+            )
+
+        listbox_id = dropdown.get_attribute("aria-controls")
+        if not listbox_id:
+            raise AssertionError(
+                f"Search dropdown '{normalized_name}' does not have an "
+                "aria-controls attribute."
+            )
+
+        label_id_literal = ComponentUtils.xpath_literal(f" {aria_labelledby} ")
+        listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
+        listbox = (
+            page.locator(
+                "xpath=//*[@role='listbox' and @id="
+                + listbox_id_literal
+                + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
+                + label_id_literal
+                + ")]"
+            )
+            .filter(visible=True)
+            .first
+        )
+        _expect_visible(listbox)
+
+        # Searchable Appian controls may render a placeholder as an option.
+        # Keep one-based index behavior aligned with Dropdown.select_by_index()
+        # by excluding that placeholder from the selectable choices.
+        options = listbox.locator(
+            "xpath=.//*[@role='option' and "
+            "translate(normalize-space(string(.)), "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') "
+            "!= 'select a value']"
+        ).filter(visible=True)
+
+        selected_option = options.nth(option_index - 1)
+        _expect_visible(
+            selected_option,
+            (
+                f"Search dropdown '{normalized_name}' did not render selectable "
+                f"option {option_index}."
+            ),
+        )
+
+        selected_text = selected_option.inner_text().strip()
+        if timeout_ms is None:
+            selected_option.click()
+        else:
+            selected_option.click(timeout=timeout_ms)
+
+        _expect_hidden(listbox)
+        _expect_attribute(dropdown, "aria-expanded", "false")
+        if selected_text:
+            _expect_contains_text(dropdown, selected_text)
+
+    @staticmethod
     def verify_selected_value(
         page: Page,
         accessible_name: str,
