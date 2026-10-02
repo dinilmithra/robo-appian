@@ -32,20 +32,21 @@ validates documentation on pull requests and publishes generated HTML to the
 Build and preview the documentation locally:
 
 ```powershell
-python -m pip install -r docs\requirements.txt
-mkdocs build --strict
-mkdocs serve
+poetry install --with docs
+poetry run mkdocs build --strict
+poetry run mkdocs serve
 ```
 
 See `docs/guides/publishing-docs.md` for the GitHub Pages branch configuration.
 
 ## Local CORE development
 
-For local CORE development the sibling `core-automation` project references this
-package with a Poetry path dependency:
+CORE pins the published package in its dependency configuration. For local
+development, install the sibling reusable-library checkouts in editable mode
+without changing the committed dependency configuration. From `core-automation`:
 
-```toml
-robo-appian = { path = "../robo-appian", develop = true }
+```powershell
+.\.venv-core\Scripts\python.exe .\tools\install_local_libraries.py
 ```
 
 ## Local virtual environment
@@ -82,7 +83,12 @@ Publishing tooling is kept under `robo-appian/tools/` but excluded from the publ
 python .\robo-appian\tools\publish_robo_appian.py
 ```
 
-Use `--build-only` to validate and build without uploading. The publisher increments the patch version by default, removes any existing `dist/` directory before building, and keeps the incremented version after a successful build-only run. Pass an explicit Poetry version rule/version to override the default patch increment. The command reads `PYPI_TOKEN` (or `POETRY_PYPI_TOKEN_PYPI`) for PyPI authentication.
+The publisher always increments the patch version, removes the existing `dist/`
+directory, builds, and uploads to PyPI. It does not support `--build-only` or
+version override arguments. A build or upload failure restores the previous
+version. To build without uploading or incrementing the version, run
+`poetry build` from the `robo-appian` directory instead. The publisher reads
+`PYPI_TOKEN` (or `POETRY_PYPI_TOKEN_PYPI`) for PyPI authentication.
 
 ### PyPI token
 
