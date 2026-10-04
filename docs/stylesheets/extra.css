@@ -64,22 +64,6 @@
 
 .ra-hero-copy, .ra-hero-visual { min-width: 0; }
 
-.ra-badges { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1rem; }
-.ra-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 34px;
-  padding: .2rem .62rem;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  background: rgba(255,255,255,.55);
-  font-size: .72rem;
-  font-weight: 750;
-}
-.ra-badge-python { color: #2253c4; }
-.ra-badge-playwright { color: #07854f; }
-.ra-badge-appian { color: #b03db3; }
-[data-md-color-scheme="slate"] .ra-badge { background: rgba(13, 24, 44, .52); }
 
 .ra-hero h1 {
   max-width: 570px;
@@ -269,7 +253,7 @@
   .ra-home { width: min(1120px, calc(100vw - 1.5rem)); }
   .ra-hero { grid-template-columns: 1fr; }
   .ra-hero-copy { max-width: 760px; margin: 0 auto; text-align: center; }
-  .ra-badges, .ra-hero-actions { justify-content: center; }
+  .ra-hero-actions { justify-content: center; }
   .ra-hero h1, .ra-hero-lead { max-width: 760px; }
   .ra-hero-visual { width: min(760px, 100%); margin: 0 auto; }
   .ra-hero-visual { min-height: auto; }
@@ -752,12 +736,6 @@
   gap: clamp(1.5rem, 2.5vw, 2.5rem);
   padding: 2.2rem clamp(1.5rem, 2.8vw, 2.6rem);
   border-radius: 0 0 16px 16px;
-}
-.ra-badges { margin-bottom: .8rem; }
-.ra-badge {
-  min-height: 31px;
-  padding: .18rem .58rem;
-  font-size: .66rem;
 }
 .ra-hero h1 {
   max-width: 560px;
