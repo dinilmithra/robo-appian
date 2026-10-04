@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class ComponentUtils:
-    """Provide low-level Playwright operations shared by Appian components."""
+    """Shared Playwright operations used by Appian components."""
 
     @staticmethod
     def xpath_literal(value: str) -> str:
@@ -27,7 +27,7 @@ class ComponentUtils:
             value: Text that may contain single or double quotes.
 
         Returns:
-            A valid XPath literal or ``concat`` expression.
+            str: A valid XPath literal or ``concat`` expression.
         """
         if "'" not in value:
             return f"'{value}'"
@@ -77,42 +77,42 @@ class ComponentUtils:
         logger.info("After button/element click: Playwright click completed successfully.")
 
     @staticmethod
-    def click_by_text(page: Page, text: str, exact: bool = True) -> None:
+    def click_by_text(scope: Scope, text: str, excat_match: bool = False) -> None:
         """Click the first visible element whose text matches the requested text.
 
         Use this only when the visible text identifies the clickable element
         itself. Duplicate matches are resolved by choosing the first visible one.
 
         Args:
-            page: Appian page containing the target text.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Text to locate.
-            exact: Whether the element text must match exactly.
+            excat_match: Whether the element text must match exactly.
         """
-        link = page.get_by_text(text, exact=exact).filter(visible=True).first
+        link = scope.get_by_text(text, exact=excat_match).filter(visible=True).first
         expect(link).to_be_visible()
         link.click()
 
     @staticmethod
-    def click_by_title(page: Page, title: str) -> None:
+    def click_by_title(scope: Scope, title: str) -> None:
         """Click the first visible element with the requested title attribute.
 
         Args:
-            page: Appian page containing the titled element.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             title: Title attribute value to locate.
         """
-        link = page.get_by_title(title).filter(visible=True).first
+        link = scope.get_by_title(title).filter(visible=True).first
         expect(link).to_be_visible()
         link.click()
 
     @staticmethod
-    def click_by_id(page: Page, button_id: str) -> None:
-        """Click the first visible, enabled element with an exact HTML ID.
+    def click_by_id(scope: Scope, button_id: str) -> None:
+        """Click the first visible, enabled element with an excat_match HTML ID.
 
         Args:
-            page: Appian page containing the element.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             button_id: Literal HTML ID, including IDs that begin with numbers.
         """
-        locator = page.locator(f'[id="{button_id}"]:not([disabled])')
+        locator = scope.locator(f'[id="{button_id}"]:not([disabled])')
         active_locator = locator.filter(visible=True).first
         expect(active_locator).to_be_visible()
         active_locator.click()
@@ -123,11 +123,11 @@ class ComponentUtils:
         """Return whether at least one XPath match is currently visible.
 
         Args:
-            scope: Appian page or locator to search.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression without application-specific CSS classes.
 
         Returns:
-            ``True`` when at least one matching element is visible.
+            bool: ``True`` when at least one matching element is visible.
         """
         expression = str(xpath or "").strip()
         if not expression:
@@ -142,15 +142,15 @@ class ComponentUtils:
         attribute: str,
         value: str,
     ) -> bool:
-        """Return whether an element with an exact attribute value is visible.
+        """Return whether an element with an excat_match attribute value is visible.
 
         Args:
-            scope: Appian page or locator to search.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             attribute: HTML attribute name to match.
             value: Exact attribute value to match.
 
         Returns:
-            ``True`` when at least one matching element is visible.
+            bool: ``True`` when at least one matching element is visible.
         """
         attribute_name = str(attribute or "").strip()
         if not attribute_name:
@@ -169,16 +169,16 @@ class ComponentUtils:
         value: str,
         visible_only: bool = False,
     ) -> Optional[Locator]:
-        """Return the first component matching an exact attribute value.
+        """Return the first component matching an excat_match attribute value.
 
         Args:
-            scope: Appian page or locator to search.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             attribute: HTML attribute name used to locate the component.
             value: Exact attribute value used to locate the component.
             visible_only: When true, require the component to be visible.
 
         Returns:
-            The first matching Playwright locator, or ``None`` when no matching
+            Optional[Locator]: The first matching Playwright locator, or ``None`` when no matching
             component exists.
         """
         attribute_name = str(attribute or "").strip()
@@ -208,7 +208,7 @@ class ComponentUtils:
             attribute: HTML attribute to read from the nearest matching ancestor.
 
         Returns:
-            The normalized attribute value, or an empty string when no matching
+            str: The normalized attribute value, or an empty string when no matching
             ancestor or value exists.
         """
         attribute_name = str(attribute or "").strip()
@@ -235,14 +235,14 @@ class ComponentUtils:
         """Read descendant text under the component with the supplied DOM ID.
 
         Args:
-            scope: Appian page or locator to search.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             component_id: Exact DOM ``id`` of the parent component.
             descendant_xpath: Relative XPath selecting descendants, for example
                 ``.//p``.
             visible_only: When true, read only visible descendant matches.
 
         Returns:
-            Unique non-empty normalized text values in DOM order.
+            list[str]: Unique non-empty normalized text values in DOM order.
         """
         component_id_value = str(component_id or "").strip()
         relative_xpath = str(descendant_xpath or "").strip()
@@ -274,12 +274,12 @@ class ComponentUtils:
         """Return unique normalized text from elements matching XPath.
 
         Args:
-            scope: Appian page or locator to search.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression without application-specific CSS classes.
             visible_only: When true, read only currently visible matches.
 
         Returns:
-            Unique non-empty text values in DOM order.
+            list[str]: Unique non-empty text values in DOM order.
         """
         expression = str(xpath or "").strip()
         if not expression:
@@ -306,7 +306,16 @@ class ComponentUtils:
 
     @staticmethod
     def get_visible_texts_by_xpath(scope: Scope, xpath: str) -> list[str]:
-        """Return unique normalized text from visible XPath matches."""
+        """Return unique normalized text from visible XPath matches.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            xpath: XPath expression evaluated within the supplied scope.
+
+
+        Returns:
+            list[str]: Visible text values from elements matching the XPath expression.
+        """
         return ComponentUtils.get_texts_by_xpath(
             scope,
             xpath,
@@ -323,13 +332,13 @@ class ComponentUtils:
         """Return unique non-empty attribute values from XPath matches.
 
         Args:
-            scope: Appian page or locator to search.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression without application-specific CSS classes.
             attribute: Attribute name to read from each matching element.
             visible_only: When true, inspect only currently visible matches.
 
         Returns:
-            Unique non-empty attribute values in DOM order.
+            list[str]: Unique non-empty attribute values in DOM order.
         """
         expression = str(xpath or "").strip()
         if not expression:
@@ -361,7 +370,7 @@ class ComponentUtils:
         absent.
 
         Args:
-            scope: Appian page or locator associated with the triggered action.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to use the whole document; pass a ``Locator`` to restrict the operation to that locator/container.
         """
         logger.info("Before wait_for_appian_action_completed.")
 
@@ -381,32 +390,32 @@ class ComponentUtils:
 
     @staticmethod
     def wait_until_visible(scope: Scope, message: str = None) -> None:
-        """Wait until a page or locator is visible.
+        """Wait until a scope or locator is visible.
 
         Args:
-            scope: Page or locator expected to become visible.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             message: Optional assertion message used when the wait fails.
         """
         expect(scope, message).to_be_visible()
 
     @staticmethod
     def wait_until_hidden(scope: Scope) -> None:
-        """Wait until a page or locator is hidden or detached.
+        """Wait until a scope or locator is hidden or detached.
 
         Args:
-            scope: Page or locator expected to become hidden.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
         """
         expect(scope).to_be_hidden()
 
     @staticmethod
-    def tab(page: Page, occurrence: Optional[int] = None) -> None:
-        """Move keyboard focus forward on the supplied page.
+    def tab(scope: Scope, occurrence: Optional[int] = None) -> None:
+        """Move keyboard focus forward on the supplied scope.
 
         Use this to trigger Appian focus-out behavior after editing a control.
         When ``occurrence`` is omitted, Tab is pressed once.
 
         Args:
-            page: Page receiving the keyboard event.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             occurrence: Optional number of Tab key presses. Defaults to 1 when
                 omitted.
 
@@ -419,11 +428,14 @@ class ComponentUtils:
             raise ValueError("Tab occurrence must be a positive integer.")
 
         for _ in range(occurrence):
-            page.keyboard.press("Tab")
+            if isinstance(scope, Page):
+                scope.keyboard.press("Tab")
+            else:
+                scope.press("Tab")
 
     @staticmethod
     def upload_document(
-        page: Page,
+        scope: Scope,
         directory_path: str,
         file_name: str,
     ) -> str:
@@ -434,12 +446,12 @@ class ComponentUtils:
         the first generic file input is used.
 
         Args:
-            page: Appian page containing a file upload control.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             directory_path: Local directory containing the upload file.
             file_name: File name relative to ``directory_path``.
 
         Returns:
-            Absolute path of the file supplied to the browser.
+            str: Absolute path of the file supplied to the browser.
 
         Raises:
             FileNotFoundError: If the resolved local file does not exist.
@@ -448,26 +460,29 @@ class ComponentUtils:
         if not resolved_path.is_file():
             raise FileNotFoundError(f"Upload file not found at: {resolved_path}")
 
-        widget_input = page.locator(
+        widget_input = scope.locator(
             "div.MultipleFileUploadWidget---upload_field input[type='file']"
         )
         if widget_input.count() > 0:
             widget_input.first.set_input_files(str(resolved_path))
         else:
-            page.locator("input[type='file']").first.set_input_files(str(resolved_path))
+            scope.locator("input[type='file']").first.set_input_files(str(resolved_path))
 
         return str(resolved_path)
 
     @staticmethod
-    def wait_for_text_visible(page: Page, text: str) -> None:
-        """
-        Waits for an exact text string to become visible.
+    def wait_for_text_visible(scope: Scope, text: str) -> None:
+        """Waits for an excat_match text string to become visible.
 
         Timeout is inherited from the Playwright default configured by
         conftest.py.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            text: Visible text used to identify the target element.
         """
         logger.info("Waiting for text '%s' to be visible...", text)
-        text_locator = page.get_by_text(text, exact=True).filter(visible=True).first
+        text_locator = scope.get_by_text(text, exact=True).filter(visible=True).first
 
         try:
             text_locator.wait_for(state="visible")
@@ -477,52 +492,52 @@ class ComponentUtils:
             raise
 
     @staticmethod
-    def find_container(page: Page, field_label: str, header_text: str) -> Locator:
+    def find_container(scope: Scope, field_label: str, header_text: str) -> Locator:
         """Build a locator for a region containing a heading and field label.
 
         Use this to scope duplicate fields to a semantic region. The returned
         locator is not awaited or validated; the caller owns visibility checks.
 
         Args:
-            page: Appian page containing the region.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             field_label: Visible field text required inside the region.
             header_text: Visible text whose ancestor region is selected.
 
         Returns:
-            A live locator for the nearest matching region.
+            Locator: A live locator for the nearest matching region.
         """
         xpath = (
             f"//*[normalize-space()='{header_text}']"
             f"/ancestor::*[@role='region']"
             f"[.//*[normalize-space()='{field_label}']][1]"
         )
-        return page.locator(f"xpath={xpath}")
+        return scope.locator(f"xpath={xpath}")
 
     @staticmethod
-    def find_locator_by_xpath(page: Page, xpath: str) -> Locator:
+    def find_locator_by_xpath(scope: Scope, xpath: str) -> Locator:
         """Build a locator using an XPath expression.
 
         Args:
-            page: Appian page containing the element.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression to locate the element.
 
         Returns:
-            A live locator for the element matching the XPath.
+            Locator: A live locator for the element matching the XPath.
         """
-        locator = page.locator(f"xpath={xpath}").filter(visible=True).first
+        locator = scope.locator(f"xpath={xpath}").filter(visible=True).first
         return locator
 
     @staticmethod
-    def wait_and_find_locator_by_xpath(page: Page, xpath: str) -> Locator:
+    def wait_and_find_locator_by_xpath(scope: Scope, xpath: str) -> Locator:
         """Build a locator using an XPath expression.
 
         Args:
-            page: Appian page containing the element.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression to locate the element.
 
         Returns:
-            A live locator for the element matching the XPath.
+            Locator: A live locator for the element matching the XPath.
         """
-        locator = ComponentUtils.find_locator_by_xpath(page, xpath)
+        locator = ComponentUtils.find_locator_by_xpath(scope, xpath)
         expect(locator).to_be_visible()
         return locator

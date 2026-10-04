@@ -4,13 +4,14 @@ import logging
 from datetime import datetime, timedelta
 
 from playwright.sync_api import Locator, Page, expect
+from robo_appian.utils.types import Scope
 
 # Initialize logger for execution tracking
 logger = logging.getLogger(__name__)
 
 
 class InputDate:
-    """Enter normalized dates and verify rendered Appian date values."""
+    """Reusable operations for Appian date controls."""
 
     @staticmethod
     def __normalize_date_string(date_str: str) -> str:
@@ -47,7 +48,7 @@ class InputDate:
             return raw_value
 
     @staticmethod
-    def __fill(page: Page, locator: Locator, date_str: str) -> None:
+    def __fill(scope: Scope, locator: Locator, date_str: str) -> None:
         """
         Fill a date field with a normalized date string.
 
@@ -70,7 +71,7 @@ class InputDate:
 
     @staticmethod
     def fill_by_locator(
-        page: Page,
+        scope: Scope,
         locator: Locator,
         date_str: str,
     ) -> None:
@@ -82,44 +83,44 @@ class InputDate:
         any subsequent Tab/focus-change operation.
 
         Args:
-            page: Appian page that owns the date control.
+            scope: Appian scope that owns the date control.
             locator: Date input locator; the first visible match is used.
             date_str: Date value to normalize and enter.
         """
-        InputDate.__fill(page, locator, date_str)
+        InputDate.__fill(scope, locator, date_str)
 
     @staticmethod
     def fill_date_by_label(
-        page: Page, label: str, date_str: str, exact: bool = False
+        scope: Scope, label: str, date_str: str, excat_match: bool = False
     ) -> None:
         """Fill a labeled date input.
 
         Args:
-            page: Appian page containing the date input.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible label used to locate the input.
             date_str: Excel, US, or ISO-style date to normalize when possible.
-            exact: Whether the accessible label must match exactly.
+            excat_match: Whether the accessible label must match exactly.
         """
         # .filter(visible=True) ignores hidden mobile layouts in Appian
-        locator = page.get_by_label(label, exact=exact)
-        InputDate.fill_by_locator(page, locator, date_str)
+        locator = scope.get_by_label(label, exact=excat_match)
+        InputDate.fill_by_locator(scope, locator, date_str)
 
     @staticmethod
-    def fill_date_by_id(page: Page, input_id: str, date_str: str) -> None:
+    def fill_date_by_id(scope: Scope, input_id: str, date_str: str) -> None:
         """Fill a date input by literal HTML ID.
 
         Args:
-            page: Appian page containing the date input.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             input_id: Exact HTML ID, including IDs that begin with numbers.
             date_str: Excel, US, or ISO-style date to normalize when possible.
         """
         # Use attribute selector [id="..."] instead of # to prevent CSS SyntaxErrors
-        locator = page.locator(f'[id="{input_id}"]')
-        InputDate.fill_by_locator(page, locator, date_str)
+        locator = scope.locator(f'[id="{input_id}"]')
+        InputDate.fill_by_locator(scope, locator, date_str)
 
     @staticmethod
     def get_date_value(
-        page: Page, label: str, exact: bool = False
+        scope: Scope, label: str, excat_match: bool = False
     ) -> str:
         """Return the current value of a labeled date input.
 
@@ -128,14 +129,14 @@ class InputDate:
         layouts are ignored by selecting the first visible matching input.
 
         Args:
-            page: Appian page containing the date input.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible label used to locate the input.
-            exact: Whether the accessible label must match exactly.
+            excat_match: Whether the accessible label must match exactly.
 
         Returns:
-            Current input value, stripped of surrounding whitespace.
+            str: Current input value, stripped of surrounding whitespace.
         """
-        locator = page.get_by_label(label, exact=exact).filter(visible=True).first
+        locator = scope.get_by_label(label, exact=excat_match).filter(visible=True).first
         expect(locator).to_be_visible()
         value = locator.input_value().strip()
         logger.info("Read date input '%s' value '%s'.", label, value)
@@ -143,19 +144,19 @@ class InputDate:
 
     @staticmethod
     def verify_date_by_label(
-        page: Page, label: str, expected_date_str: str, exact: bool = False
+        scope: Scope, label: str, expected_date_str: str, excat_match: bool = False
     ) -> None:
-        """Wait until a labeled date input displays an exact expected value.
+        """Wait until a labeled date input displays an excat_match expected value.
 
         The expected value is compared as supplied and is not normalized.
 
         Args:
-            page: Appian page containing the date input.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible label used to locate the input.
             expected_date_str: Exact rendered input value to expect.
-            exact: Whether the accessible label must match exactly.
+            excat_match: Whether the accessible label must match exactly.
         """
-        locator = page.get_by_label(label, exact=exact).filter(visible=True).first
+        locator = scope.get_by_label(label, exact=excat_match).filter(visible=True).first
         expect(locator).to_have_value(expected_date_str)
         logger.info("Verified input '%s' has value '%s'.", label, expected_date_str)
 
@@ -167,7 +168,7 @@ class InputDate:
             days: Positive or negative day offset from the current local date.
 
         Returns:
-            Offset date formatted as ``MM/DD/YYYY``.
+            str: Offset date formatted as ``MM/DD/YYYY``.
         """
         today = datetime.now()
         future_date = today + timedelta(days=days)

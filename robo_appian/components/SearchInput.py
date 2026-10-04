@@ -4,13 +4,14 @@ import logging
 from typing import Optional
 
 from playwright.sync_api import Page, expect, Locator
+from robo_appian.utils.types import Scope
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 logger = logging.getLogger(__name__)
 
 
 class SearchInput:
-    """Choose exact values from dynamic Appian search-input suggestions.
+    """Reusable operations for Appian search input controls.
 
     Use these helpers for Appian picker fields that render a suggestion list
     after keyboard input. Callers may identify a picker by accessible name or
@@ -19,17 +20,17 @@ class SearchInput:
 
     @staticmethod
     def get_section_container(
-        page: Page, header_text: str, field_label: str
+        scope: Scope, header_text: str, field_label: str
     ) -> Locator:
         """Find the nearest visible section containing a heading and field.
 
         Args:
-            page: Appian page containing the picker field.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             header_text: Unique heading for the section to search.
             field_label: Exact label of the field within that section.
 
         Returns:
-            A visible locator that scopes both the heading and field.
+            Locator: A visible locator that scopes both the heading and field.
 
         Raises:
             AssertionError: If the shared section container does not become
@@ -48,13 +49,13 @@ class SearchInput:
             + "]][1]"
         )
 
-        section_container = page.locator(f"xpath={common_root_xpath}")
+        section_container = scope.locator(f"xpath={common_root_xpath}")
         expect(section_container).to_be_visible()
         return section_container
 
     @staticmethod
     def __find_lookup(
-        page: Page,
+        scope: Scope,
         accessible_name: Optional[str] = None,
         placeholder_text: Optional[str] = None,
         section_name: Optional[str] = None,
@@ -69,12 +70,12 @@ class SearchInput:
 
         search_scope = (
             SearchInput.get_section_container(
-                page=page,
+                scope=scope,
                 header_text=section_name,
                 field_label=field_identifier,
             )
             if section_name
-            else page
+            else scope
         )
 
         if placeholder_text:
@@ -107,7 +108,7 @@ class SearchInput:
 
     @staticmethod
     def select(
-        page: Page,
+        scope: Scope,
         accessible_name: Optional[str] = None,
         placeholder_text: Optional[str] = None,
         search_text: str = "",
@@ -123,7 +124,7 @@ class SearchInput:
         be disabled or adjusted for a particular picker.
 
         Args:
-            page: Appian page containing the picker.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible field name used by Playwright's
                 role-based locator.
             placeholder_text: Exact placeholder used to identify the picker
@@ -145,13 +146,13 @@ class SearchInput:
 
         # Resolve the component, then delegate to the shared locator-based selection logic.
         lookup = SearchInput.__find_lookup(
-            page=page,
+            scope=scope,
             accessible_name=accessible_name,
             section_name=section_name,
             placeholder_text=placeholder_text,
         )
         SearchInput.select_by_locator(
-            page=page,
+            scope=scope,
             lookup=lookup,
             search_text=search_text,
             field_name=field_name,
@@ -161,8 +162,173 @@ class SearchInput:
         logger.info("Search input selection completed: field='%s'.", field_name)
 
     @staticmethod
+    def select_by_index(
+        scope: Scope,
+        index: int,
+        accessible_name: Optional[str] = None,
+        placeholder_text: Optional[str] = None,
+        search_text: str = "",
+        section_name: Optional[str] = None,
+        use_typing_delay: bool = True,
+        typing_delay: int = 50,
+    ) -> None:
+        """Choose a visible search-input suggestion by 1-based index.
+
+        The picker is first populated with ``search_text`` using the same keyboard
+        interaction as :meth:`select`. The method then selects the requested
+        visible suggestion, excluding Appian's ``No results found`` sentinel.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            index: 1-based index of the visible suggestion to select.
+            accessible_name: Accessible field name used to locate the picker.
+            placeholder_text: Exact placeholder used when no suitable accessible
+                name is available.
+            search_text: Text used to populate/filter the suggestion list.
+            section_name: Optional heading used to scope a duplicate field.
+            use_typing_delay: Whether to pause between keyboard events.
+            typing_delay: Delay in milliseconds between characters when enabled.
+
+        Raises:
+            ValueError: If ``index`` is less than 1, ``search_text`` is empty, or
+                exactly one field identifier is not supplied.
+            IndexError: If ``index`` exceeds the number of visible suggestions.
+            Exception: If Appian reports that no results were found.
+            AssertionError: If the picker or suggestion list is unavailable.
+        """
+        if index < 1:
+            raise ValueError("SearchInput index must be 1 or greater.")
+        if not str(search_text or "").strip():
+            raise ValueError("Search text cannot be empty or whitespace.")
+
+        field_name = placeholder_text or accessible_name or "SearchInput"
+        logger.info(
+            "Search input index selection starting: field='%s', index=%s.",
+            field_name,
+            index,
+        )
+
+        lookup = SearchInput.__find_lookup(
+            scope=scope,
+            accessible_name=accessible_name,
+            section_name=section_name,
+            placeholder_text=placeholder_text,
+        )
+        SearchInput.select_by_locator_index(
+            scope=scope,
+            lookup=lookup,
+            index=index,
+            search_text=search_text,
+            field_name=field_name,
+            use_typing_delay=use_typing_delay,
+            typing_delay=typing_delay,
+        )
+        logger.info(
+            "Search input index selection completed: field='%s', index=%s.",
+            field_name,
+            index,
+        )
+
+    @staticmethod
+    def select_by_locator_index(
+        scope: Scope,
+        lookup: Locator,
+        index: int,
+        search_text: str,
+        field_name: str = "SearchInput",
+        use_typing_delay: bool = True,
+        typing_delay: int = 50,
+    ) -> None:
+        """Choose a visible suggestion by 1-based index for a resolved picker.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            lookup: Locator or lookup value used to resolve the search input.
+            index: Zero-based index of the matching search input.
+            search_text: Text to type into the search input.
+            field_name: Optional field name used in diagnostics.
+            use_typing_delay: Whether to type using a per-character delay.
+            typing_delay: Delay in milliseconds between typed characters.
+        """
+        if index < 1:
+            raise ValueError("SearchInput index must be 1 or greater.")
+        if not str(search_text or "").strip():
+            raise ValueError("Search text cannot be empty or whitespace.")
+
+        expect(lookup, f"SearchInput '{field_name}' was not visible.").to_be_visible()
+        expect(lookup, f"SearchInput '{field_name}' was not enabled.").to_be_enabled()
+        expect(lookup, f"SearchInput '{field_name}' was not a combobox.").to_have_attribute(
+            "role", "combobox"
+        )
+
+        listbox_id = lookup.get_attribute("aria-controls")
+        if not lookup.get_attribute("aria-labelledby"):
+            raise AssertionError(
+                f"SearchInput '{field_name}' does not expose aria-labelledby."
+            )
+        if not listbox_id:
+            raise AssertionError(
+                f"SearchInput '{field_name}' does not expose aria-controls."
+            )
+
+        lookup.click()
+        lookup.press("Control+A")
+        lookup.press("Backspace")
+        delay = max(0, typing_delay) if use_typing_delay else 0
+        lookup.press_sequentially(str(search_text).strip(), delay=delay)
+
+        listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
+        listbox = (
+            scope.locator(
+                "xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]"
+            )
+            .filter(visible=True)
+            .first
+        )
+        expect(listbox).to_be_visible()
+
+        visible_options = listbox.get_by_role("option").filter(visible=True)
+        expect(
+            visible_options.first,
+            f"SearchInput '{field_name}' did not render any suggestions.",
+        ).to_be_visible()
+
+        no_results = listbox.get_by_role("option", name="No results found", exact=True)
+        if no_results.filter(visible=True).count() > 0:
+            raise Exception(
+                f"No lookup matches found for '{search_text}' in '{field_name}'. "
+                "Verify the entered value and the current form selections."
+            )
+
+        option_count = visible_options.count()
+        if index > option_count:
+            raise IndexError(
+                f"SearchInput '{field_name}' index {index} is out of range; "
+                f"{option_count} visible suggestion(s) were available."
+            )
+
+        option = visible_options.nth(index - 1)
+        expect(
+            option,
+            f"SearchInput '{field_name}' suggestion at index {index} was not visible.",
+        ).to_be_visible()
+        selected_text = option.inner_text().strip()
+        option.click()
+        expect(
+            listbox,
+            f"SearchInput '{field_name}' suggestion list remained visible.",
+        ).to_be_hidden()
+
+        # Appian pickers expose the selected display value in the combobox.
+        if selected_text:
+            expect(
+                lookup,
+                f"SearchInput '{field_name}' did not retain index {index} selection.",
+            ).to_have_value(selected_text)
+
+    @staticmethod
     def select_by_locator(
-        page: Page,
+        scope: Scope,
         lookup: Locator,
         search_text: str,
         field_name: str = "SearchInput",
@@ -176,7 +342,7 @@ class SearchInput:
         suggestions, and the option must exactly equal ``search_text``.
 
         Args:
-            page: Appian page that owns the picker's suggestion list.
+            scope: Appian scope that owns the picker's suggestion list.
             lookup: Visible picker input locator.
             search_text: Text that must exactly match the option to select.
             field_name: Human-readable field name used in failure messages.
@@ -224,7 +390,7 @@ class SearchInput:
         # Each Appian picker identifies its own dynamically rendered suggestion list.
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            page.locator(
+            scope.locator(
                 "xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]"
             )
             .filter(visible=True)

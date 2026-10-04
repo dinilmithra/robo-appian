@@ -7,13 +7,14 @@ components do not need to know the underlying Appian DOM structure.
 from typing import Optional, Sequence
 
 from playwright.sync_api import Locator, Page, expect
+from robo_appian.utils.types import Scope
 
 from robo_appian.components.Region import Region
 
 
 class RecordList:
     """
-    Generic helpers for repeated Appian label/value records inside a region.
+    Reusable operations for repeated Appian records inside a region.
 
     Appian layout details stay here so application components only provide
     semantic region/field labels and business expectations.
@@ -61,27 +62,45 @@ class RecordList:
 
     @staticmethod
     def count(
-        page: Page,
+        scope: Scope,
         region_name: str,
         record_labels: Sequence[str],
     ) -> int:
-        """Return the number of visible records in the named record region."""
-        region = Region.get(page, region_name)
+        """Return the number of visible records in the named record region.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            region_name: Optional region name used to narrow the lookup.
+            record_labels: Labels used to identify candidate records.
+
+
+        Returns:
+            int: The number of matching records currently available.
+        """
+        region = Region.get(scope, region_name)
         return RecordList._matching_blocks(region, record_labels).count()
 
     @staticmethod
     def latest_snapshot(
-        page: Page,
+        scope: Scope,
         region_name: str,
         record_labels: Sequence[str],
     ) -> Optional[str]:
-        """
-        Return the newest visible record text, or None when the list is empty.
+        """Return the newest visible record text, or None when the list is empty.
 
         The snapshot is preferable to a row count for paged lists because the
         visible row count may remain constant when a new record is prepended.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            region_name: Optional region name used to narrow the lookup.
+            record_labels: Labels used to identify candidate records.
+
+
+        Returns:
+            Optional[str]: The latest matching record snapshot, or ``None`` when no snapshot is available.
         """
-        region = Region.get(page, region_name)
+        region = Region.get(scope, region_name)
         records = RecordList._matching_blocks(region, record_labels)
         if records.count() == 0:
             return None
@@ -91,7 +110,7 @@ class RecordList:
 
     @staticmethod
     def latest_matching_locator(
-        page: Page,
+        scope: Scope,
         region_name: str,
         record_labels: Sequence[str],
         expected_texts: Sequence[str],
@@ -100,11 +119,21 @@ class RecordList:
 
         The returned locator stays live across Appian rerenders. If the newest
         record changes, Playwright reevaluates ``first`` against the current DOM.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            region_name: Optional region name used to narrow the lookup.
+            record_labels: Labels used to identify candidate records.
+            expected_texts: Text values that must be present in the matching record.
+
+
+        Returns:
+            Locator: The locator for the latest matching record.
         """
         if not expected_texts:
             raise ValueError("At least one expected record text must be provided.")
 
-        region = Region.get(page, region_name)
+        region = Region.get(scope, region_name)
         records = RecordList._matching_blocks(region, record_labels)
         container = RecordList._record_container(records.first)
 
@@ -118,7 +147,7 @@ class RecordList:
 
     @staticmethod
     def wait_for_latest_match(
-        page: Page,
+        scope: Scope,
         region_name: str,
         record_labels: Sequence[str],
         expected_texts: Sequence[str],
@@ -128,6 +157,16 @@ class RecordList:
         The locator remains live across Appian rerenders. Playwright re-evaluates
         the newest record and its text until the expectation succeeds or the
         configured Playwright default timeout expires; no manual polling or sleeps are used.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            region_name: Optional region name used to narrow the lookup.
+            record_labels: Labels used to identify candidate records.
+            expected_texts: Text values that must be present in the matching record.
+
+
+        Returns:
+            Locator: The locator for the latest matching record after it becomes available.
         """
         if not expected_texts:
             raise ValueError("At least one expected record text must be provided.")
@@ -139,7 +178,7 @@ class RecordList:
             normalized_expected.append(normalized)
 
         latest = RecordList.latest_matching_locator(
-            page,
+            scope,
             region_name,
             record_labels,
             normalized_expected,
@@ -155,16 +194,27 @@ class RecordList:
 
     @staticmethod
     def latest_adjacent_strong_value(
-        page: Page,
+        scope: Scope,
         region_name: str,
         label_block_texts: Sequence[str],
         value_index: int,
     ) -> str:
-        """Read a strong-text value from the newest adjacent value column."""
+        """Read a strong-text value from the newest adjacent value column.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            region_name: Optional region name used to narrow the lookup.
+            label_block_texts: Labels used to identify the record block containing the value.
+            value_index: Zero-based index of the adjacent strong value to return.
+
+
+        Returns:
+            str: The latest adjacent emphasized value for the requested label.
+        """
         if value_index < 0:
             raise ValueError("Value index cannot be negative.")
 
-        region = Region.get(page, region_name)
+        region = Region.get(scope, region_name)
         label_block = RecordList._matching_blocks(
             region,
             label_block_texts,

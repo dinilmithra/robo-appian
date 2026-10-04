@@ -1,12 +1,11 @@
 """Generic helpers for selecting values from Appian radio-button groups."""
 
-from typing import Union
-
-from playwright.sync_api import Locator, Page, expect
+from playwright.sync_api import Locator, expect
+from robo_appian.utils.types import Scope
 
 
 class RadioSelect:
-    """Utility for selecting Appian radio options using live Appian DOM relationships."""
+    """Reusable operations for Appian radio selection controls."""
 
     @staticmethod
     def __xpath_literal(value: str) -> str:
@@ -19,7 +18,7 @@ class RadioSelect:
 
     @staticmethod
     def __find_visible_label(
-        scope: Union[Locator, Page],
+        scope: Scope,
         text: str,
     ) -> Locator:
         label_text = str(text or "").strip()
@@ -39,7 +38,7 @@ class RadioSelect:
 
     @staticmethod
     def __find_locator(
-        scope: Union[Locator, Page],
+        scope: Scope,
         text: str,
     ) -> Locator:
         label = RadioSelect.__find_visible_label(scope, text)
@@ -52,7 +51,7 @@ class RadioSelect:
 
     @staticmethod
     def __select_in_scope(
-        scope: Union[Locator, Page],
+        scope: Scope,
         text: str,
     ) -> None:
         label_text = str(text or "").strip()
@@ -83,22 +82,28 @@ class RadioSelect:
 
     @staticmethod
     def click_in_group(
-        page: Page,
+        scope: Scope,
         group_label: str,
         option_name: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> None:
         """Select an option within one named Appian radio group.
 
         Appian exposes RadioSelect groups as ``role=radiogroup`` with an
         accessible name from ``aria-labelledby``. Scoping prevents ambiguous
-        Yes/No options elsewhere on the same page.
+        Yes/No options elsewhere on the same scope.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            group_label: Accessible label of the radio-button group.
+            option_name: Visible option text to select.
+            excat_match: Whether matching must use the complete label or text.
         """
         normalized_group = str(group_label or "").strip()
         if not normalized_group:
             raise ValueError("Radio group label cannot be empty.")
         group = (
-            page.get_by_role("radiogroup", name=normalized_group, exact=exact)
+            scope.get_by_role("radiogroup", name=normalized_group, exact=excat_match)
             .filter(visible=True)
             .first
         )
@@ -108,11 +113,11 @@ class RadioSelect:
         RadioSelect.__select_in_scope(group, option_name)
 
     @staticmethod
-    def click(page: Page, option_text: str) -> None:
-        """Select a visible Appian radio option on the page.
+    def click(scope: Scope, option_text: str) -> None:
+        """Select a visible Appian radio option on the scope.
 
         Args:
-            page: Current Playwright page.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             option_text: Visible option text to select.
         """
-        RadioSelect.__select_in_scope(page, option_text)
+        RadioSelect.__select_in_scope(scope, option_text)

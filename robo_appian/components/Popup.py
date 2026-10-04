@@ -1,6 +1,7 @@
 """Generic helpers for validating and interacting with modal/popup content."""
 
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
+from robo_appian.utils.types import Scope
 from robo_appian.components.Button import Button
 
 
@@ -8,18 +9,18 @@ class Popup:
     """Complete required or conditional actions in Appian dialogs."""
 
     @staticmethod
-    def click(page: Page, expected_text: str, action_label: str) -> bool:
+    def click(scope: Scope, expected_text: str, action_label: str) -> bool:
         """Complete an action in a required dialog and wait for it to close.
 
         Args:
-            page: Appian page expected to show the dialog.
+            scope: Appian scope expected to show the dialog.
             expected_text: Text fragment that identifies the dialog.
             action_label: Visible dialog button label to click.
 
         Returns:
-            ``True`` after the dialog action completes and the dialog is hidden.
+            bool: ``True`` after the dialog action completes and the dialog is hidden.
         """
-        dialog = page.get_by_role("dialog").filter(has_text=expected_text)
+        dialog = scope.get_by_role("dialog").filter(has_text=expected_text)
         dialog.wait_for(state="visible")
         Button.click(dialog, action_label)
         dialog.wait_for(state="hidden")
@@ -27,7 +28,7 @@ class Popup:
 
     @staticmethod
     def click_if_present(
-        page: Page,
+        scope: Scope,
         expected_text: str,
         action_label: str,
         timeout_ms: int = None,
@@ -39,13 +40,13 @@ class Popup:
         when the dialog appears, returns only after the action closes it.
 
         Args:
-            page: Appian page that may show the dialog.
+            scope: Appian scope that may show the dialog.
             expected_text: Text fragment that identifies the dialog.
             action_label: Visible dialog button label to click.
             timeout_ms: Positive maximum time to wait for the optional dialog.
 
         Returns:
-            ``True`` when the dialog was completed; ``False`` when it did not
+            bool: ``True`` when the dialog was completed; ``False`` when it did not
             appear within the supplied timeout.
 
         Raises:
@@ -56,7 +57,7 @@ class Popup:
         if timeout_ms <= 0:
             raise ValueError("timeout_ms must be greater than zero.")
 
-        dialog = page.get_by_role("dialog").filter(has_text=expected_text)
+        dialog = scope.get_by_role("dialog").filter(has_text=expected_text)
 
         try:
             dialog.wait_for(state="visible", timeout=timeout_ms)

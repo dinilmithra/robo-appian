@@ -3,15 +3,16 @@
 from typing import Optional
 
 from playwright.sync_api import Locator, Page, expect
+from robo_appian.utils.types import Scope
 
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 
 class CheckBox:
-    """Utility class for interacting with Appian checkbox controls."""
+    """Reusable operations for Appian checkbox controls."""
 
     @staticmethod
-    def __checkbox_locator(page: Page, text: str) -> Locator:
+    def __checkbox_locator(scope: Scope, text: str) -> Locator:
         """Return one locator that supports labeled and Appian boolean checkboxes.
 
         Appian checkbox markup is observed in two common forms:
@@ -22,7 +23,7 @@ class CheckBox:
            contains the native checkbox input.
 
         Args:
-            page: Appian page containing the checkbox.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Visible checkbox option label or boolean field label.
 
         Returns:
@@ -46,10 +47,10 @@ class CheckBox:
             "//input[@type='checkbox']"
             ")[1]"
         )
-        return page.locator(xpath)
+        return scope.locator(xpath)
 
     @staticmethod
-    def __label_for_checkbox(page: Page, checkbox: Locator, text: str) -> Locator:
+    def __label_for_checkbox(scope: Scope, checkbox: Locator, text: str) -> Locator:
         """Return the visible Appian label associated with a checkbox input."""
         checkbox_id = checkbox.get_attribute("id")
         if not checkbox_id:
@@ -57,19 +58,28 @@ class CheckBox:
 
         safe_checkbox_id = ComponentUtils.xpath_literal(checkbox_id)
         return (
-            page.locator(f"xpath=//label[@for={safe_checkbox_id}]")
+            scope.locator(f"xpath=//label[@for={safe_checkbox_id}]")
             .filter(visible=True)
             .first
         )
 
     @staticmethod
-    def is_visible(page: Page, text: str) -> bool:
-        """Return whether the requested Appian checkbox is present."""
-        return CheckBox.__checkbox_locator(page, text).count() > 0
+    def is_visible(scope: Scope, text: str) -> bool:
+        """Return whether the requested Appian checkbox is present.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            text: Visible text used to identify the target element.
+
+
+        Returns:
+            bool: ``True`` when a matching Appian checkbox is visible; otherwise ``False``.
+        """
+        return CheckBox.__checkbox_locator(scope, text).count() > 0
 
     @staticmethod
     def is_checked(
-        page: Page,
+        scope: Scope,
         text: str,
         timeout: Optional[float] = None,
     ) -> bool:
@@ -84,16 +94,16 @@ class CheckBox:
         inspect the current state immediately.
 
         Args:
-            page: Appian page containing the checkbox.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Visible option label or boolean field label.
             timeout: Optional timeout in seconds to wait for a checked state.
 
         Returns:
-            ``True`` when the checkbox is checked within the requested window;
+            bool: ``True`` when the checkbox is checked within the requested window;
             otherwise ``False``.
         """
         field_text = str(text or "").strip()
-        checkbox = CheckBox.__checkbox_locator(page, field_text)
+        checkbox = CheckBox.__checkbox_locator(scope, field_text)
         timeout_ms = None if timeout is None else max(0.0, float(timeout)) * 1000
 
         assertion = expect(
@@ -115,19 +125,19 @@ class CheckBox:
             return False
 
     @staticmethod
-    def select(page: Page, text: str, selected: bool = True) -> None:
+    def select(scope: Scope, text: str, selected: bool = True) -> None:
         """Select or deselect an Appian checkbox using its visible label.
 
         The checkbox is re-resolved after clicking because Appian may replace
         the control during a SAIL re-render.
 
         Args:
-            page: Playwright page containing the checkbox.
+            scope: Playwright scope containing the checkbox.
             text: Visible checkbox option label or boolean field label.
             selected: ``True`` to check, ``False`` to uncheck.
         """
         label_text = str(text or "").strip()
-        checkbox = CheckBox.__checkbox_locator(page, label_text)
+        checkbox = CheckBox.__checkbox_locator(scope, label_text)
         expect(
             checkbox,
             f"Checkbox '{label_text}' was not found.",
@@ -136,7 +146,7 @@ class CheckBox:
         if checkbox.is_checked() == selected:
             return
 
-        label = CheckBox.__label_for_checkbox(page, checkbox, label_text)
+        label = CheckBox.__label_for_checkbox(scope, checkbox, label_text)
         expect(
             label,
             f"Visible checkbox label for '{label_text}' was not found.",
@@ -144,10 +154,10 @@ class CheckBox:
         label.scroll_into_view_if_needed()
         label.click()
 
-        checkbox = CheckBox.__checkbox_locator(page, label_text)
+        checkbox = CheckBox.__checkbox_locator(scope, label_text)
         expect(
             checkbox,
             f"Checkbox '{label_text}' did not reach selected={selected}.",
         ).to_be_checked(checked=selected)
 
-        ComponentUtils.wait_for_appian_action_completed(page)
+        ComponentUtils.wait_for_appian_action_completed(scope)

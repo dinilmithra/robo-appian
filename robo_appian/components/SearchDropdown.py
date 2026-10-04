@@ -6,6 +6,7 @@ Keep application-specific labels, values, and workflow decisions outside this mo
 from typing import Optional
 
 from playwright.sync_api import Page, expect
+from robo_appian.utils.types import Scope
 
 from robo_appian.components.Dropdown import Dropdown
 from robo_appian.components.InputText import InputText
@@ -13,11 +14,11 @@ from robo_appian.utils.ComponentUtils import ComponentUtils
 
 
 class SearchDropdown:
-    """Select and inspect values in searchable Appian dropdown widgets."""
+    """Reusable operations for searchable Appian dropdown controls."""
 
     @staticmethod
     def select(
-        page: Page,
+        scope: Scope,
         accessible_name: str,
         option_text: str,
         exact_label: bool = True,
@@ -25,12 +26,12 @@ class SearchDropdown:
     ) -> None:
         """Search for and click an option in a labeled Appian combobox.
 
-        The exact accessible-name match is opened. Its ``aria-controls``
-        relation identifies the listbox, and the listbox container's native
-        ``Search`` label identifies the filter input.
+        The excat_match accessible-name match is opened. Its ``aria-controls``
+        relation identifies the Appian listbox, whose ``Search`` field is used
+        to filter the available options.
 
         Args:
-            page: Appian page containing the searchable dropdown.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible combobox name to match.
             option_text: Option name to search for and select.
             exact_label: When True, require the rendered Appian label to match
@@ -87,7 +88,7 @@ class SearchDropdown:
         # marker, so SearchDropdown does not maintain a second label rule.
         dropdown = (
             Dropdown._dropdown_locator(
-                page,
+                scope,
                 normalized_name,
                 exact=True,
                 allow_required_marker=not exact_label,
@@ -125,7 +126,7 @@ class SearchDropdown:
         label_id_literal = ComponentUtils.xpath_literal(f" {aria_labelledby} ")
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            page.locator(
+            scope.locator(
                 "xpath=//*[@role='listbox' and @id="
                 + listbox_id_literal
                 + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
@@ -161,19 +162,173 @@ class SearchDropdown:
         _expect_contains_text(dropdown, normalized_option)
 
     @staticmethod
+    def select_by_index(
+        scope: Scope,
+        accessible_name: str,
+        option_index: int,
+        exact_label: bool = True,
+        timeout: Optional[float] = None,
+    ) -> None:
+        """Select a searchable Appian dropdown option by one-based index.
+
+        Index 1 selects the first real selectable option, index 2 the second,
+        and so on. Placeholder entries such as ``Select a Value`` are excluded.
+        This variant is useful when searchable option text is dynamic but the
+        option ordering is stable.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            accessible_name: Accessible combobox name to match.
+            option_index: One-based index of the selectable option.
+            exact_label: When True, require the rendered Appian label to match
+                exactly. When False, also accept Appian's trailing required
+                marker variants (``Label*`` and ``Label *``).
+            timeout: Optional timeout in seconds for dropdown/listbox/option
+                visibility and final selection assertions. When omitted,
+                Playwright's configured expectation timeout is used.
+
+        Raises:
+            ValueError: If the accessible name is blank or ``option_index`` is
+                less than 1.
+            AssertionError: If the dropdown/listbox or requested option does
+                not become available.
+        """
+        normalized_name = str(accessible_name or "").strip()
+        if not normalized_name:
+            raise ValueError(
+                "Search dropdown accessible name cannot be empty or whitespace."
+            )
+        if option_index < 1:
+            raise ValueError(
+                "Search dropdown option index must be 1 or greater."
+            )
+
+        timeout_ms = None if timeout is None else max(0.0, float(timeout)) * 1000
+
+        def _expect_visible(locator, message: str | None = None) -> None:
+            assertion = expect(locator, message) if message else expect(locator)
+            if timeout_ms is None:
+                assertion.to_be_visible()
+            else:
+                assertion.to_be_visible(timeout=timeout_ms)
+
+        def _expect_hidden(locator) -> None:
+            assertion = expect(locator)
+            if timeout_ms is None:
+                assertion.to_be_hidden()
+            else:
+                assertion.to_be_hidden(timeout=timeout_ms)
+
+        def _expect_attribute(locator, name: str, value: str) -> None:
+            assertion = expect(locator)
+            if timeout_ms is None:
+                assertion.to_have_attribute(name, value)
+            else:
+                assertion.to_have_attribute(name, value, timeout=timeout_ms)
+
+        def _expect_contains_text(locator, value: str) -> None:
+            assertion = expect(locator)
+            if timeout_ms is None:
+                assertion.to_contain_text(value)
+            else:
+                assertion.to_contain_text(value, timeout=timeout_ms)
+
+        dropdown = (
+            Dropdown._dropdown_locator(
+                scope,
+                normalized_name,
+                exact=True,
+                allow_required_marker=not exact_label,
+            )
+            .filter(visible=True)
+            .first
+        )
+        _expect_visible(
+            dropdown,
+            f"Search dropdown '{normalized_name}' was not visible.",
+        )
+
+        if dropdown.get_attribute("aria-expanded") != "true":
+            if timeout_ms is None:
+                dropdown.click()
+            else:
+                dropdown.click(timeout=timeout_ms)
+
+        _expect_attribute(dropdown, "aria-expanded", "true")
+
+        aria_labelledby = dropdown.get_attribute("aria-labelledby")
+        if not aria_labelledby:
+            raise AssertionError(
+                f"Search dropdown '{normalized_name}' does not have an "
+                "aria-labelledby attribute."
+            )
+
+        listbox_id = dropdown.get_attribute("aria-controls")
+        if not listbox_id:
+            raise AssertionError(
+                f"Search dropdown '{normalized_name}' does not have an "
+                "aria-controls attribute."
+            )
+
+        label_id_literal = ComponentUtils.xpath_literal(f" {aria_labelledby} ")
+        listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
+        listbox = (
+            scope.locator(
+                "xpath=//*[@role='listbox' and @id="
+                + listbox_id_literal
+                + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
+                + label_id_literal
+                + ")]"
+            )
+            .filter(visible=True)
+            .first
+        )
+        _expect_visible(listbox)
+
+        # Searchable Appian controls may render a placeholder as an option.
+        # Keep one-based index behavior aligned with Dropdown.select_by_index()
+        # by excluding that placeholder from the selectable choices.
+        options = listbox.locator(
+            "xpath=.//*[@role='option' and "
+            "translate(normalize-space(string(.)), "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') "
+            "!= 'select a value']"
+        ).filter(visible=True)
+
+        selected_option = options.nth(option_index - 1)
+        _expect_visible(
+            selected_option,
+            (
+                f"Search dropdown '{normalized_name}' did not render selectable "
+                f"option {option_index}."
+            ),
+        )
+
+        selected_text = selected_option.inner_text().strip()
+        if timeout_ms is None:
+            selected_option.click()
+        else:
+            selected_option.click(timeout=timeout_ms)
+
+        _expect_hidden(listbox)
+        _expect_attribute(dropdown, "aria-expanded", "false")
+        if selected_text:
+            _expect_contains_text(dropdown, selected_text)
+
+    @staticmethod
     def verify_selected_value(
-        page: Page,
+        scope: Scope,
         accessible_name: str,
         expected_value: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> None:
         """Wait until a visible dropdown displays the expected rendered text.
 
         Args:
-            page: Appian page containing the dropdown.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible combobox name.
             expected_value: Text expected inside the selected dropdown.
-            exact: Whether ``accessible_name`` must exactly match; this does
+            excat_match: Whether ``accessible_name`` must exactly match; this does
                 not change the rendered-value assertion.
         """
         normalized_name = str(accessible_name or "").strip()
@@ -183,9 +338,9 @@ class SearchDropdown:
             )
 
         dropdown = Dropdown._get_dropdown(
-            page,
+            scope,
             normalized_name,
-            exact=exact,
+            excat_match=excat_match,
         )
 
         expect(
@@ -195,7 +350,7 @@ class SearchDropdown:
         ).to_have_text(expected_value)
 
     @staticmethod
-    def check_dropdown_state(page: Page, label_text: str) -> str:
+    def check_dropdown_state(scope: Scope, label_text: str) -> str:
         """Immediately classify a label-linked field's editability.
 
         Use this inside caller-owned retry logic when Appian may still be
@@ -203,11 +358,11 @@ class SearchDropdown:
         represented as ``Label or ID Not Found`` rather than raised.
 
         Args:
-            page: Appian page containing the field label.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label_text: Exact visible label text to inspect.
 
         Returns:
-            ``EDITABLE``, ``READ_ONLY``, or ``Label or ID Not Found``.
+            str: ``EDITABLE``, ``READ_ONLY``, or ``Label or ID Not Found``.
         """
         if not label_text or not label_text.strip():
             return "Label or ID Not Found"
@@ -215,7 +370,7 @@ class SearchDropdown:
         try:
             safe_label_text = ComponentUtils.xpath_literal(label_text.strip())
             label_locator = (
-                page.locator(f"xpath=//*[@id and normalize-space(.)={safe_label_text}]")
+                scope.locator(f"xpath=//*[@id and normalize-space(.)={safe_label_text}]")
                 .filter(visible=True)
                 .first
             )
@@ -228,7 +383,7 @@ class SearchDropdown:
                 return "Label or ID Not Found"
 
             label_id_literal = ComponentUtils.xpath_literal(f" {label_id} ")
-            linked_containers = page.locator(
+            linked_containers = scope.locator(
                 "xpath=//*[@role='combobox' and contains("
                 "concat(' ', normalize-space(@aria-labelledby), ' '), "
                 + label_id_literal

@@ -1,3 +1,5 @@
+"""Increment, build, and publish robo-appian using its dedicated environment."""
+
 from __future__ import annotations
 
 import os
@@ -97,6 +99,7 @@ def _poetry_executable() -> str:
 
 
 def run_poetry(*args: str, env: dict[str, str] | None = None, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
+    """Run Poetry in the package directory and raise on a nonzero exit status."""
     command = [_poetry_executable(), *args]
     print("> " + subprocess.list2cmdline(command))
     return subprocess.run(
@@ -164,6 +167,7 @@ def publish_package(version: str) -> None:
 
 
 def main() -> int:
+    """Activate the environment and publish, restoring the version on failure."""
     # Required release order:
     # 1. activate virtual environment
     # 2. remove dist folder

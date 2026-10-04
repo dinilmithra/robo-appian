@@ -8,13 +8,18 @@ dependencies = [
 ]
 
 [tool.poetry]
-version = "0.1.9"
+version = "0.1.10"
 packages = [{ include = "robo_appian" }]
 exclude = ["scripts/**", "tools/**"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "9.1.1"
 black = "26.5.1"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.7.7"
+mkdocstrings = {extras = ["python"], version = "^1.0.6"}
 
 [build-system]
 requires = ["poetry-core==2.5.0"]

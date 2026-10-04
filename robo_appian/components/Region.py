@@ -3,24 +3,35 @@
 import re
 
 from playwright.sync_api import Locator, Page, expect
+from robo_appian.utils.types import Scope
 
 
 class Region:
-    """Generic helpers for interacting with semantically named page regions."""
+    """Reusable operations for named Appian regions."""
 
     @staticmethod
     def get(
-        page: Page,
+        scope: Scope,
         accessible_name: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> Locator:
-        """Return the first visible semantic region identified by its accessible name."""
+        """Return the first visible semantic region identified by its accessible name.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            accessible_name: Accessible name used to identify the control.
+            excat_match: Whether matching must use the complete label or text.
+
+
+        Returns:
+            Locator: The locator for the matching Appian region.
+        """
         region_name = str(accessible_name or "").strip()
         if not region_name:
             raise ValueError("Region name cannot be empty or whitespace.")
 
         region = (
-            page.get_by_role("region", name=region_name, exact=exact)
+            scope.get_by_role("region", name=region_name, exact=excat_match)
             .filter(visible=True)
             .first
         )
@@ -29,17 +40,26 @@ class Region:
 
     @staticmethod
     def get_labeled_text(
-        page: Page,
+        scope: Scope,
         region_name: str,
         label: str,
         exact_region: bool = True,
     ) -> str:
-        """
-        Return the text associated with a visible inline label in a region.
+        """Return the text associated with a visible inline label in a region.
 
         This is intended for read-only summary/detail layouts where a paragraph
         contains one or more ``Label: value`` pairs. It deliberately uses text
         and semantic region boundaries rather than CSS classes.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            region_name: Optional region name used to narrow the lookup.
+            label: Visible or accessible label used to identify the control.
+            exact_region: Value supplied for ``exact_region``.
+
+
+        Returns:
+            str: The visible text associated with the label in the region.
         """
         normalized_label = str(label or "").strip()
         if not normalized_label:
@@ -47,7 +67,7 @@ class Region:
         if not normalized_label.endswith(":"):
             normalized_label = f"{normalized_label}:"
 
-        region = Region.get(page, region_name, exact=exact_region)
+        region = Region.get(scope, region_name, excat_match=exact_region)
         label_text = (
             region.get_by_text(normalized_label, exact=False).filter(visible=True).first
         )
