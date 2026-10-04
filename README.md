@@ -46,18 +46,6 @@ Full documentation, guides, and API reference are published at:
 
 **https://dinilmithra.github.io/robo-appian/**
 
-The MkDocs site is the primary user documentation. It includes installation, architecture and label-oriented concepts, a first-test walkthrough, component-selection guidance, troubleshooting, and generated API reference pages.
-
-For local documentation development:
-
-```bash
-poetry install --with docs
-poetry run mkdocs build --strict
-poetry run mkdocs serve
-```
-
-Generated `site/` output is not source and should not be edited manually.
-
 ## Developer
 
 **Dinil Mithra** — developer and maintainer of `robo-appian`.

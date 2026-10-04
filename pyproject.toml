@@ -2,6 +2,7 @@
 name = "robo-appian"
 dynamic = ["version"]
 description = "Reusable Playwright components for Appian automation"
+readme = "README.md"
 authors = [
     { name = "Dinil Mithra" },
 ]
@@ -19,7 +20,7 @@ Repository = "https://github.com/dinilmithra/robo-appian"
 Issues = "https://github.com/dinilmithra/robo-appian/issues"
 
 [tool.poetry]
-version = "0.1.12"
+version = "0.1.14"
 packages = [{ include = "robo_appian" }]
 exclude = ["scripts/**", "tools/**"]
 
