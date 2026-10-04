@@ -2,13 +2,24 @@
 name = "robo-appian"
 dynamic = ["version"]
 description = "Reusable Playwright components for Appian automation"
+authors = [
+    { name = "Dinil Mithra" },
+]
+maintainers = [
+    { name = "Dinil Mithra" },
+]
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "playwright==1.63.0",
 ]
 
+[project.urls]
+Documentation = "https://dinilmithra.github.io/robo-appian/"
+Repository = "https://github.com/dinilmithra/robo-appian"
+Issues = "https://github.com/dinilmithra/robo-appian/issues"
+
 [tool.poetry]
-version = "0.1.11"
+version = "0.1.12"
 packages = [{ include = "robo_appian" }]
 exclude = ["scripts/**", "tools/**"]
 
