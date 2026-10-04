@@ -7,12 +7,6 @@ hide:
 <div class="ra-home">
   <section class="ra-hero">
     <div class="ra-hero-copy">
-      <div class="ra-badges" aria-label="Technology stack">
-        <span class="ra-badge ra-badge-python">Python</span>
-        <span class="ra-badge ra-badge-playwright">Playwright</span>
-        <span class="ra-badge ra-badge-appian">Appian</span>
-      </div>
-
       <h1><span>Readable Appian UI automation</span><span>built on Playwright</span></h1>
 
       <p class="ra-hero-lead"><strong>robo-appian</strong> is a Python component library built on top of Playwright for automating Appian web applications. It provides reusable, label-oriented interactions for common Appian controls so tests stay readable and less coupled to Appian's generated HTML structure.</p>

@@ -106,7 +106,7 @@ class ComponentUtils:
 
     @staticmethod
     def click_by_id(scope: Scope, button_id: str) -> None:
-        """Click the first visible, enabled element with an excat_match HTML ID.
+        """Click the first visible, enabled element with an exact HTML ID.
 
         Args:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
@@ -142,7 +142,7 @@ class ComponentUtils:
         attribute: str,
         value: str,
     ) -> bool:
-        """Return whether an element with an excat_match attribute value is visible.
+        """Return whether an element with an exact attribute value is visible.
 
         Args:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
@@ -169,7 +169,7 @@ class ComponentUtils:
         value: str,
         visible_only: bool = False,
     ) -> Optional[Locator]:
-        """Return the first component matching an excat_match attribute value.
+        """Return the first component matching an exact attribute value.
 
         Args:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
@@ -472,7 +472,7 @@ class ComponentUtils:
 
     @staticmethod
     def wait_for_text_visible(scope: Scope, text: str) -> None:
-        """Waits for an excat_match text string to become visible.
+        """Waits for an exact text string to become visible.
 
         Timeout is inherited from the Playwright default configured by
         conftest.py.

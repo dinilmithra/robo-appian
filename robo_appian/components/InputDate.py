@@ -146,7 +146,7 @@ class InputDate:
     def verify_date_by_label(
         scope: Scope, label: str, expected_date_str: str, excat_match: bool = False
     ) -> None:
-        """Wait until a labeled date input displays an excat_match expected value.
+        """Wait until a labeled date input displays an exact expected value.
 
         The expected value is compared as supplied and is not normalized.
 

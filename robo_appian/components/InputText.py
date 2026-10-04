@@ -32,7 +32,7 @@ class InputText:
 
         locator = scope.get_by_label(
             label.strip(),
-            excat_match=excat_match,
+            exact=excat_match,
         ).filter(visible=True)
 
         return locator.count() > 0
@@ -127,7 +127,7 @@ class InputText:
             scope.get_by_role(
                 "textbox",
                 name=normalized_label,
-                excat_match=excat_match,
+                exact=excat_match,
             )
             .filter(visible=True)
             .first
@@ -259,7 +259,7 @@ class InputText:
         locator = (
             scope.get_by_placeholder(
                 placeholder.strip(),
-                excat_match=excat_match,
+                exact=excat_match,
             )
             .filter(visible=True)
             .first
@@ -299,7 +299,7 @@ class InputText:
         header = (
             scope.get_by_text(
                 header_text.strip(),
-                excat_match=excat_match,
+                exact=excat_match,
             )
             .filter(visible=True)
             .first

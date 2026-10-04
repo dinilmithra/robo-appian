@@ -64,7 +64,7 @@ class Table:
                 scope.get_by_role(
                     "table",
                     name=normalized_table_name,
-                    excat_match=excat_match,
+                    exact=excat_match,
                 )
                 .filter(visible=True)
                 .first
@@ -75,7 +75,7 @@ class Table:
             table_label = (
                 scope.get_by_text(
                     normalized_table_name,
-                    excat_match=excat_match,
+                    exact=excat_match,
                 )
                 .filter(visible=True)
                 .first
@@ -111,7 +111,7 @@ class Table:
                 scope.get_by_role(
                     "region",
                     name=normalized_region_name,
-                    excat_match=excat_match,
+                    exact=excat_match,
                 )
                 .filter(visible=True)
                 .first
@@ -265,7 +265,7 @@ class Table:
         Locate a visible table row using its first data-cell text.
 
         Appian constructs a row's accessible name from all cells in that
-        row. Therefore an excat_match role/name lookup such as:
+        row. Therefore an exact role/name lookup such as:
 
             get_by_role("row", name="Registration Type", exact=True)
 
@@ -1104,7 +1104,7 @@ class Table:
         row = Table.__get_row_by_name(
             table,
             row_name,
-            exact=False,
+            excat_match=False,
         )
 
         checkbox = row.get_by_role("checkbox").filter(visible=True).first
@@ -1141,7 +1141,7 @@ class Table:
             table_name,
             row_name,
             column_name,
-            exact=False,
+            excat_match=False,
         )
 
         RadioSelect.click_locator(

@@ -82,7 +82,7 @@ class Link:
         """Click the first visible link whose rendered text contains a value.
 
         Use this when partial visible text uniquely identifies the link. This
-        method does not perform an excat_match accessible-name match.
+        method does not perform an exact accessible-name match.
 
         Args:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.

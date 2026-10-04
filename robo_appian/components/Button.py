@@ -188,7 +188,7 @@ class Button:
 
         This method is useful when a scope renders duplicate buttons with the
         same label. An attribute value of ``None`` means that the attribute
-        must be present; another value requires an excat_match attribute match.
+        must be present; another value requires an exact attribute match.
 
         Args:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.

@@ -60,7 +60,7 @@ class Tab:
         return scope.get_by_role(
             "tab",
             name=tab_name,
-            excat_match=excat_match,
+            exact=excat_match,
         ).filter(visible=True)
 
     @staticmethod
@@ -73,7 +73,7 @@ class Tab:
         return scope.get_by_role(
             "button",
             name=tab_name,
-            excat_match=excat_match,
+            exact=excat_match,
         ).filter(visible=True)
 
     @staticmethod
