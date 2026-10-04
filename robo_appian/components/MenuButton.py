@@ -1,21 +1,22 @@
 """Generic helpers for opening menu buttons and choosing menu actions."""
 
 from playwright.sync_api import Locator, Page, expect
+from robo_appian.utils.types import Scope
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 
 class MenuButton:
-    """Reusable operations for menu-button controls."""
+    """Reusable operations for Appian menu-button controls."""
 
     @staticmethod
-    def __find_by_label(page: Page, label: str) -> Locator:
+    def __find_by_label(scope: Scope, label: str) -> Locator:
         """
         Finds a visible header navigation menu button by its label text.
         """
-        role_buttons = page.get_by_role("button", name=label, exact=False)
+        role_buttons = scope.get_by_role("button", name=label, exact=False)
         menu_button = (
             role_buttons.and_(
-                page.locator(
+                scope.locator(
                     "button[type='button'][data-owl-test-label='menuLayout-button']"
                 )
             )
@@ -56,12 +57,12 @@ class MenuButton:
         return aria_owns
 
     @staticmethod
-    def __find_menu_listbox(page: Page, menu_id: str) -> Locator:
+    def __find_menu_listbox(scope: Scope, menu_id: str) -> Locator:
         """
         Finds the visible menu listbox <ul> for the given menu id.
         Example: menu_id='abc123' -> ul id='abc123_menuItems'.
         """
-        listbox = page.locator(f'ul[id="{menu_id}_menuItems"][role="listbox"]').first
+        listbox = scope.locator(f'ul[id="{menu_id}_menuItems"][role="listbox"]').first
         expect(listbox).to_be_visible()
         return listbox
 
@@ -79,36 +80,37 @@ class MenuButton:
         return item
 
     @staticmethod
-    def select(page: Page, label: str, value: str) -> Page:
-        """Choose a header-menu option that opens a new browser page.
+    def select(scope: Scope, label: str, value: str) -> Page:
+        """Choose a header-menu option that opens a new browser scope.
 
         Use this for application switching menus such as CORE Admin Console to
         CORE User Hub. Button and option names are matched partially. The method
-        requires the option click to create a popup and returns after that page
+        requires the option click to create a popup and returns after that scope
         reaches ``domcontentloaded``.
 
         Args:
-            page: Current Appian page containing the header menu.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Visible menu-button label.
             value: Visible option text to select.
 
         Returns:
-            The newly opened Playwright page; subsequent interactions must use it.
+            Page: The newly opened Playwright scope; subsequent interactions must use it.
 
         Raises:
             ValueError: If the menu button has no valid ARIA-owned menu ID.
             AssertionError: If the menu or option does not become visible.
         """
 
-        menu_button = MenuButton.__find_by_label(page, label)
+        menu_button = MenuButton.__find_by_label(scope, label)
         MenuButton.__click_if_not_expanded(menu_button)
         menu_id = MenuButton.__find_id_from_aria_owns(menu_button)
         if not menu_id:
             raise ValueError("Menu button does not have a valid 'aria-owns' value.")
 
-        listbox = MenuButton.__find_menu_listbox(page, menu_id)
+        listbox = MenuButton.__find_menu_listbox(scope, menu_id)
         item = MenuButton.__find_menu_item_by_value(listbox, value)
-        with page.expect_popup() as new_page_info:
+        owner_page = scope if isinstance(scope, Page) else scope.page
+        with owner_page.expect_popup() as new_page_info:
             ComponentUtils.click(item)
 
         new_page = new_page_info.value

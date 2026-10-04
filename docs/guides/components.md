@@ -1,6 +1,6 @@
 # Components
 
-The preferred import style is through the package-level API:
+The preferred import style is through the package-level API. In every scope-aware component method, `scope` is **either a Playwright `Page` or a Playwright `Locator` object**. A `Page` searches the whole document; a `Locator` restricts the lookup to that locator's DOM subtree. See [Scope](../api/scope.md) for examples and guidance.
 
 ```python
 from robo_appian import Button, Dropdown, InputText, Table
@@ -11,7 +11,7 @@ from robo_appian import Button, Dropdown, InputText, Table
 ```python
 from robo_appian import Button
 
-Button.click(page, "Submit")
+Button.click(scope, "Submit")
 ```
 
 For pages where duplicate button labels require additional disambiguation, use
@@ -22,7 +22,7 @@ the attribute-aware helpers exposed by `Button`.
 ```python
 from robo_appian import InputText
 
-InputText.fill_by_label(page, "Request Name", "Example Request")
+InputText.fill_by_label(scope, "Request Name", "Example Request")
 ```
 
 ## Dropdowns
@@ -30,7 +30,7 @@ InputText.fill_by_label(page, "Request Name", "Example Request")
 ```python
 from robo_appian import Dropdown
 
-Dropdown.select(page, "Status", "Active")
+Dropdown.select(scope, "Status", "Active")
 ```
 
 ## Tables

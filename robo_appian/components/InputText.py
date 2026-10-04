@@ -1,39 +1,57 @@
 """Generic helpers for text-input and textarea interaction."""
 
 import logging
-from typing import Union
-
-from playwright.sync_api import Locator, Page, expect
+from playwright.sync_api import Locator, expect
+from robo_appian.utils.types import Scope
 
 logger = logging.getLogger(__name__)
 
 
 class InputText:
-    """Reusable operations for text inputs and textareas."""
+    """Reusable operations for Appian text input and paragraph controls."""
 
     @staticmethod
     def is_visible_by_label(
-        scope: Union[Page, Locator],
+        scope: Scope,
         label: str,
-        exact: bool = False,
+        excat_match: bool = False,
     ) -> bool:
-        """Return whether a visible input exists for the supplied label."""
+        """Return whether a visible input exists for the supplied label.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            label: Visible or accessible label used to identify the control.
+            excat_match: Whether matching must use the complete label or text.
+
+
+        Returns:
+            bool: ``True`` when a matching Appian text input is visible; otherwise ``False``.
+        """
         if not label or not label.strip():
             return False
 
         locator = scope.get_by_label(
             label.strip(),
-            exact=exact,
+            excat_match=excat_match,
         ).filter(visible=True)
 
         return locator.count() > 0
 
     @staticmethod
     def is_visible_by_type(
-        scope: Union[Page, Locator],
+        scope: Scope,
         input_type: str,
     ) -> bool:
-        """Return whether a visible input exists for the supplied HTML type."""
+        """Return whether a visible Appian input exists for the supplied input type.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            input_type: Input type used to identify the Appian field.
+
+
+        Returns:
+            bool: ``True`` when a matching input of the requested type is visible; otherwise ``False``.
+        """
         if not input_type or not input_type.strip():
             return False
 
@@ -48,11 +66,14 @@ class InputText:
         locator: Locator,
         value: str,
     ) -> None:
-        """
-        Fill an already-resolved Appian text input or textarea.
+        """Fill an already-resolved Appian text input or textarea.
 
         Container utilities can use this public API after locating a textbox in
         their own semantic scope without duplicating input interaction logic.
+
+        Args:
+            locator: Playwright locator for the target control.
+            value: Value to enter or select.
         """
         expect(
             locator,
@@ -75,10 +96,10 @@ class InputText:
 
     @staticmethod
     def fill_by_label(
-        scope: Union[Page, Locator],
+        scope: Scope,
         label: str,
         value: str,
-        exact: bool = False,
+        excat_match: bool = False,
     ) -> None:
         """
         Fill a visible textbox using its accessible label.
@@ -88,10 +109,10 @@ class InputText:
         ensures this API resolves only an editable text input or textarea.
 
         Args:
-            scope: Page or Locator used to resolve the textbox.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible label of the textbox.
             value: Value to enter.
-            exact: Whether the accessible label must match exactly.
+            excat_match: Whether the accessible label must match exactly.
 
         Raises:
             ValueError: If the label is empty or whitespace.
@@ -106,7 +127,7 @@ class InputText:
             scope.get_by_role(
                 "textbox",
                 name=normalized_label,
-                exact=exact,
+                excat_match=excat_match,
             )
             .filter(visible=True)
             .first
@@ -129,10 +150,10 @@ class InputText:
 
     @staticmethod
     def fill_by_visible_label(
-        scope: Union[Page, Locator],
+        scope: Scope,
         label: str,
         value: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> None:
         """Fill an Appian textbox whose visible field heading is separate from it.
 
@@ -143,13 +164,19 @@ class InputText:
 
         This API intentionally handles that specific Appian structure without
         changing ``fill_by_label`` or adding a fallback to it.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            label: Visible or accessible label used to identify the control.
+            value: Value to enter or select.
+            excat_match: Whether matching must use the complete label or text.
         """
         normalized_label = str(label or "").strip()
         if not normalized_label:
             raise ValueError("Visible label cannot be empty or whitespace.")
 
         visible_label = (
-            scope.get_by_text(normalized_label, exact=exact).filter(visible=True).first
+            scope.get_by_text(normalized_label, exact=excat_match).filter(visible=True).first
         )
         expect(
             visible_label,
@@ -177,7 +204,7 @@ class InputText:
 
     @staticmethod
     def fill_by_id(
-        page: Page,
+        scope: Scope,
         element_id: str,
         value: str,
     ) -> None:
@@ -188,7 +215,7 @@ class InputText:
         a concrete input id before delegating text interaction to InputText.
 
         Args:
-            page: Current Playwright page.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             element_id: DOM id of the input or textarea.
             value: Value to enter.
 
@@ -200,7 +227,7 @@ class InputText:
             raise ValueError("InputText id cannot be empty or whitespace.")
 
         normalized_id = element_id.strip()
-        locator = page.locator(f'[id="{normalized_id}"]').filter(visible=True).first
+        locator = scope.locator(f'[id="{normalized_id}"]').filter(visible=True).first
 
         expect(
             locator,
@@ -213,19 +240,26 @@ class InputText:
 
     @staticmethod
     def fill_by_placeholder(
-        scope: Union[Page, Locator],
+        scope: Scope,
         placeholder: str,
         value: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> None:
-        """Fill a visible input using its placeholder."""
+        """Fill a visible input using its placeholder.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            placeholder: Placeholder text used to identify the input.
+            value: Value to enter or select.
+            excat_match: Whether matching must use the complete label or text.
+        """
         if not placeholder or not placeholder.strip():
             raise ValueError("Placeholder cannot be empty or whitespace.")
 
         locator = (
             scope.get_by_placeholder(
                 placeholder.strip(),
-                exact=exact,
+                excat_match=excat_match,
             )
             .filter(visible=True)
             .first
@@ -238,17 +272,23 @@ class InputText:
 
     @staticmethod
     def fill_by_label_and_container(
-        scope: Union[Page, Locator],
+        scope: Scope,
         field_label: str,
         header_text: str,
         value: str,
-        exact: bool = False,
+        excat_match: bool = False,
     ) -> None:
-        """
-        Fill a labeled input within a named semantic region.
+        """Fill a labeled input within a named semantic region.
 
         This is useful when the same field label occurs in multiple
-        sections of a page.
+        sections of a scope.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            field_label: Visible label of the target field.
+            header_text: Header text identifying the container that holds the field.
+            value: Value to enter or select.
+            excat_match: Whether matching must use the complete label or text.
         """
         if not field_label or not field_label.strip():
             raise ValueError("Field label cannot be empty or whitespace.")
@@ -259,7 +299,7 @@ class InputText:
         header = (
             scope.get_by_text(
                 header_text.strip(),
-                exact=exact,
+                excat_match=excat_match,
             )
             .filter(visible=True)
             .first
@@ -281,5 +321,5 @@ class InputText:
             container,
             field_label,
             value,
-            exact=exact,
+            excat_match=excat_match,
         )

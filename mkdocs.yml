@@ -1,13 +1,35 @@
 site_name: robo-appian
-site_description: Reusable Playwright components for Appian UI automation
+site_description: Label-oriented Appian UI automation components built on Playwright
+copyright: Copyright &copy; 2026 Dinil Mithra
+
+extra:
+  generator: false
+
+extra_css:
+  - stylesheets/extra.css
 
 theme:
   name: material
+  logo: assets/images/robo-appian-icon.png
+  favicon: assets/images/robo-appian-icon.png
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   features:
     - navigation.tabs
     - navigation.sections
     - navigation.top
+    - navigation.tracking
     - navigation.indexes
+    - toc.follow
     - content.code.copy
     - search.suggest
     - search.highlight
@@ -21,7 +43,7 @@ plugins:
             - .
           options:
             docstring_style: google
-            show_source: true
+            show_source: false
             show_root_heading: true
             show_root_full_path: false
             show_object_full_path: false
@@ -33,6 +55,7 @@ plugins:
               - "!^_"
 
 markdown_extensions:
+  - md_in_html
   - admonition
   - attr_list
   - pymdownx.details
@@ -40,8 +63,10 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
-  - toc:
-      permalink: true
+  - toc
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 remote_branch: gh-pages
 remote_name: origin
@@ -50,11 +75,11 @@ nav:
   - Home: index.md
   - Getting Started:
       - Installation: getting-started/installation.md
+      - Core Concepts: getting-started/concepts.md
       - Quick Start: getting-started/quick-start.md
-  - Guides:
-      - Components: guides/components.md
-      - Development: guides/development.md
-      - Publishing Docs: guides/publishing-docs.md
+      - Your First Test: getting-started/first-test.md
+      - Choosing a Component: getting-started/component-basics.md
+      - Troubleshooting: getting-started/troubleshooting.md
   - API Reference:
       - Overview: api/index.md
       - Button: api/button.md

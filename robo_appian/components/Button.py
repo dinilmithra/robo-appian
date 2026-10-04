@@ -2,34 +2,44 @@
 
 import logging
 import re
-from typing import Mapping, Optional, Union
+from typing import Mapping, Optional
 
 from playwright.sync_api import Locator, Page, expect
+from robo_appian.utils.types import Scope
 
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 logger = logging.getLogger(__name__)
 
-Scope = Union[Page, Locator]
 
 
 class Button:
-    """Reusable operations for native HTML button controls."""
+    """Reusable operations for Appian button controls."""
 
     @staticmethod
     def is_visible(
         scope: Scope,
         label: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> bool:
-        """Return whether a matching native HTML button is visible."""
+        """Return whether a matching Appian button control is visible.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            label: Visible or accessible label used to identify the control.
+            excat_match: Whether matching must use the complete label or text.
+
+
+        Returns:
+            bool: ``True`` when a matching Appian button control is visible; otherwise ``False``.
+        """
         if not label or not label.strip():
             return False
 
         button = Button._button_wait_locator(
             scope,
             label,
-            exact=exact,
+            excat_match=excat_match,
         )
 
         return button.is_visible()
@@ -49,7 +59,7 @@ class Button:
     def _button_wait_locator(
         scope: Scope,
         label: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> Locator:
         """Build a live XPath locator for a native button label.
 
@@ -84,7 +94,7 @@ class Button:
         data_label = normalized_xpath("@data-owl-test-label")
         input_value = normalized_xpath("@value")
 
-        if exact:
+        if excat_match:
             compare = lambda expr: f"{expr} = {expected}"
         else:
             compare = lambda expr: f"contains({expr}, {expected})"
@@ -127,7 +137,7 @@ class Button:
     def wait_until_ready(
         scope: Scope,
         label: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> Locator:
         """Wait using Playwright auto-waiting until a button is actionable.
 
@@ -135,12 +145,21 @@ class Button:
         during a SAIL rerender, Playwright re-evaluates the locator until the
         current element is visible and enabled. No manual polling or sleeps are
         required.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            label: Visible or accessible label used to identify the control.
+            excat_match: Whether matching must use the complete label or text.
+
+
+        Returns:
+            Locator: The visible and enabled Appian button locator.
         """
         button = (
             Button._button_wait_locator(
                 scope,
                 label,
-                exact=exact,
+                excat_match=excat_match,
             )
             .filter(visible=True)
             .first
@@ -163,20 +182,20 @@ class Button:
         scope: Scope,
         label: str,
         attributes: Mapping[str, Optional[str]],
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> None:
-        """Wait for and click a native button matching HTML attributes.
+        """Wait for and click an Appian button control matching HTML attributes.
 
-        This method is useful when a page renders duplicate buttons with the
+        This method is useful when a scope renders duplicate buttons with the
         same label. An attribute value of ``None`` means that the attribute
-        must be present; another value requires an exact attribute match.
+        must be present; another value requires an excat_match attribute match.
 
         Args:
-            scope: Page or locator used to resolve the button.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible or rendered button label.
             attributes: HTML attribute constraints used to disambiguate the
                 button. Values of ``None`` require attribute presence.
-            exact: Whether the normalized button text must match the label.
+            excat_match: Whether the normalized button text must match the label.
 
         Raises:
             ValueError: If the label or an attribute name is empty or invalid.
@@ -205,7 +224,7 @@ class Button:
         )
         label_predicate = (
             f"{normalized_text} = {expected}"
-            if exact
+            if excat_match
             else f"contains({normalized_text}, {expected})"
         )
         predicates = attribute_predicates + [label_predicate]
@@ -227,15 +246,21 @@ class Button:
     def click(
         scope: Scope,
         label: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> None:
-        """Wait for a native HTML button to be actionable, then click it."""
+        """Wait for an Appian button control to be actionable, then click it.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            label: Visible or accessible label used to identify the control.
+            excat_match: Whether matching must use the complete label or text.
+        """
         logger.info("Before button click: label='%s'.", label)
 
         button = Button.wait_until_ready(
             scope,
             label,
-            exact=exact,
+            excat_match=excat_match,
         )
 
         ComponentUtils.click(button)
@@ -246,13 +271,19 @@ class Button:
     def wait_until_hidden(
         scope: Scope,
         label: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> None:
-        """Wait until a matching native button is hidden or detached."""
+        """Wait until a matching Appian button control is hidden or detached.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            label: Visible or accessible label used to identify the control.
+            excat_match: Whether matching must use the complete label or text.
+        """
         button = Button._button_wait_locator(
             scope,
             label,
-            exact=exact,
+            excat_match=excat_match,
         )
 
         expect(

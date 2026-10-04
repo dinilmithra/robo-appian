@@ -6,6 +6,7 @@ Keep application-specific labels, values, and workflow decisions outside this mo
 from typing import Optional
 
 from playwright.sync_api import Page, expect
+from robo_appian.utils.types import Scope
 
 from robo_appian.components.Dropdown import Dropdown
 from robo_appian.components.InputText import InputText
@@ -13,11 +14,11 @@ from robo_appian.utils.ComponentUtils import ComponentUtils
 
 
 class SearchDropdown:
-    """Select and inspect values in searchable Appian dropdown widgets."""
+    """Reusable operations for searchable Appian dropdown controls."""
 
     @staticmethod
     def select(
-        page: Page,
+        scope: Scope,
         accessible_name: str,
         option_text: str,
         exact_label: bool = True,
@@ -25,12 +26,12 @@ class SearchDropdown:
     ) -> None:
         """Search for and click an option in a labeled Appian combobox.
 
-        The exact accessible-name match is opened. Its ``aria-controls``
-        relation identifies the listbox, and the listbox container's native
-        ``Search`` label identifies the filter input.
+        The excat_match accessible-name match is opened. Its ``aria-controls``
+        relation identifies the Appian listbox, whose ``Search`` field is used
+        to filter the available options.
 
         Args:
-            page: Appian page containing the searchable dropdown.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible combobox name to match.
             option_text: Option name to search for and select.
             exact_label: When True, require the rendered Appian label to match
@@ -87,7 +88,7 @@ class SearchDropdown:
         # marker, so SearchDropdown does not maintain a second label rule.
         dropdown = (
             Dropdown._dropdown_locator(
-                page,
+                scope,
                 normalized_name,
                 exact=True,
                 allow_required_marker=not exact_label,
@@ -125,7 +126,7 @@ class SearchDropdown:
         label_id_literal = ComponentUtils.xpath_literal(f" {aria_labelledby} ")
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            page.locator(
+            scope.locator(
                 "xpath=//*[@role='listbox' and @id="
                 + listbox_id_literal
                 + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
@@ -162,7 +163,7 @@ class SearchDropdown:
 
     @staticmethod
     def select_by_index(
-        page: Page,
+        scope: Scope,
         accessible_name: str,
         option_index: int,
         exact_label: bool = True,
@@ -176,7 +177,7 @@ class SearchDropdown:
         option ordering is stable.
 
         Args:
-            page: Appian page containing the searchable dropdown.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible combobox name to match.
             option_index: One-based index of the selectable option.
             exact_label: When True, require the rendered Appian label to match
@@ -234,7 +235,7 @@ class SearchDropdown:
 
         dropdown = (
             Dropdown._dropdown_locator(
-                page,
+                scope,
                 normalized_name,
                 exact=True,
                 allow_required_marker=not exact_label,
@@ -272,7 +273,7 @@ class SearchDropdown:
         label_id_literal = ComponentUtils.xpath_literal(f" {aria_labelledby} ")
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            page.locator(
+            scope.locator(
                 "xpath=//*[@role='listbox' and @id="
                 + listbox_id_literal
                 + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
@@ -316,18 +317,18 @@ class SearchDropdown:
 
     @staticmethod
     def verify_selected_value(
-        page: Page,
+        scope: Scope,
         accessible_name: str,
         expected_value: str,
-        exact: bool = True,
+        excat_match: bool = False,
     ) -> None:
         """Wait until a visible dropdown displays the expected rendered text.
 
         Args:
-            page: Appian page containing the dropdown.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible combobox name.
             expected_value: Text expected inside the selected dropdown.
-            exact: Whether ``accessible_name`` must exactly match; this does
+            excat_match: Whether ``accessible_name`` must exactly match; this does
                 not change the rendered-value assertion.
         """
         normalized_name = str(accessible_name or "").strip()
@@ -337,9 +338,9 @@ class SearchDropdown:
             )
 
         dropdown = Dropdown._get_dropdown(
-            page,
+            scope,
             normalized_name,
-            exact=exact,
+            excat_match=excat_match,
         )
 
         expect(
@@ -349,7 +350,7 @@ class SearchDropdown:
         ).to_have_text(expected_value)
 
     @staticmethod
-    def check_dropdown_state(page: Page, label_text: str) -> str:
+    def check_dropdown_state(scope: Scope, label_text: str) -> str:
         """Immediately classify a label-linked field's editability.
 
         Use this inside caller-owned retry logic when Appian may still be
@@ -357,11 +358,11 @@ class SearchDropdown:
         represented as ``Label or ID Not Found`` rather than raised.
 
         Args:
-            page: Appian page containing the field label.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label_text: Exact visible label text to inspect.
 
         Returns:
-            ``EDITABLE``, ``READ_ONLY``, or ``Label or ID Not Found``.
+            str: ``EDITABLE``, ``READ_ONLY``, or ``Label or ID Not Found``.
         """
         if not label_text or not label_text.strip():
             return "Label or ID Not Found"
@@ -369,7 +370,7 @@ class SearchDropdown:
         try:
             safe_label_text = ComponentUtils.xpath_literal(label_text.strip())
             label_locator = (
-                page.locator(f"xpath=//*[@id and normalize-space(.)={safe_label_text}]")
+                scope.locator(f"xpath=//*[@id and normalize-space(.)={safe_label_text}]")
                 .filter(visible=True)
                 .first
             )
@@ -382,7 +383,7 @@ class SearchDropdown:
                 return "Label or ID Not Found"
 
             label_id_literal = ComponentUtils.xpath_literal(f" {label_id} ")
-            linked_containers = page.locator(
+            linked_containers = scope.locator(
                 "xpath=//*[@role='combobox' and contains("
                 "concat(' ', normalize-space(@aria-labelledby), ' '), "
                 + label_id_literal

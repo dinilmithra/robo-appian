@@ -4,13 +4,14 @@ import logging
 from typing import Optional
 
 from playwright.sync_api import Page, expect, Locator
+from robo_appian.utils.types import Scope
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 logger = logging.getLogger(__name__)
 
 
 class SearchInput:
-    """Choose exact values from dynamic Appian search-input suggestions.
+    """Reusable operations for Appian search input controls.
 
     Use these helpers for Appian picker fields that render a suggestion list
     after keyboard input. Callers may identify a picker by accessible name or
@@ -19,17 +20,17 @@ class SearchInput:
 
     @staticmethod
     def get_section_container(
-        page: Page, header_text: str, field_label: str
+        scope: Scope, header_text: str, field_label: str
     ) -> Locator:
         """Find the nearest visible section containing a heading and field.
 
         Args:
-            page: Appian page containing the picker field.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             header_text: Unique heading for the section to search.
             field_label: Exact label of the field within that section.
 
         Returns:
-            A visible locator that scopes both the heading and field.
+            Locator: A visible locator that scopes both the heading and field.
 
         Raises:
             AssertionError: If the shared section container does not become
@@ -48,13 +49,13 @@ class SearchInput:
             + "]][1]"
         )
 
-        section_container = page.locator(f"xpath={common_root_xpath}")
+        section_container = scope.locator(f"xpath={common_root_xpath}")
         expect(section_container).to_be_visible()
         return section_container
 
     @staticmethod
     def __find_lookup(
-        page: Page,
+        scope: Scope,
         accessible_name: Optional[str] = None,
         placeholder_text: Optional[str] = None,
         section_name: Optional[str] = None,
@@ -69,12 +70,12 @@ class SearchInput:
 
         search_scope = (
             SearchInput.get_section_container(
-                page=page,
+                scope=scope,
                 header_text=section_name,
                 field_label=field_identifier,
             )
             if section_name
-            else page
+            else scope
         )
 
         if placeholder_text:
@@ -107,7 +108,7 @@ class SearchInput:
 
     @staticmethod
     def select(
-        page: Page,
+        scope: Scope,
         accessible_name: Optional[str] = None,
         placeholder_text: Optional[str] = None,
         search_text: str = "",
@@ -123,7 +124,7 @@ class SearchInput:
         be disabled or adjusted for a particular picker.
 
         Args:
-            page: Appian page containing the picker.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible field name used by Playwright's
                 role-based locator.
             placeholder_text: Exact placeholder used to identify the picker
@@ -145,13 +146,13 @@ class SearchInput:
 
         # Resolve the component, then delegate to the shared locator-based selection logic.
         lookup = SearchInput.__find_lookup(
-            page=page,
+            scope=scope,
             accessible_name=accessible_name,
             section_name=section_name,
             placeholder_text=placeholder_text,
         )
         SearchInput.select_by_locator(
-            page=page,
+            scope=scope,
             lookup=lookup,
             search_text=search_text,
             field_name=field_name,
@@ -162,7 +163,7 @@ class SearchInput:
 
     @staticmethod
     def select_by_index(
-        page: Page,
+        scope: Scope,
         index: int,
         accessible_name: Optional[str] = None,
         placeholder_text: Optional[str] = None,
@@ -178,7 +179,7 @@ class SearchInput:
         visible suggestion, excluding Appian's ``No results found`` sentinel.
 
         Args:
-            page: Appian page containing the picker.
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             index: 1-based index of the visible suggestion to select.
             accessible_name: Accessible field name used to locate the picker.
             placeholder_text: Exact placeholder used when no suitable accessible
@@ -208,13 +209,13 @@ class SearchInput:
         )
 
         lookup = SearchInput.__find_lookup(
-            page=page,
+            scope=scope,
             accessible_name=accessible_name,
             section_name=section_name,
             placeholder_text=placeholder_text,
         )
         SearchInput.select_by_locator_index(
-            page=page,
+            scope=scope,
             lookup=lookup,
             index=index,
             search_text=search_text,
@@ -230,7 +231,7 @@ class SearchInput:
 
     @staticmethod
     def select_by_locator_index(
-        page: Page,
+        scope: Scope,
         lookup: Locator,
         index: int,
         search_text: str,
@@ -238,7 +239,17 @@ class SearchInput:
         use_typing_delay: bool = True,
         typing_delay: int = 50,
     ) -> None:
-        """Choose a visible suggestion by 1-based index for a resolved picker."""
+        """Choose a visible suggestion by 1-based index for a resolved picker.
+
+        Args:
+            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            lookup: Locator or lookup value used to resolve the search input.
+            index: Zero-based index of the matching search input.
+            search_text: Text to type into the search input.
+            field_name: Optional field name used in diagnostics.
+            use_typing_delay: Whether to type using a per-character delay.
+            typing_delay: Delay in milliseconds between typed characters.
+        """
         if index < 1:
             raise ValueError("SearchInput index must be 1 or greater.")
         if not str(search_text or "").strip():
@@ -268,7 +279,7 @@ class SearchInput:
 
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            page.locator(
+            scope.locator(
                 "xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]"
             )
             .filter(visible=True)
@@ -317,7 +328,7 @@ class SearchInput:
 
     @staticmethod
     def select_by_locator(
-        page: Page,
+        scope: Scope,
         lookup: Locator,
         search_text: str,
         field_name: str = "SearchInput",
@@ -331,7 +342,7 @@ class SearchInput:
         suggestions, and the option must exactly equal ``search_text``.
 
         Args:
-            page: Appian page that owns the picker's suggestion list.
+            scope: Appian scope that owns the picker's suggestion list.
             lookup: Visible picker input locator.
             search_text: Text that must exactly match the option to select.
             field_name: Human-readable field name used in failure messages.
@@ -379,7 +390,7 @@ class SearchInput:
         # Each Appian picker identifies its own dynamically rendered suggestion list.
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            page.locator(
+            scope.locator(
                 "xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]"
             )
             .filter(visible=True)

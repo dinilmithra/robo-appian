@@ -1,102 +1,55 @@
 # robo-appian
 
-Reusable Playwright component helpers for Appian applications.
+`robo-appian` is a reusable Python component library built on top of Playwright for automating Appian web applications. It provides Appian-focused operations that identify controls primarily through user-facing labels, accessible semantics, text, and meaningful scopes where supported, while consumer projects keep ownership of application workflows, assertions, business rules, credentials, waits, and test data.
 
-This package intentionally contains only generic Appian interaction behavior.
-Application-specific labels, workflows, waits, and business rules belong in the
-consuming application's facade layer.
+## Architecture
 
-## Installation
+```text
+Consumer tests → robo-appian → Playwright → Appian web application
+```
+
+The first argument to scope-aware component methods is a `Scope`. **A `Scope` is either a Playwright `Page` or a Playwright `Locator`.** Pass a `Page` to search the whole document, or a `Locator` to restrict the search to a particular container. `robo-appian` does not create a separate scope object.
+
+The project favors readable component calls such as:
+
+```python
+from robo_appian import Button, Dropdown, InputText
+
+InputText.fill_by_label(scope, "Request Name", "Example Request")
+Dropdown.select(scope, "Request Type", "Travel")
+Button.click(scope, "Submit")
+```
+
+This keeps reusable Appian lookup mechanics in the library instead of repeating them throughout consumer workflows.
+
+## Install
+
+With pip:
 
 ```bash
 pip install robo-appian
 playwright install chromium
 ```
 
-## Documentation
+With Poetry:
 
-The public documentation is built with MkDocs Material and generated API pages
-from the Python source/docstrings.
-
-After GitHub Pages is enabled for the repository, the project site will normally
-be available at:
-
-```text
-https://<github-owner>.github.io/robo-appian/
+```bash
+poetry add robo-appian
+poetry run playwright install chromium
 ```
 
-Documentation source is maintained under `docs/` on `main`. GitHub Actions
-validates documentation on pull requests and publishes generated HTML to the
-`gh-pages` branch after documentation-related changes are merged to `main`.
+Python 3.12 is required.
 
-Build and preview the documentation locally:
+## Documentation
 
-```powershell
+The MkDocs site is the primary user documentation. It includes installation, architecture and label-oriented concepts, a first-test walkthrough, component-selection guidance, troubleshooting, and generated API reference pages.
+
+For local documentation development:
+
+```bash
 poetry install --with docs
 poetry run mkdocs build --strict
 poetry run mkdocs serve
 ```
 
-See `docs/guides/publishing-docs.md` for the GitHub Pages branch configuration.
-
-## Local CORE development
-
-CORE pins the published package in its dependency configuration. For local
-development, install the sibling reusable-library checkouts in editable mode
-without changing the committed dependency configuration. From `core-automation`:
-
-```powershell
-.\.venv-core\Scripts\python.exe .\tools\install_local_libraries.py
-```
-
-## Local virtual environment
-
-Create a dedicated Python 3.12 environment inside `robo-appian/.venv` from the parent workspace:
-
-```powershell
-python .\robo-appian\tools\setup_venv.py
-```
-
-The setup script recreates `robo-appian/.venv`, installs Poetry 2.5.1 into that environment, installs the project and development dependencies, and verifies Poetry. The `.venv` directory is ignored by Git and is not packaged.
-
-### VS Code automatic activation
-
-Open the tracked standalone workspace file instead of opening the parent CORE workspace:
-
-```powershell
-code .\robo-appian\robo-appian.code-workspace
-```
-
-The workspace selects `robo-appian/.venv` as the default Python environment and enables terminal environment activation. New VS Code terminals opened in this workspace automatically activate the standalone `robo-appian` environment. This intentionally does not change CORE's parent `.venv-core`.
-
-If you are using an existing terminal, activate it manually once:
-
-```powershell
-.\robo-appian\.venv\Scripts\Activate.ps1
-```
-
-## Publishing to PyPI
-
-Publishing tooling is kept under `robo-appian/tools/` but excluded from the published package. After opening the standalone workspace or activating `robo-appian/.venv`, run from `core-automation-project`:
-
-```powershell
-python .\robo-appian\tools\publish_robo_appian.py
-```
-
-The publisher always increments the patch version, removes the existing `dist/`
-directory, builds, and uploads to PyPI. It does not support `--build-only` or
-version override arguments. A build or upload failure restores the previous
-version. To build without uploading or incrementing the version, run
-`poetry build` from the `robo-appian` directory instead. The publisher reads
-`PYPI_TOKEN` (or `POETRY_PYPI_TOKEN_PYPI`) for PyPI authentication.
-
-### PyPI token
-
-The publisher reads the PyPI token from the process environment. The preferred variable is `POETRY_PYPI_TOKEN_PYPI`; `PYPI_TOKEN` and `PYPI_API_TOKEN` are also accepted and are mapped only into the child Poetry process. The token is never printed or written into the workspace.
-
-PowerShell example:
-
-```powershell
-$env:POETRY_PYPI_TOKEN_PYPI = "<token>"
-python .\tools\publish_robo_appian.py
-```
+Generated `site/` output is not source and should not be edited manually.
