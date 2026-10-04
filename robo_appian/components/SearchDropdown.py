@@ -26,7 +26,7 @@ class SearchDropdown:
     ) -> None:
         """Search for and click an option in a labeled Appian combobox.
 
-        The excat_match accessible-name match is opened. Its ``aria-controls``
+        The exact accessible-name match is opened. Its ``aria-controls``
         relation identifies the Appian listbox, whose ``Search`` field is used
         to filter the available options.
 
@@ -90,7 +90,7 @@ class SearchDropdown:
             Dropdown._dropdown_locator(
                 scope,
                 normalized_name,
-                exact=True,
+                excat_match=True,
                 allow_required_marker=not exact_label,
             )
             .filter(visible=True)
@@ -237,7 +237,7 @@ class SearchDropdown:
             Dropdown._dropdown_locator(
                 scope,
                 normalized_name,
-                exact=True,
+                excat_match=True,
                 allow_required_marker=not exact_label,
             )
             .filter(visible=True)

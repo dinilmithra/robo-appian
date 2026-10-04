@@ -36,7 +36,7 @@ class Dropdown:
             excat_match: Whether the label text must match exactly.
             editable_only: When True, exclude comboboxes with
                 ``aria-disabled=true``.
-            allow_required_marker: When True, excat_match label matching also accepts
+            allow_required_marker: When True, exact label matching also accepts
                 Appian's trailing required-marker variants (``Label*`` and
                 ``Label *``).
 
@@ -58,7 +58,7 @@ class Dropdown:
             label_condition = f"{label_text} = {expected}"
         else:
             # Appian appends a trailing required marker to some field labels.
-            # Normalize only that trailing marker so flexible excat_match matching
+            # Normalize only that trailing marker so flexible exact matching
             # accepts Label, Label*, and Label * without stripping asterisks
             # elsewhere in legitimate labels.
             base_name = normalized_name.rstrip()
@@ -106,7 +106,7 @@ class Dropdown:
         Args:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name of the dropdown.
-            excat_match: Whether the accessible-name match must be excat_match.
+            excat_match: Whether the accessible-name match must match exactly.
             allow_required_marker: Whether excat_match matching may accept Appian's
                 trailing required-marker variants.
 
@@ -391,7 +391,7 @@ class Dropdown:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name of the dropdown.
             option_text: Option text to select.
-            excat_match: Whether label and option matching must be excat_match.
+            excat_match: Whether label and option matching must match exactly.
             container: Optional locator used to restrict dropdown lookup.
         """
         logger.info(
@@ -558,7 +558,7 @@ class Dropdown:
         Args:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name to locate.
-            excat_match: Whether the accessible-name match must be excat_match.
+            excat_match: Whether the accessible-name match must match exactly.
             container: Optional locator used to restrict lookup.
 
 
@@ -603,7 +603,7 @@ class Dropdown:
         Args:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Visible label text of the dropdown.
-            excat_match: Whether the label-text match must be excat_match.
+            excat_match: Whether the label-text match must match exactly.
             immediate: Whether to inspect the current DOM without waiting.
             timeout: Optional timeout in seconds. When omitted, Playwright's
                 configured default timeout is used.
@@ -656,7 +656,7 @@ class Dropdown:
         Args:
             scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name of the dropdown.
-            excat_match: Whether the accessible-name match must be excat_match.
+            excat_match: Whether the accessible-name match must match exactly.
             container: Optional locator used to restrict lookup.
 
         Returns:
