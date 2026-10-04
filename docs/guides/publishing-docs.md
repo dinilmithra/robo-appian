@@ -19,8 +19,22 @@ gh-pages
   generated HTML only
 ```
 
-Do not manually edit `gh-pages`. The GitHub Actions workflow rebuilds and
-replaces the generated site whenever documentation is published.
+Do not manually edit `gh-pages`. The repository workflow
+`.github/workflows/publish-robo-appian-docs.yml` rebuilds and replaces the
+generated site automatically.
+
+The workflow runs when a commit is pushed to `main` and changes any of these
+robo-appian documentation inputs:
+
+- `robo-appian/docs/**`
+- `robo-appian/robo_appian/**`
+- `robo-appian/mkdocs.yml`
+- `robo-appian/pyproject.toml`
+- `robo-appian/poetry.lock`
+
+It can also be started manually from **Actions > Publish robo-appian docs > Run
+workflow**. The job first runs `mkdocs build --strict`; only a successful build
+is published to `gh-pages`.
 
 ## GitHub Pages setting
 
