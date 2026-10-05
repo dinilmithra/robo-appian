@@ -7,7 +7,7 @@ The API reference documents the public `robo-appian` building blocks you can use
 Prefer imports from `robo_appian`:
 
 ```python
-from robo_appian import Button, Dropdown, InputText, Table
+from robo_appian import RoboLocator, Button, Dropdown, InputText, Table
 ```
 
 The package root exposes the supported public components plus `ComponentUtils` and `Scope`.
@@ -31,6 +31,7 @@ InputText.fill_by_label(scope, "Request Name", "Example Request")
 | Convention | What it means |
 | --- | --- |
 | `scope` | A Playwright `Page` or `Locator`. `Page` searches the whole document; `Locator` restricts lookup to that locator. See [Scope](scope.md). |
+| `RoboLocator` | Generic attribute-based element wrapper. Define any HTML attributes in `attributes` (for example `role`, `aria-label`, `data-testid`, `title`, or custom `data-*` attributes); robo-appian builds a scoped XPath locator. `excat_match` remains a separate matching option. Includes wrapped actions and assertions such as `click()`, `to_be_visible()`, `first()`, and generic `wait_for_attribute()` support. |
 | label / text / accessible name | User-facing information used to identify an Appian control. Exact parameter names differ by component. |
 | `excat_match` | Controls exact versus partial text matching when supported. Defaults to `False`. |
 | waits | Generic component synchronization can live in `robo-appian`; workflow-specific timing stays in the consumer project. |
@@ -42,6 +43,9 @@ InputText.fill_by_label(scope, "Request Name", "Example Request")
 ## Choose a component
 
 <div class="grid cards" markdown>
+
+-   **[RoboLocator](robo-locator.md)**  
+    Generic XPath-backed wrapper for Appian elements using arbitrary HTML attributes.
 
 -   **[Button](button.md)**  
     Reusable operations for Appian button controls.

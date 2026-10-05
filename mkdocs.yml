@@ -82,6 +82,7 @@ nav:
       - Troubleshooting: getting-started/troubleshooting.md
   - API Reference:
       - Overview: api/index.md
+      - RoboLocator: api/robo-locator.md
       - Button: api/button.md
       - CheckBox: api/checkbox.md
       - Dropdown: api/dropdown.md

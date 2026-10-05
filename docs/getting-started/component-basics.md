@@ -52,3 +52,55 @@ scope.get_by_role("heading", name="Request Summary").wait_for()
 ```
 
 If the behavior is truly generic across Appian applications, it may be a candidate for the library. Do not move application-specific selectors or workflows into `robo-appian` simply to avoid writing Playwright in a test project.
+
+
+## Generic attribute-based elements
+
+When a control does not need a specialized robo-appian component, use `RoboLocator` with the HTML attributes visible in the Appian markup:
+
+```python
+from robo_appian import RoboLocator
+
+user_options = RoboLocator(
+    scope,
+    attributes={
+        "role": "button",
+        "aria-label": "User options",
+    },
+    excat_match=True,
+)
+
+user_options.to_be_visible()
+user_options.click()
+user_options.wait_for_attribute(
+    attributes={
+        "aria-expanded": "false",
+    }
+)
+```
+
+`attributes` is an arbitrary HTML-attribute map. It is not restricted to a predefined robo-appian list, so you can use attributes such as `role`, `aria-label`, `data-testid`, `title`, `id`, `href`, or application-specific `data-*` attributes. `RoboLocator` builds a scoped XPath locator from the supplied attributes.
+
+For an element with a stable HTML `id`, use `get_by_id()`:
+
+```python
+agree_button = RoboLocator.get_by_id(scope, "jsAcceptButton")
+agree_button.to_be_visible()
+agree_button.click()
+```
+
+Use `wait_for_attribute(attributes={...}, timeout=None)` to wait for one or more dynamic HTML attributes (for example `{"aria-expanded": "false"}`). If no timeout is supplied, Playwright's configured default assertion timeout is used.
+
+`excat_match` is separate from `attributes`. With `True` (or when omitted), string attribute values use exact equality. With `False`, string values use XPath `contains()` matching. `None`/`True` attribute values mean the attribute must be present; `False` means it must be absent. `click()` operates on the wrapped locator. `to_be_visible()` uses Playwright's configured default assertion timeout when `timeout` is omitted or `None`, or accepts an explicit timeout in milliseconds. If multiple visible matches remain, `to_be_visible()` retains only that visible set; use `locator.first()` to explicitly select the first visible element before an action.
+
+### Selecting the first visible match
+
+When Appian renders multiple visible matches and selecting the first is intentional:
+
+```python
+user_options.to_be_visible()
+user_options = user_options.first()
+user_options.click()
+```
+
+`first()` returns a new `RoboLocator` and does not modify the original object. After `to_be_visible()`, it operates on the retained visible match set.

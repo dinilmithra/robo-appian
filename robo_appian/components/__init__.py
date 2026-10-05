@@ -4,6 +4,7 @@ Components should expose semantic operations and avoid application-specific
 workflow rules or selectors based on generated CSS class names.
 """
 
+from robo_appian.components.RoboLocator import RoboLocator
 from robo_appian.components.Button import Button
 from robo_appian.components.InputDate import InputDate
 from robo_appian.components.Dropdown import Dropdown
@@ -21,6 +22,7 @@ from robo_appian.components.RecordList import RecordList
 from robo_appian.components.CheckBox import CheckBox
 
 __all__ = [
+    "RoboLocator",
     "Button",
     "InputDate",
     "Dropdown",
