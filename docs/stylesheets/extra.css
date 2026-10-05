@@ -1732,3 +1732,17 @@ html[data-md-color-scheme="default"] body { background: #f7f9fc; }
   text-decoration: none;
 }
 .ra-target-footer .ra-footer-link:hover { color: #fff; }
+
+
+/* Uniform Robo Appian footer on every MkDocs page. */
+.md-footer {
+  background: transparent;
+}
+.ra-global-footer {
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+.ra-global-footer .ra-target-footer {
+  width: 100%;
+}

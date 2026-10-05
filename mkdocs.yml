@@ -10,6 +10,7 @@ extra_css:
 
 theme:
   name: material
+  custom_dir: overrides
   logo: assets/images/robo-appian-header-logo.png
   favicon: assets/images/robo-appian-icon.png
   palette:

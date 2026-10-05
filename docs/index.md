@@ -77,7 +77,4 @@ hide:
     </div>
   </section>
 
-  <footer class="ra-target-footer">
-    <span>🐍 Python 3.9+</span><i></i><span>◇ PyPI</span><span class="tag">robo-appian</span><i></i><span>◉ GitHub</span><i></i><a class="ra-footer-link" href="license/">⚖ License <b class="tag">MIT</b></a><span class="grow"></span><span>Copyright © 2026 Dinil Mithra</span>
-  </footer>
 </div>
