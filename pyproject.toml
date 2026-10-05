@@ -1,7 +1,7 @@
 [project]
 name = "robo-appian"
 dynamic = ["version"]
-description = "Reusable Playwright components for Appian automation"
+description = "Reusable Playwright components for Appian automation."
 readme = "README.md"
 authors = [
     { name = "Dinil Mithra" },
