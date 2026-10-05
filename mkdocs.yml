@@ -10,7 +10,7 @@ extra_css:
 
 theme:
   name: material
-  logo: assets/images/robo-appian-icon.png
+  logo: assets/images/robo-appian-header-logo.png
   favicon: assets/images/robo-appian-icon.png
   palette:
     - media: "(prefers-color-scheme: light)"

@@ -1683,3 +1683,43 @@ html[data-md-color-scheme="default"] body { background: #f7f9fc; }
 [data-md-color-scheme="slate"] .ra-target-arch-flow .node strong { color: #e7efff; }
 [data-md-color-scheme="slate"] .ra-target-panel-title.light,
 [data-md-color-scheme="slate"] .ra-target-docs-head { background: #172235; border-color: #2a3a54; }
+
+/* ---------- Header branding: align with the current robo_appian 3D identity ---------- */
+.md-header__button.md-logo {
+  display: inline-flex;
+  align-items: center;
+  width: 7.25rem;
+  min-width: 7.25rem;
+  height: 2.55rem;
+  margin: .12rem .35rem .12rem 0;
+  padding: .08rem 0;
+}
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  width: 7.1rem;
+  max-width: none;
+  height: 2.45rem;
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 3px 5px rgba(7, 22, 66, .18));
+}
+
+/* The new logo already contains the robo_appian wordmark and framework subtitle. */
+.md-header__button.md-logo + .md-header__title {
+  display: none;
+}
+
+@media screen and (max-width: 76.24em) {
+  .md-header__button.md-logo {
+    width: 6.55rem;
+    min-width: 6.55rem;
+    height: 2.35rem;
+  }
+
+  .md-header__button.md-logo img,
+  .md-header__button.md-logo svg {
+    width: 6.4rem;
+    height: 2.2rem;
+  }
+}
