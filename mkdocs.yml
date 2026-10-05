@@ -80,6 +80,7 @@ nav:
       - Your First Test: getting-started/first-test.md
       - Choosing a Component: getting-started/component-basics.md
       - Troubleshooting: getting-started/troubleshooting.md
+  - License: license.md
   - API Reference:
       - Overview: api/index.md
       - RoboLocator: api/robo-locator.md

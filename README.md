@@ -28,17 +28,15 @@ With pip:
 
 ```bash
 pip install robo-appian
-playwright install chromium
 ```
 
 With Poetry:
 
 ```bash
 poetry add robo-appian
-poetry run playwright install chromium
 ```
 
-Python 3.12 is required.
+Python 3.12 is required. `robo-appian` does **not** require Chromium specifically and does not provision browsers. Use the Playwright-supported browser configured by your consumer test project. If a Playwright-managed browser is not already available, install the engine your project uses separately, for example `playwright install chromium`, `playwright install firefox`, or `playwright install webkit`.
 
 ## Documentation
 
@@ -52,3 +50,7 @@ Full documentation, guides, and API reference are published at:
 
 - Repository: https://github.com/dinilmithra/robo-appian
 - Issues: https://github.com/dinilmithra/robo-appian/issues
+
+## License
+
+`robo-appian` is licensed under the [MIT License](LICENSE). Copyright (c) 2026 Dinil Mithra.

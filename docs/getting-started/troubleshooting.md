@@ -16,17 +16,21 @@ poetry run python -c "import robo_appian; print(robo_appian.__file__)"
 
 ## Playwright says the browser executable is missing
 
-Installing the Python package and installing a browser are separate steps. Install Chromium in the environment that runs the tests:
+Installing the Python package and provisioning a browser are separate steps. `robo-appian` does not require Chromium specifically. Install the Playwright-managed browser engine your consumer project is configured to use, for example:
 
 ```bash
 playwright install chromium
+playwright install firefox
+playwright install webkit
 ```
 
-With Poetry:
+With Poetry, run the applicable browser-install command in the same environment, for example:
 
 ```bash
 poetry run playwright install chromium
 ```
+
+If your environment already provides the browser through an installed Chrome/Edge channel, a container image, or other project-level provisioning, you do not need to install a separate Playwright-managed browser just for `robo-appian`.
 
 ## A control cannot be found
 

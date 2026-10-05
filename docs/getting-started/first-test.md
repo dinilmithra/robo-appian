@@ -6,6 +6,9 @@ This walkthrough shows where `robo-appian` fits in a normal Python + Playwright 
 
 `robo-appian` does not create the browser for you. Your test framework or fixture owns it.
 
+!!! note "Browser used in this example"
+    This example launches Playwright-managed Chromium for simplicity. Chromium is not required by `robo-appian`; use the browser and launch configuration owned by your consumer test project.
+
 ```python
 import pytest
 from playwright.sync_api import sync_playwright

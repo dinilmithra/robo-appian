@@ -3,6 +3,8 @@ name = "robo-appian"
 dynamic = ["version"]
 description = "Reusable Playwright components for Appian automation."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "Dinil Mithra" },
 ]
@@ -25,7 +27,6 @@ packages = [{ include = "robo_appian" }]
 exclude = ["scripts/**", "tools/**"]
 
 [tool.poetry.group.dev.dependencies]
-pytest = "9.1.1"
 black = "26.5.1"
 
 [tool.poetry.group.docs.dependencies]

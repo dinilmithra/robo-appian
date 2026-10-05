@@ -1723,3 +1723,12 @@ html[data-md-color-scheme="default"] body { background: #f7f9fc; }
     height: 2.2rem;
   }
 }
+
+.ra-target-footer .ra-footer-link {
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-decoration: none;
+}
+.ra-target-footer .ra-footer-link:hover { color: #fff; }
