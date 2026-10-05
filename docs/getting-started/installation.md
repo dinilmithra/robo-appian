@@ -1,19 +1,14 @@
 # Installation
 
-Install `robo-appian` into the same Python environment your tests will use. Browser provisioning is a separate Playwright/project concern.
+Install `robo-appian` into the Python environment that runs your tests. The package owns the Playwright Python dependency and can also provision Playwright-managed browser binaries through its platform-independent CLI.
 
-## Before you start
+## Requirements
 
-You need:
+- Python **3.12** (`>=3.12,<3.13`)
+- pytest
+- one or more Playwright-supported browser engines installed for the environment that executes the tests
 
-- **Python 3.12** (`>=3.12,<3.13`)
-- a Python project or virtual environment
-- a Playwright-supported browser available to the environment that runs your tests
-
-`robo-appian` uses Playwright's **synchronous Python API**. It does not create or provision your browser, fixtures, credentials, or test framework configuration.
-
-!!! important "Chromium is not required by robo-appian"
-    `robo-appian` is not tied to Chromium. Use the browser configured by your Playwright test project. Playwright supports the Chromium, Firefox, and WebKit browser engines. Chromium-based branded browsers such as Google Chrome or Microsoft Edge can also be used through Playwright browser channels when configured by the consumer project.
+`playwright`, `pytest`, and `robo-automation` are direct `robo-appian` dependencies. A consuming project does not need to declare `playwright` or `pytest-playwright` merely to use the robo-appian fixture stack.
 
 ## Install with pip
 
@@ -21,120 +16,129 @@ You need:
 pip install robo-appian
 ```
 
-This installs the Python library and its Playwright Python dependency. It does **not** install a Playwright-managed browser binary.
-
 ## Install with Poetry
 
 ```bash
 poetry add robo-appian
 ```
 
-This installs `robo-appian` into your Poetry environment. Browser provisioning remains separate from package installation.
+Installing the Python package installs Playwright's Python library. Browser binaries are provisioned explicitly so projects can choose only what they need.
 
-## Browser setup
+## Install browser binaries
 
-If your test environment already provides the browser your project uses, no additional browser installation is required for `robo-appian`.
+The CLI invokes Playwright with the **current Python interpreter** (`sys.executable -m playwright install ...`), so it works consistently in Windows, Linux, macOS, virtual environments, Poetry environments, and CI agents.
 
-If your project uses a Playwright-managed browser and that browser is not installed yet, install only the browser engine your project needs. For example:
+Install the full Playwright-managed browser set:
 
 ```bash
-# Chromium example
-playwright install chromium
-
-# Firefox example
-playwright install firefox
-
-# WebKit example
-playwright install webkit
+robo-appian install-browser
 ```
 
-With Poetry, run the command inside the same environment:
+`all` is an explicit alias for the same full install:
 
 ```bash
-poetry run playwright install chromium
+robo-appian install-browser all
 ```
 
-To install all Playwright-managed browser engines, use:
+Install only one engine:
 
 ```bash
-playwright install
-```
-
-The browser choice belongs to the consumer automation project. The `chromium` commands above are examples, not a `robo-appian` requirement.
-
-## Verify robo-appian
-
-```bash
-python -c "from robo_appian import Button, InputText, Table; print('robo-appian import OK')"
+robo-appian install-browser firefox
+robo-appian install-browser chromium
+robo-appian install-browser webkit
 ```
 
 With Poetry:
 
 ```bash
-poetry run python -c "from robo_appian import Button, InputText, Table; print('robo-appian import OK')"
+poetry run robo-appian install-browser firefox
 ```
 
-Expected output:
+!!! tip "Install the browser you actually run"
+    The default generic browser lifecycle uses `BROWSER=chromium` when no browser is configured. If your test environment sets `BROWSER=firefox`, install Firefox with `robo-appian install-browser firefox`.
+
+## Configure the runtime browser
+
+The generic lifecycle used by the robo-appian pytest plugin reads the browser configuration supplied through the automation environment. The primary settings are:
+
+| Setting | Purpose | Default |
+| --- | --- | --- |
+| `BROWSER` | Browser engine: `chromium`, `firefox`, or `webkit` | `chromium` |
+| `HEAD_LESS` | Run without a visible browser window | `true` |
+| `WAIT_TIME` | Default operation/navigation timeout in seconds | automation-project configuration |
+
+For example:
 
 ```text
-robo-appian import OK
+BROWSER=firefox
+HEAD_LESS=false
 ```
 
-## Verify your configured Playwright browser
+Then provision the matching engine:
 
-The following example verifies Playwright-managed Chromium. If your project uses Firefox, WebKit, Chrome, Edge, or another configured Playwright channel, adapt the launch configuration to match your project.
+```bash
+robo-appian install-browser firefox
+```
 
-Create `verify_playwright.py`:
+## Enable the pytest fixtures
+
+Load the plugin from the consuming project's root `conftest.py`:
 
 ```python
-from playwright.sync_api import sync_playwright
-
-with sync_playwright() as playwright:
-    browser = playwright.chromium.launch()
-    scope = browser.new_page()
-    scope.set_content("<h1>Playwright OK</h1>")
-    print(scope.get_by_role("heading").text_content())
-    browser.close()
+pytest_plugins = ("robo_appian.pytest_plugin",)
 ```
 
-Run it:
-
-```bash
-python verify_playwright.py
-```
-
-Or with Poetry:
-
-```bash
-poetry run python verify_playwright.py
-```
-
-You should see:
+The plugin owns these public fixtures:
 
 ```text
-Playwright OK
+browser -> RoboBrowser
+context -> RoboContext
+page    -> RoboPage
 ```
 
-!!! note "CI and Linux runners"
-    Some Linux environments also require operating-system packages used by Playwright browsers. Provision those dependencies in the runner image or according to your organization's CI setup.
+A test can therefore consume `RoboPage` without importing Playwright:
+
+```python
+from robo_appian import RoboPage
+
+
+def test_home(page: RoboPage) -> None:
+    page.goto("https://your-appian-site.example/")
+```
+
+Application projects can override authenticated storage state and lifecycle-provider fixtures without replacing the public `browser`, `context`, or `page` fixtures. See [Pytest Integration](../guides/pytest-integration.md).
+
+## Verify the installation
+
+Verify the package and framework wrappers:
+
+```bash
+python -c "from robo_appian import RoboBrowser, RoboContext, RoboPage, RoboLocator; print('robo-appian import OK')"
+```
+
+Verify the CLI:
+
+```bash
+robo-appian --help
+robo-appian install-browser --help
+```
 
 ## What installation does not configure
 
-Installing the library does **not** configure:
+`robo-appian` intentionally does not know your application-specific:
 
-- a specific browser engine or browser channel
-- Appian URLs or credentials
-- authentication or navigation flows
-- pytest fixtures
-- environment configuration
-- application-specific labels or business rules
-- application-specific test data
-- workflow-specific waits
+- Appian URLs
+- credentials or secret-management policy
+- authentication workflow
+- business workflows and assertions
+- test data
+- application labels and rules
+- worker-to-credential mapping
 
-Those concerns stay in the consumer automation project.
+Those remain in the consuming project. `robo-appian` owns the browser/runtime wrapper layer and reusable Appian interaction mechanics.
 
 <div class="ra-doc-next" markdown>
 
-**Next:** [Understand the architecture and label-oriented model →](concepts.md)
+**Next:** [Understand the framework architecture →](concepts.md)
 
 </div>

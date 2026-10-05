@@ -1,86 +1,91 @@
 # Your First Test
 
-This walkthrough shows where `robo-appian` fits in a normal Python + Playwright test. The URL and labels are examples; replace them with values from your application.
+This walkthrough uses the robo-appian pytest plugin, so the consuming test never creates a raw Playwright browser, context, or page.
 
-## 1. Create or obtain a Playwright-backed `scope`
+## 1. Enable robo-appian fixtures
 
-`robo-appian` does not create the browser for you. Your test framework or fixture owns it.
-
-!!! note "Browser used in this example"
-    This example launches Playwright-managed Chromium for simplicity. Chromium is not required by `robo-appian`; use the browser and launch configuration owned by your consumer test project.
+Create or update the root `conftest.py`:
 
 ```python
-import pytest
-from playwright.sync_api import sync_playwright
-
-
-@pytest.fixture
-def scope():
-    with sync_playwright() as playwright:
-        browser = playwright.chromium.launch()
-        scope = browser.new_page()
-        yield scope
-        browser.close()
+pytest_plugins = ("robo_appian.pytest_plugin",)
 ```
 
-In a real project, keep browser configuration, authentication state, tracing, screenshots, and environment handling in your consumer fixtures.
+The public fixture chain is:
 
-## 2. Navigate to the Appian application
+```text
+browser -> RoboBrowser
+context -> RoboContext
+page    -> RoboPage
+```
 
-Navigation and authentication are application-specific, so they stay outside `robo-appian`:
+## 2. Write a test with `RoboPage`
 
 ```python
-def test_create_request(scope):
-    scope.goto("https://your-appian-site.example/")
-    # Perform your application's authentication/navigation here.
+from robo_appian import RoboPage
+
+
+def test_open_appian(page: RoboPage) -> None:
+    page.goto("https://your-appian-site.example/")
+    assert "your-appian-site" in page.url
 ```
 
-## 3. Use robo-appian for reusable Appian interactions
+Authentication and the target URL are application-specific. A real project can put those operations in lifecycle callbacks so tests receive an already-authenticated `RoboPage`.
 
-Import the component that represents the control and identify the control in user-facing terms where the API supports it:
+## 3. Locate and act through `RoboLocator`
 
 ```python
-from robo_appian import Button, Dropdown, InputText, Text
+from robo_appian import RoboPage
 
 
-def test_create_request(scope):
-    scope.goto("https://your-appian-site.example/")
-    # Application-specific authentication/navigation belongs here.
+def test_user_menu(page: RoboPage) -> None:
+    page.goto("https://your-appian-site.example/")
 
-    InputText.fill_by_label(scope, "Request Name", "Example Request")
-    Dropdown.select(scope, "Request Type", "Travel")
-    Button.click(scope, "Submit")
+    user_options = page.get_by_attributes(
+        attributes={
+            "role": "button",
+            "aria-label": "User options",
+        },
+        excat_match=True,
+    )
 
-    Text.wait_visible(scope, "Created successfully")
+    user_options.to_be_visible()
+    user_options.wait_for_attribute(attributes={"aria-expanded": "false"})
+    user_options.click()
+    user_options.wait_for_attribute(attributes={"aria-expanded": "true"})
 ```
 
-The workflow remains in your test project. `robo-appian` supplies generic Appian component mechanics and Playwright performs the browser automation.
+## 4. Use `get_by_id()` when the DOM has a stable id
 
-## 4. Keep business assertions in the test project
+For markup such as:
 
-Use pytest, Playwright assertions, or your project's assertion conventions for business expectations. Query methods can provide values when useful:
+```html
+<input id="jsAcceptButton" type="button" value="I Agree">
+```
+
+use:
 
 ```python
-from robo_appian import Text
-
-message = Text.get_visible_text(scope, "Created successfully", excat_match=True)
-assert message == "Created successfully"
+agree = page.get_by_id("jsAcceptButton")
+agree.to_be_visible()
+agree.click()
 ```
 
-## 5. Scope repeated labels
-
-If the same label appears in more than one UI region, narrow the current `scope` before calling the component API:
+## 5. Use reusable Appian component helpers
 
 ```python
-scope = scope.get_by_role("region", name="Request Details")
-InputText.fill_by_label(scope, "Name", "Example Request")
+from robo_appian import Button, InputText, RoboPage
+
+
+def test_create_request(page: RoboPage) -> None:
+    InputText.fill_by_label(page, "Request Name", "Example Request")
+    Button.click(page, "Submit")
 ```
 
-This is a useful boundary: your project knows **which application region** matters; `robo-appian` knows **how to interact with the reusable Appian component** inside that scope.
+The component classes keep reusable Appian lookup mechanics out of application workflows. Their current generated signatures may still expose the internal `Scope` compatibility type; the framework fixture boundary remains `RoboPage`.
 
-## A maintainable consumer-project shape
+## 6. Keep business rules in the consuming project
 
-One possible structure is:
+A maintainable project can keep application concerns separate:
 
 ```text
 my-automation-project/
@@ -92,12 +97,8 @@ my-automation-project/
 └── pyproject.toml
 ```
 
-There is no required folder structure. The important separation is architectural:
+The consumer project owns URLs, credentials, authentication policy, workflow orchestration, assertions, test data, and application-specific waits. robo-appian owns reusable browser wrappers, pytest resource fixtures, and generic Appian interactions.
 
-- consumer project → application workflow, assertions, data, credentials, environment
-- `robo-appian` → reusable Appian component behavior
-- Playwright → browser automation
+## 7. Add application-specific lifecycle behavior
 
-## Next steps
-
-Use [Choosing a Component](component-basics.md) when you know what the Appian control looks like but not which helper to use. Use the [API Reference](../api/index.md) for exact signatures, defaults, parameter descriptions, and return values.
+For authenticated applications, override `storage_state`, `robo_appian_context_lifecycle`, or `robo_appian_page_lifecycle` instead of replacing the public fixtures. See [Pytest Integration](../guides/pytest-integration.md).

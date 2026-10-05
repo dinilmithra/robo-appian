@@ -1,36 +1,29 @@
 # Components
 
-The preferred import style is through the package-level API. In every scope-aware component method, `scope` is **either a Playwright `Page` or a Playwright `Locator` object**. A `Page` searches the whole document; a `Locator` restricts the lookup to that locator's DOM subtree. See [Scope](../api/scope.md) for examples and guidance.
+The preferred import style is through the package-level API:
 
 ```python
 from robo_appian import Button, Dropdown, InputText, Table
 ```
 
+Component helpers encapsulate reusable Appian-specific interaction mechanics. Browser lifecycle and generic element ownership belong to the framework wrappers (`RoboBrowser`, `RoboContext`, `RoboPage`, and `RoboLocator`).
+
 ## Buttons
 
 ```python
-from robo_appian import Button
-
-Button.click(scope, "Submit")
+Button.click(page, "Submit")
 ```
-
-For pages where duplicate button labels require additional disambiguation, use
-the attribute-aware helpers exposed by `Button`.
 
 ## Text inputs
 
 ```python
-from robo_appian import InputText
-
-InputText.fill_by_label(scope, "Request Name", "Example Request")
+InputText.fill_by_label(page, "Request Name", "Example Request")
 ```
 
 ## Dropdowns
 
 ```python
-from robo_appian import Dropdown
-
-Dropdown.select(scope, "Status", "Active")
+Dropdown.select(page, "Status", "Active")
 ```
 
 ## Tables
@@ -38,8 +31,13 @@ Dropdown.select(scope, "Status", "Active")
 ```python
 from robo_appian import Table
 
-# See the Table API reference for the supported table operations.
+# See the Table API reference for supported table/grid operations.
 ```
 
-The API reference is generated directly from the Python source and docstrings,
-so use it for exact signatures and available methods.
+## Component `Scope` compatibility
+
+The current generated component signatures still use `Scope = Playwright Page | Locator`. That type describes the component implementation's search boundary and is retained for compatibility while the framework wrapper migration continues.
+
+For new consuming-project browser/resource code, use `RoboPage` and `RoboLocator`. Do not create raw Playwright browser/page fixtures when using the robo-appian pytest plugin.
+
+The generated API reference is authoritative for the exact current component signatures and defaults.

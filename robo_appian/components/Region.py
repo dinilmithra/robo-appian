@@ -2,7 +2,7 @@
 
 import re
 
-from playwright.sync_api import Locator, Page, expect
+from playwright.sync_api import Locator, expect
 from robo_appian.utils.types import Scope
 
 

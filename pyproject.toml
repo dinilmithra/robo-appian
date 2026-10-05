@@ -14,7 +14,12 @@ maintainers = [
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "playwright==1.63.0",
+    "pytest==9.1.1",
+    "robo-automation @ file:///C:/FDA/workspace/GIT/core/core-workspace/robo-automation",
 ]
+
+[project.scripts]
+robo-appian = "robo_appian.cli:main"
 
 [project.urls]
 Documentation = "https://dinilmithra.github.io/robo-appian/"
@@ -34,6 +39,8 @@ mkdocs = "^1.6.1"
 mkdocs-material = "^9.7.7"
 mkdocstrings = {extras = ["python"], version = "^1.0.6"}
 
+[tool.poetry.dependencies]
+robo-automation = {develop = true}
 [build-system]
 requires = ["poetry-core==2.5.0"]
 build-backend = "poetry.core.masonry.api"

@@ -1,46 +1,79 @@
 # robo-appian
 
-`robo-appian` is a reusable Python component library built on top of Playwright for automating Appian web applications. It provides Appian-focused operations that identify controls primarily through user-facing labels, accessible semantics, text, and meaningful scopes where supported, while consumer projects keep ownership of application workflows, assertions, business rules, credentials, waits, and test data.
+`robo-appian` is a Python automation framework for Appian built on Playwright. It owns the browser/runtime wrapper layer and provides reusable Appian interaction components so consuming projects can focus on application workflows, data, and assertions.
 
 ## Architecture
 
 ```text
-Consumer tests → robo-appian → Playwright → Appian web application
+Consumer pytest project
+        ↓
+RoboBrowser → RoboContext → RoboPage → RoboLocator
+        ↓
+Reusable Appian components
+        ↓
+Playwright implementation
+        ↓
+Appian
 ```
 
-The first argument to scope-aware component methods is a `Scope`. **A `Scope` is either a Playwright `Page` or a Playwright `Locator`.** Pass a `Page` to search the whole document, or a `Locator` to restrict the search to a particular container. `robo-appian` does not create a separate scope object.
-
-The project favors readable component calls such as:
+The public framework wrappers are:
 
 ```python
-from robo_appian import Button, Dropdown, InputText
-
-InputText.fill_by_label(scope, "Request Name", "Example Request")
-Dropdown.select(scope, "Request Type", "Travel")
-Button.click(scope, "Submit")
+from robo_appian import RoboBrowser, RoboContext, RoboPage, RoboLocator
 ```
 
-This keeps reusable Appian lookup mechanics in the library instead of repeating them throughout consumer workflows.
+With the pytest plugin enabled, tests normally receive `RoboPage` directly:
+
+```python
+pytest_plugins = ("robo_appian.pytest_plugin",)
+```
+
+```python
+from robo_appian import RoboPage
+
+
+def test_example(page: RoboPage) -> None:
+    user_options = page.get_by_attributes(
+        attributes={
+            "role": "button",
+            "aria-label": "User options",
+        }
+    )
+    user_options.to_be_visible()
+    user_options.click()
+```
 
 ## Install
-
-With pip:
 
 ```bash
 pip install robo-appian
 ```
 
-With Poetry:
+Python 3.12 is required. Playwright is installed automatically as a robo-appian dependency.
+
+Install all Playwright-managed browser binaries:
 
 ```bash
-poetry add robo-appian
+robo-appian install-browser
 ```
 
-Python 3.12 is required. `robo-appian` does **not** require Chromium specifically and does not provision browsers. Use the Playwright-supported browser configured by your consumer test project. If a Playwright-managed browser is not already available, install the engine your project uses separately, for example `playwright install chromium`, `playwright install firefox`, or `playwright install webkit`.
+or one engine:
+
+```bash
+robo-appian install-browser firefox
+robo-appian install-browser chromium
+robo-appian install-browser webkit
+```
+
+`robo-appian install-browser all` is equivalent to the no-argument full install. The command uses the current Python interpreter (`sys.executable -m playwright install ...`) and is platform independent.
+
+## Component APIs and Scope
+
+Existing reusable components such as `Button`, `InputText`, `Dropdown`, and `Table` still expose the internal `Scope = Playwright Page | Locator` compatibility boundary in many generated signatures. New browser lifecycle/resource ownership should use the Robo* wrappers; `Scope` remains documented because it is still part of the current component implementation.
 
 ## Documentation
 
-Full documentation, guides, and API reference are published at:
+Full documentation, guides, framework reference, and component API reference:
 
 **https://dinilmithra.github.io/robo-appian/**
 

@@ -1,192 +1,182 @@
 # Core Concepts
 
-`robo-appian` is easiest to use when you understand its role before you start writing tests. It is a **Python component library built on Playwright**. It is not a test framework and it does not own your application workflow.
+`robo-appian` is the controller layer between a consuming pytest project and Playwright. Consumer tests work with framework objects (`RoboBrowser`, `RoboContext`, `RoboPage`, and `RoboLocator`) instead of owning raw browser, context, and page resources directly.
 
-## The four layers
+## Framework object model
 
-<div class="ra-layers" aria-label="robo-appian architecture layers">
-  <div class="ra-layers-head">
-    <span class="ra-layers-kicker">ARCHITECTURE</span>
-    <h3>Know what each layer owns</h3>
-    <p>Your tests express the workflow. <code>robo-appian</code> provides reusable Appian interactions, Playwright drives the browser, and Appian is the application under test.</p>
-  </div>
-
-  <div class="ra-layer-flow">
-    <article class="ra-layer-card ra-layer-test">
-      <div class="ra-layer-top"><span class="ra-layer-number">1</span><span class="ra-layer-icon" aria-hidden="true">✓</span></div>
-      <h4>Your test project</h4>
-      <p>Owns application intent and test orchestration.</p>
-      <ul>
-        <li>Login & navigation</li>
-        <li>Workflows & assertions</li>
-        <li>Credentials & test data</li>
-        <li>Workflow-specific waits</li>
-      </ul>
-    </article>
-
-
-    <article class="ra-layer-card ra-layer-robo">
-      <div class="ra-layer-top"><span class="ra-layer-number">2</span><span class="ra-layer-icon" aria-hidden="true">⚙</span></div>
-      <h4>robo-appian</h4>
-      <p>Owns reusable behavior for common Appian controls.</p>
-      <ul>
-        <li>Label-oriented component lookup</li>
-        <li>Fill, click & select operations</li>
-        <li>Table, record & region helpers</li>
-        <li>Generic component synchronization</li>
-      </ul>
-    </article>
-
-
-    <article class="ra-layer-card ra-layer-playwright">
-      <div class="ra-layer-top"><span class="ra-layer-number">3</span><span class="ra-layer-icon" aria-hidden="true">↗</span></div>
-      <h4>Playwright</h4>
-      <p>The browser-automation engine underneath the library.</p>
-      <ul>
-        <li><code>Scope</code> and locator execution</li>
-        <li>Browser interaction</li>
-        <li>Locator execution</li>
-        <li>Synchronization primitives</li>
-      </ul>
-    </article>
-
-
-    <article class="ra-layer-card ra-layer-appian">
-      <div class="ra-layer-top"><span class="ra-layer-number">4</span><span class="ra-layer-icon" aria-hidden="true">▦</span></div>
-      <h4>Appian</h4>
-      <p>The web application UI that is ultimately automated.</p>
-      <ul>
-        <li>Rendered controls</li>
-        <li>Labels & accessible names</li>
-        <li>Dynamic UI state</li>
-        <li>Application content</li>
-      </ul>
-    </article>
-  </div>
-
-  <div class="ra-layer-summary">
-    <div class="ra-layer-summary-icon" aria-hidden="true">i</div>
-    <div>
-      <strong>The boundary to remember</strong>
-      <p><b>Your project</b> owns application-specific behavior. <b>robo-appian</b> owns reusable Appian component behavior. Playwright remains available directly whenever a robo-appian abstraction is not the right fit.</p>
-    </div>
-  </div>
-</div>
-
-!!! important "robo-appian does not replace Playwright"
-    Your project still creates and owns the Playwright browser scope, controls authentication and navigation, and can use Playwright directly whenever a robo-appian component is not the right abstraction.
-
-## A label-oriented component model
-
-Many public operations identify Appian controls using the same information a user sees or assistive technology exposes: **visible labels, accessible names, button text, region names, and meaningful scopes**.
-
-```python
-from robo_appian import Button, Dropdown, InputText
-
-InputText.fill_by_label(scope, "Request Name", "Example Request")
-Dropdown.select(scope, "Request Type", "Travel")
-Button.click(scope, "Submit")
+```text
+pytest / consumer project
+        ↓
+RoboBrowser
+        ↓ new_context()
+RoboContext
+        ↓ new_page()
+RoboPage
+        ↓ element lookup
+RoboLocator
+        ↓
+Playwright implementation
+        ↓
+Appian
 ```
 
-This is best understood as a **label-oriented component model**: the test expresses the Appian control and user-facing identifier, while the library encapsulates reusable component-specific lookup mechanics.
-
-The phrase is descriptive rather than a formal industry-standard architecture name. The important design goal is to keep consumer tests from depending unnecessarily on Appian-generated DOM details.
-
-!!! note "Labels are the preferred interface, not the only implementation"
-    Some Appian layouts cannot be resolved by a normal accessible label. The library therefore includes specialized component methods when a reusable Appian structure requires a different strategy. Use the narrowest public method that matches the rendered control.
-
-## Why this is easier to maintain
-
-A test such as:
+The wrappers are framework-level classes under `robo_appian.framework`, and they are exported from the package root:
 
 ```python
-Button.click(scope, "Submit")
+from robo_appian import RoboBrowser, RoboContext, RoboPage, RoboLocator
 ```
 
-communicates business intent directly. The consumer project does not need to repeat the locator mechanics used to resolve that Appian button.
+### `RoboBrowser`
 
-This does **not** mean labels can never change. If an application renames `Submit` to `Send Request`, the test still needs to change. The benefit is that changes to reusable Appian markup mechanics can usually be handled inside the component library rather than repeated across every consumer workflow.
+Owns the browser-level boundary. `new_context(...)` returns a `RoboContext`.
 
-## Components are static helpers
+### `RoboContext`
 
-You normally do not instantiate component classes. Import the component and call the operation you need:
+Owns a browser context. `new_page()` and `pages` return `RoboPage` objects. It also exposes context timeout, storage-state, event, and close operations needed by the framework lifecycle.
+
+### `RoboPage`
+
+Owns a browser page. It exposes controlled navigation, page operations, and page-level element lookup. Attribute-based lookup methods return `RoboLocator` objects:
 
 ```python
-from robo_appian import Button, InputText
-
-InputText.fill_by_label(scope, "Request Name", "Example Request")
-Button.click(scope, "Submit")
+user_options = page.get_by_attributes(
+    attributes={
+        "role": "button",
+        "aria-label": "User options",
+    },
+    excat_match=True,
+)
 ```
 
-The first argument commonly defines **where to look**. The remaining arguments describe **what to find** and **what to do**.
+### `RoboLocator`
 
-## `scope`: Playwright `Page` or `Locator`
-
-Public component APIs use `scope` to mean **where robo-appian should search**. A `Scope` is either a Playwright `Page` or a Playwright `Locator`; it is not a separate object created by robo-appian.
-
-| Pass this object | Search boundary |
-| --- | --- |
-| Playwright `Page` | Entire current document |
-| Playwright `Locator` | Only the DOM subtree represented by that locator |
-
-Use the Playwright `Page` when the target is unambiguous across the document:
+Wraps a resolved Playwright locator and provides framework operations such as:
 
 ```python
-InputText.fill_by_label(scope, "Request Name", "Example Request")
+user_options.to_be_visible()
+user_options.wait_for_attribute(attributes={"aria-expanded": "false"})
+user_options.click()
 ```
 
-Use a Playwright `Locator` when repeated labels exist or the workflow should stay inside a specific application container:
+It supports arbitrary HTML attributes rather than a fixed attribute whitelist.
+
+## Pytest fixture ownership
+
+When `robo_appian.pytest_plugin` is loaded, robo-appian owns the public fixture chain:
+
+```text
+playwright runtime
+      ↓
+browser -> RoboBrowser
+      ↓
+context -> RoboContext
+      ↓
+page -> RoboPage
+```
+
+A consuming project can override lifecycle providers for authentication, storage state, diagnostics, or application navigation while leaving resource ownership in robo-appian.
+
+This keeps application-specific behavior separate from browser-control mechanics.
+
+## Application responsibility versus framework responsibility
+
+| Concern | robo-appian | Consumer project |
+| --- | :---: | :---: |
+| Playwright Python dependency | ✓ | |
+| Playwright runtime fixture | ✓ | |
+| Browser/context/page fixture ownership | ✓ | |
+| Browser/context/page wrappers | ✓ | |
+| Browser binary installation CLI | ✓ | |
+| Generic Appian component mechanics | ✓ | |
+| Generic element lookup / visibility / attribute waits | ✓ | |
+| Appian URL | | ✓ |
+| Credentials and authentication policy | | ✓ |
+| Worker-specific credential mapping | | ✓ |
+| Business workflow orchestration | | ✓ |
+| Application assertions and test data | | ✓ |
+| Application-specific synchronization | | ✓ |
+
+## Component APIs and `Scope`
+
+The reusable component layer (`Button`, `InputText`, `Dropdown`, and others) predates the framework wrappers and still exposes the internal `Scope` type in many generated signatures:
 
 ```python
-request_scope = scope.get_by_role("region", name="Request Details")
-InputText.fill_by_label(request_scope, "Name", "Example Request")
+Scope = Page | Locator
 ```
 
-Both calls use the same robo-appian method. Only the Playwright object supplied as the first argument changes. This is why the API calls the parameter `scope` rather than `page`. See the dedicated [Scope reference](../api/scope.md) for the complete explanation.
+`Scope` describes the Playwright search boundary used by those component implementations: a page searches the whole document and a locator restricts the operation to a subtree.
+
+For new consumer lifecycle code, prefer `RoboPage` and `RoboLocator`. The raw Playwright `Scope` type remains a component/internal compatibility boundary while the component layer continues to migrate toward the wrapper model. Some `RoboPage` locator helpers also currently return Playwright `Locator` objects for compatibility with existing components; this does not re-expose the raw browser/context/page resources. See [Scope](../api/scope.md).
+
+## Attribute-based lookup
+
+Use `RoboPage.get_by_attributes(...)` when an element is best described directly from its HTML or accessibility attributes:
+
+```python
+user_options = page.get_by_attributes(
+    attributes={
+        "role": "button",
+        "aria-label": "User options",
+    },
+    excat_match=True,
+)
+```
+
+The attribute map can include standard attributes, ARIA attributes, `data-*` attributes, and custom attributes.
+
+For a stable HTML id:
+
+```python
+agree = page.get_by_id("jsAcceptButton")
+agree.to_be_visible()
+agree.click()
+```
 
 ## Exact matching
 
-Methods that expose an `excat_match` parameter let you control text matching. It is optional and defaults to `False`; pass `True` when an exact label or text match is required.
+`excat_match` is intentionally the robo-appian parameter name used by the current public API. For `RoboLocator` attribute lookup:
+
+- `True` or `None` → exact attribute equality
+- `False` → substring (`contains`) matching
+
+The Playwright keyword `exact` remains an internal implementation detail at direct Playwright boundaries.
+
+## Visibility and duplicate Appian DOM elements
+
+Appian can render hidden and visible copies of the same control. `RoboLocator.to_be_visible()` filters the current match set by visibility:
+
+- zero visible matches → the visibility assertion waits/fails normally
+- one visible match → the locator narrows to that match
+- multiple visible matches → the visible set remains; use `first()` only when selecting the first visible match is intentional
 
 ```python
-InputText.fill_by_label(scope, "Name", "Example", excat_match=True)
+user_options.to_be_visible()
+user_options = user_options.first()
+user_options.click()
 ```
 
-Use exact matching when similar labels could otherwise match the wrong control.
+## Dynamic attribute waits
 
-## Waiting and synchronization
-
-Prefer meaningful component state and Playwright synchronization over arbitrary sleeps:
+Wait for one or more attributes without rebuilding the locator:
 
 ```python
-from robo_appian import Button, Text
-
-Button.click(scope, "Submit")
-Text.wait_visible(scope, "Created successfully")
+user_options.wait_for_attribute(
+    attributes={
+        "aria-expanded": "true",
+    }
+)
 ```
 
-Generic synchronization needed by a reusable Appian component belongs in `robo-appian`. A wait for a consumer application's workflow or business event belongs in the consumer project.
+`timeout` is optional. When omitted or `None`, Playwright's configured default assertion timeout is used.
 
-## Actions and queries
+## Browser provisioning versus browser execution
 
-Public methods generally fall into two categories:
+Installing `robo-appian` installs the Playwright Python dependency. Browser binaries are installed separately with:
 
-- **Actions** interact with the UI: click, fill, select, or wait for a component state.
-- **Queries** inspect the UI and return a documented value such as `bool`, `str`, a list, or a Playwright locator.
+```bash
+robo-appian install-browser [firefox|chromium|webkit|all]
+```
 
-The API pages show the exact signature, parameter types, defaults, descriptions, and return information for each public method.
+With no argument, the command installs the full browser set. Browser execution is then controlled by the fixture lifecycle/environment, for example `BROWSER=firefox`.
 
-## What belongs where?
-
-| Concern | `robo-appian` | Consumer project |
-| --- | :---: | :---: |
-| Generic Appian control interaction | ✓ | |
-| Reusable component lookup mechanics | ✓ | |
-| Generic component synchronization | ✓ | |
-| Login and application navigation | | ✓ |
-| Application workflow orchestration | | ✓ |
-| Application-specific labels and rules | | ✓ |
-| Assertions and test data | | ✓ |
-| Workflow-specific waits | | ✓ |
-
-Next, take the shortest working path through [Quick Start](quick-start.md) or build a complete example in [Your First Test](first-test.md).
+Next, use [Quick Start](quick-start.md) for the shortest working path or [Pytest Integration](../guides/pytest-integration.md) for lifecycle customization.

@@ -81,27 +81,38 @@ nav:
       - Your First Test: getting-started/first-test.md
       - Choosing a Component: getting-started/component-basics.md
       - Troubleshooting: getting-started/troubleshooting.md
-  - License: license.md
+  - Guides:
+      - Framework Architecture: guides/framework-architecture.md
+      - Pytest Integration: guides/pytest-integration.md
+      - Browser Management: guides/browser-management.md
+      - Components: guides/components.md
+      - Development: guides/development.md
+      - Publishing Docs: guides/publishing-docs.md
   - API Reference:
       - Overview: api/index.md
-      - RoboBrowser: api/robo-browser.md
-      - RoboContext: api/robo-context.md
-      - RoboPage: api/robo-page.md
-      - RoboLocator: api/robo-locator.md
-      - Button: api/button.md
-      - CheckBox: api/checkbox.md
-      - Dropdown: api/dropdown.md
-      - InputDate: api/input-date.md
-      - InputText: api/input-text.md
-      - Link: api/link.md
-      - MenuButton: api/menu-button.md
-      - RadioSelect: api/radio-select.md
-      - RecordList: api/record-list.md
-      - Region: api/region.md
-      - SearchDropdown: api/search-dropdown.md
-      - SearchInput: api/search-input.md
-      - Tab: api/tab.md
-      - Table: api/table.md
-      - Text: api/text.md
-      - ComponentUtils: api/component-utils.md
-      - Scope: api/scope.md
+      - Framework:
+          - RoboBrowser: api/robo-browser.md
+          - RoboContext: api/robo-context.md
+          - RoboPage: api/robo-page.md
+          - RoboLocator: api/robo-locator.md
+          - Pytest Plugin: api/pytest-plugin.md
+          - CLI: api/cli.md
+      - Components:
+          - Button: api/button.md
+          - CheckBox: api/checkbox.md
+          - Dropdown: api/dropdown.md
+          - InputDate: api/input-date.md
+          - InputText: api/input-text.md
+          - Link: api/link.md
+          - MenuButton: api/menu-button.md
+          - RadioSelect: api/radio-select.md
+          - RecordList: api/record-list.md
+          - Region: api/region.md
+          - SearchDropdown: api/search-dropdown.md
+          - SearchInput: api/search-input.md
+          - Tab: api/tab.md
+          - Table: api/table.md
+          - Text: api/text.md
+          - ComponentUtils: api/component-utils.md
+          - Scope: api/scope.md
+  - License: license.md

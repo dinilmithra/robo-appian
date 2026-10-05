@@ -1,19 +1,15 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
-  "python.useEnvironmentsExtension": false,
-  "python.terminal.activateEnvironment": true,
-  "python.terminal.activateEnvInCurrentTerminal": true,
-  "terminal.integrated.env.windows": {
-    "POETRY_VIRTUALENVS_IN_PROJECT": "true"
-  },
-  "files.exclude": {
-    "**/__pycache__": true,
-    "**/.pytest_cache": true
-  },
-  "search.exclude": {
-    "**/.venv": true,
-    "**/dist": true,
-    "**/site": true,
-    "**/__pycache__": true
-  }
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.profiles.windows": {
+        "PowerShell (.venv)": {
+            "source": "PowerShell",
+            "args": [
+                "-NoExit",
+                "-Command",
+                ". '${workspaceFolder}/.venv/Scripts/Activate.ps1'"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell (.venv)"
 }

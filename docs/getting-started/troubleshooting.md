@@ -2,7 +2,7 @@
 
 ## Import fails with `ModuleNotFoundError`
 
-Confirm the package is installed in the same Python environment that runs the tests:
+Confirm robo-appian is installed in the Python environment that runs pytest:
 
 ```bash
 python -c "import robo_appian; print(robo_appian.__file__)"
@@ -16,56 +16,115 @@ poetry run python -c "import robo_appian; print(robo_appian.__file__)"
 
 ## Playwright says the browser executable is missing
 
-Installing the Python package and provisioning a browser are separate steps. `robo-appian` does not require Chromium specifically. Install the Playwright-managed browser engine your consumer project is configured to use, for example:
+The Playwright Python package is installed as a robo-appian dependency, but browser binaries are provisioned explicitly.
+
+Install the full browser set:
 
 ```bash
-playwright install chromium
-playwright install firefox
-playwright install webkit
+robo-appian install-browser
 ```
 
-With Poetry, run the applicable browser-install command in the same environment, for example:
+or:
 
 ```bash
-poetry run playwright install chromium
+robo-appian install-browser all
 ```
 
-If your environment already provides the browser through an installed Chrome/Edge channel, a container image, or other project-level provisioning, you do not need to install a separate Playwright-managed browser just for `robo-appian`.
+Install one engine:
 
-## A control cannot be found
+```bash
+robo-appian install-browser firefox
+robo-appian install-browser chromium
+robo-appian install-browser webkit
+```
 
-Check these in order:
+The command uses the current Python interpreter, so run it in the same environment as your tests.
 
-1. Confirm the current scope has reached the expected application state.
-2. Confirm the label/text matches what the Appian UI exposes.
-3. Remember that `excat_match` defaults to `False`; use `True` only when exact matching is required.
-4. If the same label appears more than once, scope the operation to a meaningful container when the API accepts `Scope`.
-5. Confirm you selected the correct component—for example, `Dropdown` versus `SearchDropdown`.
-6. Check the component API for a specialized method that matches the rendered Appian structure.
+## The wrong browser starts
 
-Avoid fixing locator problems with arbitrary sleeps. Synchronize on a meaningful UI state instead.
+The generic lifecycle reads `BROWSER`, defaulting to `chromium`.
 
-## Exact matching behaves differently than expected
+For Firefox:
 
-`excat_match` is optional and defaults to `False`. Use `excat_match=True` when a complete label match is required to disambiguate similar controls.
+```text
+BROWSER=firefox
+```
 
-## The same label exists twice
+Make sure the matching browser binary is installed:
 
-When the method accepts a `Scope`, narrow the current scope to the correct container:
+```bash
+robo-appian install-browser firefox
+```
+
+## The `page` fixture is missing
+
+Make sure the plugin is loaded in the root `conftest.py`:
 
 ```python
-scope = scope.get_by_role("region", name="Billing Address")
-InputText.fill_by_label(scope, "City", "Rockville")
+pytest_plugins = ("robo_appian.pytest_plugin",)
 ```
 
-## Should I add a sleep?
+The plugin provides `browser`, `context`, and `page` as Robo* wrapper objects.
 
-Usually no. Prefer a component wait or a Playwright assertion tied to the state the workflow actually requires. Application-specific synchronization belongs in your consumer project; generic Appian component synchronization belongs in `robo-appian`.
+## I need application login before every test
 
-## I need a selector that robo-appian does not provide
+Do not replace the public page fixture just to add login/navigation. Override `robo_appian_page_lifecycle` and return your application lifecycle function. See [Pytest Integration](../guides/pytest-integration.md).
 
-Using Playwright directly is valid. `robo-appian` is a focused component library, not a requirement that every browser interaction go through the package. Keep one-off and application-specific selectors in the consumer project.
+## I need authenticated storage state
+
+Override the session-scoped `storage_state` fixture. For xdist, keep the state worker-aware if workers may use different credentials or independent server sessions.
+
+## An element resolves to hidden and visible duplicates
+
+Appian may render hidden and visible copies of the same control. `RoboLocator.to_be_visible()` filters the current match set to visible elements.
+
+```python
+user_options.to_be_visible()
+```
+
+If more than one visible match remains and selecting the first is intentional:
+
+```python
+user_options = user_options.first()
+user_options.click()
+```
+
+## Wait for an attribute transition
+
+Use `wait_for_attribute()` with an attribute map:
+
+```python
+user_options.wait_for_attribute(
+    attributes={
+        "aria-expanded": "true",
+    },
+    timeout=5000,
+)
+```
+
+`timeout` is optional. When omitted or `None`, the configured default assertion timeout is used.
+
+## A component cannot find a control
+
+Check:
+
+1. the application reached the expected state;
+2. the user-facing label/text actually matches the rendered Appian control;
+3. whether exact versus partial matching is correct;
+4. whether a repeated control should be narrowed to a smaller scope;
+5. whether the correct component type is being used;
+6. whether generic `RoboPage.get_by_attributes()` is a better fit for the element.
+
+Avoid arbitrary sleeps; synchronize on a meaningful UI state.
+
+## `Scope` mentions Playwright even though my test uses `RoboPage`
+
+This is expected in the current version. Framework lifecycle code uses Robo* wrappers, while many existing component signatures still expose the internal `Scope = Page | Locator` compatibility boundary. The API reference reflects the actual current source signatures.
+
+## Should CORE or another consumer declare Playwright directly?
+
+Not for the standard robo-appian fixture stack. Playwright is a direct dependency of robo-appian. A consumer should declare Playwright separately only if it intentionally contains direct Playwright code outside the wrapper boundary.
 
 ## I need exact behavior for a method
 
-Open that component's [API Reference](../api/index.md). API pages are generated from the public source signatures and docstrings and show parameter types, defaults, descriptions, and return information without exposing implementation source bodies.
+Use the [API Reference](../api/index.md). Generated component pages are sourced from the current Python signatures and docstrings.

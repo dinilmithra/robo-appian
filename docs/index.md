@@ -43,16 +43,15 @@ hide:
   <section class="ra-target-workbench">
     <div class="ra-target-code">
       <div class="ra-target-panel-title"><span>›_ &nbsp; Quick Start</span><span>🐍 Python</span></div>
-      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_appian <span class="kw">import</span> RoboLocator, Button, InputText
+      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_appian <span class="kw">import</span> RoboPage
 <span class="ln">2</span>
-<span class="ln">3</span> <span class="cm"># Interact with Appian controls by visible intent</span>
-<span class="ln">4</span> InputText.fill_by_label(scope, <span class="st">"Request Name"</span>, <span class="st">"Example"</span>)
-<span class="ln">5</span> Button.click(scope, <span class="st">"Submit"</span>)
-<span class="ln">6</span>
-<span class="ln">7</span> <span class="cm"># Use RoboLocator when a control is generic or attribute-driven</span>
-<span class="ln">8</span> robo_locator = RoboLocator.get(scope)
-<span class="ln">9</span> user_options = robo_locator.get_by_attributes(robo_locator, attributes={<span class="st">"role"</span>: <span class="st">"button"</span>, <span class="st">"aria-label"</span>: <span class="st">"User options"</span>}, excat_match=<span class="kw">True</span>)
-<span class="ln">10</span> user_options.click()</code></pre>
+<span class="ln">3</span> <span class="kw">def</span> test_user_options(page: RoboPage):
+<span class="ln">4</span>     user_options = page.get_by_attributes(
+<span class="ln">5</span>         attributes={<span class="st">"role"</span>: <span class="st">"button"</span>, <span class="st">"aria-label"</span>: <span class="st">"User options"</span>},
+<span class="ln">6</span>         excat_match=<span class="kw">True</span>,
+<span class="ln">7</span>     )
+<span class="ln">8</span>     user_options.to_be_visible()
+<span class="ln">9</span>     user_options.click()</code></pre>
     </div>
 
     <div class="ra-target-architecture">
@@ -60,9 +59,9 @@ hide:
       <div class="ra-target-arch-flow">
         <div class="node"><span class="node-icon">▤</span><strong>Test Cases</strong><small>• Pytest tests<br>• Page objects<br>• Custom workflows</small></div>
         <b>→</b>
-        <div class="node library"><div class="library-brand"><img src="assets/images/robo-appian-icon.png" alt=""><span><strong>robo-appian</strong><small>Automation Framework</small></span></div><ul><li>Appian components</li><li>Element interactions</li><li>Wait &amp; synchronization</li><li>Reporting &amp; logging</li><li>Parallel-friendly design</li></ul></div>
+        <div class="node library"><div class="library-brand"><img src="assets/images/robo-appian-icon.png" alt=""><span><strong>robo-appian</strong><small>Automation Framework</small></span></div><ul><li>RoboBrowser / RoboContext</li><li>RoboPage / RoboLocator</li><li>Appian components</li><li>Pytest fixture ownership</li><li>Parallel-friendly sessions</li></ul></div>
         <b>→</b>
-        <div class="node"><span class="node-icon">▣</span><strong>Browser + Appian</strong><small>• Automate Appian UI<br>• Execute processes<br>• Validate outcomes</small></div>
+        <div class="node"><span class="node-icon">▣</span><strong>Playwright + Appian</strong><small>• Browser engine<br>• Appian UI<br>• Private implementation boundary</small></div>
       </div>
     </div>
   </section>

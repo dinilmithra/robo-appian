@@ -1,64 +1,83 @@
 # Quick Start
 
-This guide is the shortest path from an installed package to useful Appian interactions. If `scope` is unfamiliar, read [Core Concepts](concepts.md) first.
+This is the shortest path from installation to a test that uses the robo-appian wrapper stack.
 
-## 1. Import from the package root
+## 1. Install robo-appian and a browser
 
-Prefer the public package-level API:
-
-```python
-from robo_appian import Button, Dropdown, InputText, Text
+```bash
+pip install robo-appian
+robo-appian install-browser firefox
 ```
 
-You normally call component operations directly; you do not instantiate these helper classes.
+Choose the browser engine your environment will run.
 
-## 2. Pass a Playwright `Page` or `Locator` as `scope`
+## 2. Enable the pytest plugin
 
-`scope` is the search boundary for every scope-aware robo-appian operation. It is **either a Playwright `Page` or a Playwright `Locator`**:
-
-- Pass a `Page` to search the entire current document.
-- Pass a `Locator` to search only inside that locator, such as a form, region, dialog, or row.
-
-Your test project creates and owns these Playwright objects. `robo-appian` does not create a separate scope object. For example, a function can receive a Playwright `Page` and pass it directly as `scope`:
+In the consuming project's root `conftest.py`:
 
 ```python
-from robo_appian import Button, Dropdown, InputText, Text
-
-
-def create_request(scope):
-    InputText.fill_by_label(scope, "Request Name", "Example Request")
-    Dropdown.select(scope, "Request Type", "Travel")
-    Button.click(scope, "Submit")
-    Text.wait_visible(scope, "Created successfully")
+pytest_plugins = ("robo_appian.pytest_plugin",)
 ```
 
-The workflow (`create_request`) belongs to the consumer project. The reusable Appian control mechanics belong to `robo-appian`.
+The plugin provides `browser`, `context`, and `page` fixtures as `RoboBrowser`, `RoboContext`, and `RoboPage`.
 
-## 3. Think in component + user-facing identifier
-
-For label-oriented APIs, the call usually reads like the UI:
+## 3. Use `RoboPage`
 
 ```python
-InputText.fill_by_label(scope, "Request Name", "Example Request")
-Button.click(scope, "Submit")
+from robo_appian import RoboPage
+
+
+def test_user_options(page: RoboPage) -> None:
+    page.goto("https://your-appian-site.example/")
+
+    user_options = page.get_by_attributes(
+        attributes={
+            "role": "button",
+            "aria-label": "User options",
+        },
+        excat_match=True,
+    )
+
+    user_options.to_be_visible()
+    user_options.click()
 ```
 
-`robo-appian` handles reusable component lookup and interaction behavior; your test does not need to repeat that locator implementation.
+`get_by_attributes(...)` returns a `RoboLocator`.
 
-## 4. Scope repeated controls when needed
-
-When the same label appears more than once, narrow the search by passing a Playwright `Locator` instead of the whole `Page`:
+## 4. Wait for dynamic state when needed
 
 ```python
-scope = scope.get_by_role("region", name="Request Details")
-InputText.fill_by_label(scope, "Name", "Example Request")
+user_options.wait_for_attribute(
+    attributes={
+        "aria-expanded": "true",
+    }
+)
 ```
 
-The container is application-specific, so the consumer project chooses it. The component interaction remains reusable.
+The timeout is optional. Omit it to use the configured default.
 
-## 5. Use the API reference for exact behavior
+## 5. Use a stable id when available
 
-`excat_match` is optional and defaults to `False`. Pass `excat_match=True` only when the complete label or text must match exactly. The [API Reference](../api/index.md) shows the authoritative signature, parameter descriptions, and return information.
+```python
+agree = page.get_by_id("jsAcceptButton")
+agree.to_be_visible()
+agree.click()
+```
 
-!!! tip "Want the full test shape?"
-    Continue to [Your First Test](first-test.md) for browser setup, navigation, component usage, assertions, scoping, and recommended project boundaries.
+## 6. Use Appian components for reusable control behavior
+
+The package also exposes component helpers such as `Button`, `Dropdown`, `InputText`, and `Table`. Their generated API reference documents the exact current signatures and the internal `Scope` compatibility boundary.
+
+```python
+from robo_appian import Button, InputText
+
+InputText.fill_by_label(page, "Request Name", "Example Request")
+Button.click(page, "Submit")
+```
+
+!!! note "Framework wrappers are the consumer boundary"
+    New browser lifecycle code should use `RoboBrowser`, `RoboContext`, `RoboPage`, and `RoboLocator`. Raw Playwright `Page | Locator` remains documented as `Scope` because existing component APIs still use that implementation boundary.
+
+## 7. Customize authentication without replacing the fixtures
+
+Keep application-specific authentication/storage-state logic in the consuming project by overriding the lifecycle-provider or `storage_state` fixtures. See [Pytest Integration](../guides/pytest-integration.md).
