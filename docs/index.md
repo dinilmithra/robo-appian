@@ -43,14 +43,14 @@ hide:
   <section class="ra-target-workbench">
     <div class="ra-target-code">
       <div class="ra-target-panel-title"><span>›_ &nbsp; Quick Start</span><span>🐍 Python</span></div>
-      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_appian <span class="kw">import</span> AppianElement, Button, InputText
+      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_appian <span class="kw">import</span> RoboLocator, Button, InputText
 <span class="ln">2</span>
 <span class="ln">3</span> <span class="cm"># Interact with Appian controls by visible intent</span>
 <span class="ln">4</span> InputText.fill_by_label(scope, <span class="st">"Request Name"</span>, <span class="st">"Example"</span>)
 <span class="ln">5</span> Button.click(scope, <span class="st">"Submit"</span>)
 <span class="ln">6</span>
-<span class="ln">7</span> <span class="cm"># Use AppianElement when a control is semantic but generic</span>
-<span class="ln">8</span> AppianElement.click(scope, <span class="st">"User options"</span>, role=<span class="st">"button"</span>)</code></pre>
+<span class="ln">7</span> <span class="cm"># Use RoboLocator when a control is generic or attribute-driven</span>
+<span class="ln">8</span> RoboLocator.get(scope, attributes={<span class="st">"role"</span>: <span class="st">"button"</span>, <span class="st">"aria-label"</span>: <span class="st">"User options"</span>}).click()</code></pre>
     </div>
 
     <div class="ra-target-architecture">

@@ -84,7 +84,6 @@ nav:
   - API Reference:
       - Overview: api/index.md
       - RoboLocator: api/robo-locator.md
-      - AppianElement: api/appian-element.md
       - Button: api/button.md
       - CheckBox: api/checkbox.md
       - Dropdown: api/dropdown.md

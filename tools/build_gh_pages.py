@@ -26,7 +26,6 @@ NAV = [
 ]
 
 API_MAP = {
-    "appian-element": ("AppianElement", PKG / "components" / "AppianElement.py"),
     "robo-locator": ("RoboLocator", PKG / "components" / "RoboLocator.py"),
     "button": ("Button", PKG / "components" / "Button.py"),
     "checkbox": ("CheckBox", PKG / "components" / "CheckBox.py"),
@@ -192,14 +191,14 @@ def home_body() -> str:
   <section class="ra-target-workbench">
     <div class="ra-target-code">
       <div class="ra-target-panel-title"><span>&gt;_ &nbsp; Quick Start</span><span>Python</span></div>
-      <pre><code>from robo_appian import AppianElement, Button, InputText
+      <pre><code>from robo_appian import RoboLocator, Button, InputText
 
 # Interact with Appian controls by visible intent
 InputText.fill_by_label(scope, "Request Name", "Example")
 Button.click(scope, "Submit")
 
 # Semantic generic control
-AppianElement.click(scope, "User options", role="button")</code></pre>
+RoboLocator.get(scope, attributes={"role": "button", "aria-label": "User options"}).click()</code></pre>
     </div>
     <div class="ra-target-architecture">
       <div class="ra-target-panel-title light"><span>Architecture Overview</span><a href="getting-started/concepts/index.html">How it works &rarr;</a></div>
