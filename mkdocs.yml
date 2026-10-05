@@ -84,6 +84,9 @@ nav:
   - License: license.md
   - API Reference:
       - Overview: api/index.md
+      - RoboBrowser: api/robo-browser.md
+      - RoboContext: api/robo-context.md
+      - RoboPage: api/robo-page.md
       - RoboLocator: api/robo-locator.md
       - Button: api/button.md
       - CheckBox: api/checkbox.md

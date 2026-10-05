@@ -3,6 +3,7 @@
 from playwright.sync_api import Locator, Page, expect
 from robo_appian.utils.types import Scope
 from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian.framework.robo_page import RoboPage
 
 
 class MenuButton:
@@ -109,7 +110,7 @@ class MenuButton:
 
         listbox = MenuButton.__find_menu_listbox(scope, menu_id)
         item = MenuButton.__find_menu_item_by_value(listbox, value)
-        owner_page = scope if isinstance(scope, Page) else scope.page
+        owner_page = scope if isinstance(scope, (Page, RoboPage)) else scope.page
         with owner_page.expect_popup() as new_page_info:
             ComponentUtils.click(item)
 

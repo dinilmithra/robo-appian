@@ -7,7 +7,7 @@ The API reference documents the public `robo-appian` building blocks you can use
 Prefer imports from `robo_appian`:
 
 ```python
-from robo_appian import RoboLocator, Button, Dropdown, InputText, Table
+from robo_appian import RoboBrowser, RoboContext, RoboPage, RoboLocator, Button, Dropdown, InputText, Table
 ```
 
 The package root exposes the supported public components plus `ComponentUtils` and `Scope`.
@@ -31,6 +31,9 @@ InputText.fill_by_label(scope, "Request Name", "Example Request")
 | Convention | What it means |
 | --- | --- |
 | `scope` | A Playwright `Page` or `Locator`. `Page` searches the whole document; `Locator` restricts lookup to that locator. See [Scope](scope.md). |
+| `RoboBrowser` | Browser-level wrapper around Playwright `Browser`. `new_context(...)` returns `RoboContext`. |
+| `RoboContext` | Context-level wrapper around Playwright `BrowserContext`. `new_page()` returns `RoboPage`. |
+| `RoboPage` | Page-level wrapper around Playwright `Page`. `get_by_attributes(...)` and `get_by_id(...)` return `RoboLocator` objects. |
 | `RoboLocator` | Generic attribute-based element wrapper. Define any HTML attributes in `attributes` (for example `role`, `aria-label`, `data-testid`, `title`, or custom `data-*` attributes); robo-appian builds a scoped XPath locator. `excat_match` remains a separate matching option. Includes wrapped actions and assertions such as `click()`, `to_be_visible()`, `first()`, and generic `wait_for_attribute()` support. |
 | label / text / accessible name | User-facing information used to identify an Appian control. Exact parameter names differ by component. |
 | `excat_match` | Controls exact versus partial text matching when supported. Defaults to `False`. |
@@ -43,6 +46,15 @@ InputText.fill_by_label(scope, "Request Name", "Example Request")
 ## Choose a component
 
 <div class="grid cards" markdown>
+
+-   **[RoboBrowser](robo-browser.md)**  
+    Playwright `Browser` wrapper that creates `RoboContext` objects.
+
+-   **[RoboContext](robo-context.md)**  
+    Playwright `BrowserContext` wrapper that creates `RoboPage` objects.
+
+-   **[RoboPage](robo-page.md)**  
+    Playwright `Page` wrapper for creating `RoboLocator` objects.
 
 -   **[RoboLocator](robo-locator.md)**  
     Generic XPath-backed wrapper for Appian elements using arbitrary HTML attributes.
@@ -117,9 +129,9 @@ For a fuller decision guide, see [Choosing a Component](../getting-started/compo
 ```text
 Consumer test project
         ↓
-robo-appian public component API
+RoboBrowser → RoboContext → RoboPage → RoboLocator/components
         ↓
-Playwright-backed Scope
+Playwright implementation
         ↓
 Appian web application
 ```
@@ -128,6 +140,6 @@ Your **consumer project** owns application workflows, credentials, business rule
 
 **robo-appian** owns generic Appian component interaction behavior and reusable locator mechanics.
 
-**Playwright** performs the browser automation and remains available directly to your project whenever you need an interaction that is not represented by a reusable robo-appian component.
+**Playwright** remains the underlying browser engine, but browser, context, and page objects are private implementation details behind the robo-appian framework wrappers.
 
 New to the library? Start with [Installation](../getting-started/installation.md), then read [Core Concepts](../getting-started/concepts.md) and [Your First Test](../getting-started/first-test.md).

@@ -428,7 +428,9 @@ class ComponentUtils:
             raise ValueError("Tab occurrence must be a positive integer.")
 
         for _ in range(occurrence):
-            if isinstance(scope, Page):
+            if hasattr(scope, "press_key"):
+                scope.press_key("Tab")
+            elif isinstance(scope, Page):
                 scope.keyboard.press("Tab")
             else:
                 scope.press("Tab")

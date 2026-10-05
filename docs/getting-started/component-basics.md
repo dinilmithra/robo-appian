@@ -88,6 +88,25 @@ agree_button = RoboLocator.get_by_id(scope, "jsAcceptButton")
 agree_button.to_be_visible()
 agree_button.click()
 ```
+### Chained attribute lookup
+
+Create a root `RoboLocator` once, then locate elements below that root with
+`get_by_attributes()`. The attribute map accepts arbitrary HTML attributes.
+
+```python
+robo_locator = RoboLocator.get(scope)
+user_options = robo_locator.get_by_attributes(
+    robo_locator,
+    attributes={
+        "role": "button",
+        "aria-label": "User options",
+    },
+    excat_match=True,
+)
+user_options.to_be_visible()
+user_options.click()
+```
+
 
 Use `wait_for_attribute(attributes={...}, timeout=None)` to wait for one or more dynamic HTML attributes (for example `{"aria-expanded": "false"}`). If no timeout is supplied, Playwright's configured default assertion timeout is used.
 
@@ -104,3 +123,36 @@ user_options.click()
 ```
 
 `first()` returns a new `RoboLocator` and does not modify the original object. After `to_be_visible()`, it operates on the retained visible match set.
+
+
+## Framework wrappers
+
+robo-appian provides a wrapper chain for Playwright browser resources:
+
+```text
+RoboBrowser -> RoboContext -> RoboPage -> RoboLocator
+```
+
+`RoboBrowser.new_context()` returns `RoboContext`, `RoboContext.new_page()` returns
+`RoboPage`, and page-level element lookup returns `RoboLocator`. During migration,
+the wrapped Playwright objects are private implementation details; consuming projects interact through `RoboBrowser`, `RoboContext`, `RoboPage`, and `RoboLocator`.
+
+Wrap a Playwright `Page` with `RoboPage`, then create `RoboLocator` objects from it:
+
+```python
+from robo_appian import RoboPage
+
+robo_page = RoboPage.get(page)
+user_options = robo_page.get_by_attributes(
+    attributes={
+        "role": "button",
+        "aria-label": "User options",
+    },
+    excat_match=True,
+)
+
+user_options.to_be_visible()
+user_options.click()
+```
+
+`RoboPage.get_by_attributes(...)` and `RoboPage.get_by_id(...)` return `RoboLocator` objects.

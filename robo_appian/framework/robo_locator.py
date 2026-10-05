@@ -120,13 +120,57 @@ class RoboLocator:
     def get(
         cls,
         scope: Scope,
-        attributes: Mapping[str, Any],
+        attributes: Mapping[str, Any] | None = None,
         excat_match: bool | None = None,
     ) -> "RoboLocator":
-        """Create a ``RoboLocator`` from arbitrary HTML attributes.
+        """Create a root or attribute-based ``RoboLocator``.
+
+        When ``attributes`` is omitted, the returned ``RoboLocator`` represents
+        the supplied search root and can be passed to :meth:`get_by_attributes`.
+        When ``attributes`` is provided, this remains a convenience factory for
+        creating the matching attribute-based locator directly.
 
         Args:
             scope: Playwright ``Page`` or ``Locator`` used as the search root.
+            attributes: Optional HTML attributes used to identify an element.
+            excat_match: Attribute string matching mode. ``True`` (or ``None``)
+                uses exact equality; ``False`` uses substring matching.
+
+        Returns:
+            A root ``RoboLocator`` when ``attributes`` is omitted, otherwise a
+            ``RoboLocator`` wrapping the matching element.
+        """
+        if attributes is not None:
+            return cls(scope, attributes=attributes, excat_match=excat_match)
+
+        result = object.__new__(cls)
+        result.scope = scope
+        result.attributes = {}
+        result.excat_match = excat_match
+        if isinstance(scope, Locator):
+            result._locator = scope
+        else:
+            # A Page has no element identity of its own. Use the document root
+            # as the locator search root for subsequent get_by_attributes calls.
+            result._locator = scope.locator("html")
+        return result
+
+    @classmethod
+    def get_by_attributes(
+        cls,
+        scope: Scope | "RoboLocator",
+        attributes: Mapping[str, Any],
+        excat_match: bool | None = None,
+    ) -> "RoboLocator":
+        """Create a locator below ``scope`` using arbitrary HTML attributes.
+
+        ``scope`` may be a Playwright ``Page``/``Locator`` or another
+        ``RoboLocator``. Passing a root ``RoboLocator`` created by
+        ``RoboLocator.get(page)`` keeps chained lookup code uniform.
+
+        Args:
+            scope: Search root. A ``RoboLocator`` uses its currently retained
+                Playwright locator as the search root.
             attributes: One or more HTML attributes used to identify the element.
             excat_match: Attribute string matching mode. ``True`` (or ``None``)
                 uses exact equality; ``False`` uses substring matching.
@@ -134,7 +178,8 @@ class RoboLocator:
         Returns:
             A ``RoboLocator`` wrapping the matching element.
         """
-        return cls(scope, attributes=attributes, excat_match=excat_match)
+        search_scope: Scope = scope.locator if isinstance(scope, cls) else scope
+        return cls(search_scope, attributes=attributes, excat_match=excat_match)
 
     @classmethod
     def get_by_id(

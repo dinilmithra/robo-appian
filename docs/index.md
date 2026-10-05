@@ -50,7 +50,9 @@ hide:
 <span class="ln">5</span> Button.click(scope, <span class="st">"Submit"</span>)
 <span class="ln">6</span>
 <span class="ln">7</span> <span class="cm"># Use RoboLocator when a control is generic or attribute-driven</span>
-<span class="ln">8</span> RoboLocator.get(scope, attributes={<span class="st">"role"</span>: <span class="st">"button"</span>, <span class="st">"aria-label"</span>: <span class="st">"User options"</span>}).click()</code></pre>
+<span class="ln">8</span> robo_locator = RoboLocator.get(scope)
+<span class="ln">9</span> user_options = robo_locator.get_by_attributes(robo_locator, attributes={<span class="st">"role"</span>: <span class="st">"button"</span>, <span class="st">"aria-label"</span>: <span class="st">"User options"</span>}, excat_match=<span class="kw">True</span>)
+<span class="ln">10</span> user_options.click()</code></pre>
     </div>
 
     <div class="ra-target-architecture">

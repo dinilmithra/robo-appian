@@ -203,7 +203,8 @@ InputText.fill_by_label(scope, "Request Name", "Example")
 Button.click(scope, "Submit")
 
 # Semantic generic control
-RoboLocator.get(scope, attributes={"role": "button", "aria-label": "User options"}).click()</code></pre>
+robo_locator = RoboLocator.get(scope)
+robo_locator.get_by_attributes(robo_locator, attributes={"role": "button", "aria-label": "User options"}, excat_match=True).click()</code></pre>
     </div>
     <div class="ra-target-architecture">
       <div class="ra-target-panel-title light"><span>Architecture Overview</span><a href="getting-started/concepts/index.html">How it works &rarr;</a></div>
