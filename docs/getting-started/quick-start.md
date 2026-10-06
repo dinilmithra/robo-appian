@@ -1,6 +1,6 @@
 # Quick Start
 
-This is the shortest path from installation to a test that uses the robo-appian wrapper stack.
+This is the shortest path from installing `robo-appian` to using its Appian components with the generic browser fixtures supplied by `robo-automation`.
 
 ## 1. Install robo-appian and a browser
 
@@ -9,22 +9,24 @@ pip install robo-appian
 robo-appian install-browser firefox
 ```
 
-Choose the browser engine your environment will run.
+`robo-appian` depends on `robo-automation`, so the generic wrapper/pytest layer is installed with it.
 
-## 2. Enable the pytest plugin
+## 2. Use the auto-discovered pytest fixtures
 
-In the consuming project's root `conftest.py`:
+`robo-automation` registers `robo_automation.pytest_plugin` through the `pytest11` entry-point group. No `pytest_plugins` declaration or `-p` option is required under normal pytest plugin autoloading.
 
-```python
-# robo-appian is discovered automatically by pytest via the pytest11 entry point
+The generic fixture chain is:
+
+```text
+browser -> Playwright Browser
+context -> RoboBrowserContext
+page    -> RoboPage
 ```
-
-The plugin provides `browser`, `context`, and `page` fixtures as `RoboBrowser`, `RoboContext`, and `RoboPage`.
 
 ## 3. Use `RoboPage`
 
 ```python
-from robo_appian import RoboPage
+from robo_automation import RoboPage
 
 
 def test_user_options(page: RoboPage) -> None:
@@ -42,42 +44,21 @@ def test_user_options(page: RoboPage) -> None:
     user_options.click()
 ```
 
-`get_by_attributes(...)` returns a `RoboLocator`.
+`get_by_attributes(...)` returns a `RoboLocator` from `robo-automation`.
 
-## 4. Wait for dynamic state when needed
-
-```python
-user_options.wait_for_attribute(
-    attributes={
-        "aria-expanded": "true",
-    }
-)
-```
-
-The timeout is optional. Omit it to use the configured default.
-
-## 5. Use a stable id when available
-
-```python
-agree = page.get_by_id("jsAcceptButton")
-agree.to_be_visible()
-agree.click()
-```
-
-## 6. Use Appian components for reusable control behavior
-
-The package also exposes component helpers such as `Button`, `Dropdown`, `InputText`, and `Table`. Their generated API reference documents the exact current signatures and the internal `Scope` compatibility boundary.
+## 4. Use Appian components for reusable control behavior
 
 ```python
 from robo_appian import Button, InputText
 
-InputText.fill_by_label(page, "Request Name", "Example Request")
-Button.click(page, "Submit")
+
+def test_create_request(page: RoboPage) -> None:
+    InputText.fill_by_label(page, "Request Name", "Example Request")
+    Button.click(page, "Submit")
 ```
 
-!!! note "Framework wrappers are the consumer boundary"
-    New browser lifecycle code should use `RoboBrowser`, `RoboContext`, `RoboPage`, and `RoboLocator`. Raw Playwright `Page | Locator` remains documented as `Scope` because existing component APIs still use that implementation boundary.
+`robo-appian` owns Appian-specific component behavior; `robo-automation` owns the generic browser/page/locator wrappers and pytest lifecycle.
 
-## 7. Customize authentication without replacing the fixtures
+## 5. Customize application behavior narrowly
 
-Keep application-specific authentication/storage-state logic in the consuming project by overriding the lifecycle-provider or `storage_state` fixtures. See [Pytest Integration](../guides/pytest-integration.md).
+Keep authentication, navigation, diagnostics policy, and worker-aware storage state in the consuming application. Override `storage_state`, `context_options`, `wait_time`, or `context_page_handler` as needed, and override `page` when application-specific navigation/login is required. See [Pytest Integration](../guides/pytest-integration.md).

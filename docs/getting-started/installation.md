@@ -1,6 +1,6 @@
 # Installation
 
-Install `robo-appian` into the Python environment that runs your tests. The package owns the Playwright Python dependency and can also provision Playwright-managed browser binaries through its platform-independent CLI.
+Install `robo-appian` into the Python environment that runs your tests. The package provides Appian-specific components and a platform-independent CLI for provisioning Playwright-managed browser binaries. Generic Playwright wrappers and pytest lifecycle are supplied by its `robo-automation` dependency.
 
 ## Requirements
 
@@ -8,7 +8,7 @@ Install `robo-appian` into the Python environment that runs your tests. The pack
 - pytest
 - one or more Playwright-supported browser engines installed for the environment that executes the tests
 
-`playwright`, `pytest`, and `robo-automation` are direct `robo-appian` dependencies. A consuming project does not need to declare `playwright` or `pytest-playwright` merely to use the robo-appian fixture stack.
+`playwright`, `pytest`, and `robo-automation` are direct dependencies in the current package metadata. The generic fixture stack itself is owned by `robo-automation`; a consuming project does not need `pytest-playwright` for that stack.
 
 ## Install with pip
 
@@ -59,7 +59,7 @@ poetry run robo-appian install-browser firefox
 
 ## Configure the runtime browser
 
-The generic lifecycle used by the robo-appian pytest plugin reads the browser configuration supplied through the automation environment. The primary settings are:
+The generic lifecycle owned by the `robo-automation` pytest plugin reads browser configuration from the automation environment. The primary settings are:
 
 | Setting | Purpose | Default |
 | --- | --- | --- |
@@ -82,38 +82,34 @@ robo-appian install-browser firefox
 
 ## Enable the pytest fixtures
 
-Load the plugin from the consuming project's root `conftest.py`:
-
-```python
-# robo-appian is discovered automatically by pytest via the pytest11 entry point
-```
+Installing `robo-automation` registers `robo_automation.pytest_plugin` through pytest's `pytest11` entry-point group. Under normal plugin autoloading, no `conftest.py` import, `pytest_plugins` declaration, or `-p` option is required.
 
 The plugin owns these public fixtures:
 
 ```text
-browser -> RoboBrowser
-context -> RoboContext
+browser -> Playwright Browser
+context -> RoboBrowserContext
 page    -> RoboPage
 ```
 
 A test can therefore consume `RoboPage` without importing Playwright:
 
 ```python
-from robo_appian import RoboPage
+from robo_automation import RoboPage
 
 
 def test_home(page: RoboPage) -> None:
     page.goto("https://your-appian-site.example/")
 ```
 
-Application projects can override authenticated storage state and lifecycle-provider fixtures without replacing the public `browser`, `context`, or `page` fixtures. See [Pytest Integration](../guides/pytest-integration.md).
+Application projects can override generic context inputs such as `storage_state`, `context_options`, `wait_time`, and `context_page_handler`, and may override `page` when application-specific navigation/login is required. See [Pytest Integration](../guides/pytest-integration.md).
 
 ## Verify the installation
 
-Verify the package and framework wrappers:
+Verify both package layers:
 
 ```bash
-python -c "from robo_appian import RoboBrowser, RoboContext, RoboPage, RoboLocator; print('robo-appian import OK')"
+python -c "import robo_appian, robo_automation; from robo_automation import RoboBrowserContext, RoboPage, RoboLocator; print('imports OK')"
 ```
 
 Verify the CLI:
@@ -135,7 +131,7 @@ robo-appian install-browser --help
 - application labels and rules
 - worker-to-credential mapping
 
-Those remain in the consuming project. `robo-appian` owns the browser/runtime wrapper layer and reusable Appian interaction mechanics.
+Those remain in the consuming project. `robo-appian` owns reusable Appian interaction mechanics; `robo-automation` owns the generic browser/runtime wrapper and pytest layer.
 
 <div class="ra-doc-next" markdown>
 

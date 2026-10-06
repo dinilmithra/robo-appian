@@ -1,19 +1,20 @@
 # API Reference
 
-The public API has two layers: framework wrappers for browser/resource ownership, and reusable Appian components for control-specific interaction behavior.
+`robo-appian`'s public API is the Appian component/utility layer. Generic browser/resource wrappers are provided by the dependency `robo-automation` and are shown here only as integration context.
 
-## Framework API
+## Generic framework dependency (`robo-automation`)
 
 Prefer package-root imports:
 
 ```python
-from robo_appian import RoboBrowser, RoboContext, RoboPage, RoboLocator
+from playwright.sync_api import Browser
+from robo_automation import RoboBrowserContext, RoboPage, RoboLocator
 ```
 
 | Class | Responsibility |
 | --- | --- |
-| [`RoboBrowser`](robo-browser.md) | Browser-level wrapper; creates `RoboContext` |
-| [`RoboContext`](robo-context.md) | Context-level wrapper; creates and tracks `RoboPage` |
+| Playwright `Browser` | Used directly by the public `browser` fixture |
+| [`RoboBrowserContext`](robo-browser-context.md) | Context-level wrapper; creates and tracks `RoboPage` |
 | [`RoboPage`](robo-page.md) | Page-level wrapper; navigation and page-level element lookup |
 | [`RoboLocator`](robo-locator.md) | Element wrapper; actions, visibility filtering, attribute waits, nested selection |
 
@@ -33,8 +34,8 @@ user_options.click()
 
 ## Pytest and CLI
 
-- [Pytest Plugin](pytest-plugin.md) — fixture ownership and extension points
-- [Command-Line Interface](cli.md) — browser binary provisioning
+- [Pytest Integration](../guides/pytest-integration.md) — `robo-automation` fixture ownership and extension points
+- [Command-Line Interface](cli.md) — `robo-appian` browser binary provisioning
 
 ## Component API
 
@@ -67,18 +68,20 @@ Component pages are generated from current source signatures/docstrings.
 
 ## `Scope` compatibility boundary
 
-Many current component signatures still expose [`Scope`](scope.md), defined as Playwright `Page | Locator`. This reflects the current component implementation boundary. New consumer browser/resource code should use the Robo* wrapper chain and the robo-appian pytest plugin.
+Many current component signatures still expose [`Scope`](scope.md), defined as Playwright `Page | Locator`. `Scope` and the Robo* wrapper chain are owned by `robo-automation`; robo-appian components consume them.
 
 ## Relationship to Playwright
 
 ```text
 consumer project
       ↓
-robo-appian pytest plugin / Robo* wrappers / components
+robo-appian components
+      ↓
+robo-automation pytest plugin / Robo* wrappers
       ↓
 Playwright implementation dependency
       ↓
 Appian
 ```
 
-Playwright is installed as a robo-appian dependency. Consumer projects using the standard wrapper/fixture stack do not need to declare Playwright directly.
+The generic wrapper/fixture stack is owned by `robo-automation`. `robo-appian` currently also declares Playwright directly because its Appian implementation and tooling use Playwright APIs.

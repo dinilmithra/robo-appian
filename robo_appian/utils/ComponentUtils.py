@@ -11,7 +11,7 @@ from playwright.sync_api import (
     TimeoutError as PlaywrightTimeoutError,
     expect,
 )
-from robo_appian.utils.types import Scope
+from robo_automation import Scope
 
 logger = logging.getLogger(__name__)
 

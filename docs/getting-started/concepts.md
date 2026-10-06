@@ -1,112 +1,94 @@
 # Core Concepts
 
-`robo-appian` is the controller layer between a consuming pytest project and Playwright. Consumer tests work with framework objects (`RoboBrowser`, `RoboContext`, `RoboPage`, and `RoboLocator`) instead of owning raw browser, context, and page resources directly.
+`robo-appian` is the Appian-specific component layer. It builds on the generic browser automation layer provided by `robo-automation`.
 
-## Framework object model
+## Layering
 
 ```text
-pytest / consumer project
+consumer application / tests
         ↓
-RoboBrowser
-        ↓ new_context()
-RoboContext
-        ↓ new_page()
-RoboPage
-        ↓ element lookup
-RoboLocator
+robo-appian
+Appian components and interaction utilities
         ↓
-Playwright implementation
+robo-automation
+Browser -> RoboBrowserContext -> RoboPage -> RoboLocator
+        ↓
+Playwright
         ↓
 Appian
 ```
 
-The wrappers are framework-level classes under `robo_appian.framework`, and they are exported from the package root:
+The generic wrapper classes are exported by `robo_automation`:
 
 ```python
-from robo_appian import RoboBrowser, RoboContext, RoboPage, RoboLocator
+from playwright.sync_api import Browser
+from robo_automation import RoboBrowserContext, RoboPage, RoboLocator
 ```
 
-### `RoboBrowser`
+`robo-appian` consumes these generic types; it does not own or export them.
 
-Owns the browser-level boundary. `new_context(...)` returns a `RoboContext`.
+## Generic wrapper model
 
-### `RoboContext`
+### Playwright `Browser`
 
-Owns a browser context. `new_page()` and `pages` return `RoboPage` objects. It also exposes context timeout, storage-state, event, and close operations needed by the framework lifecycle.
+The public `browser` fixture is a Playwright `Browser` supplied by the `robo-automation` pytest plugin.
+
+### `RoboBrowserContext`
+
+Wraps a Playwright browser context. `new_page()` and `pages` return `RoboPage` objects and the wrapper exposes the context lifecycle operations needed by the generic pytest layer.
 
 ### `RoboPage`
 
-Owns a browser page. It exposes controlled navigation, page operations, and page-level element lookup. Attribute-based lookup methods return `RoboLocator` objects:
-
-```python
-user_options = page.get_by_attributes(
-    attributes={
-        "role": "button",
-        "aria-label": "User options",
-    },
-    excat_match=True,
-)
-```
+Wraps a Playwright page and provides framework-level navigation and lookup helpers. Attribute-based lookup methods return `RoboLocator` objects.
 
 ### `RoboLocator`
 
-Wraps a resolved Playwright locator and provides framework operations such as:
-
-```python
-user_options.to_be_visible()
-user_options.wait_for_attribute(attributes={"aria-expanded": "false"})
-user_options.click()
-```
-
-It supports arbitrary HTML attributes rather than a fixed attribute whitelist.
+Wraps a resolved Playwright locator and provides operations such as visibility filtering, attribute waits, click, nested lookup, and `first()`.
 
 ## Pytest fixture ownership
 
-When `robo_appian.pytest_plugin` is loaded, robo-appian owns the public fixture chain:
+All generic fixtures are supplied by `robo-automation`:
 
 ```text
-playwright runtime
+robo-automation: Playwright runtime
       ↓
-browser -> RoboBrowser
+robo-automation: browser -> Playwright Browser
       ↓
-context -> RoboContext
+robo-automation: context -> RoboBrowserContext
       ↓
-page -> RoboPage
+robo-automation: page -> RoboPage
 ```
 
-A consuming project can override lifecycle providers for authentication, storage state, diagnostics, or application navigation while leaving resource ownership in robo-appian.
+A consuming project can override generic context inputs (`storage_state`, `context_options`, `wait_time`, `context_page_handler`) and can override `page` for application navigation/login. Application-specific behavior remains in the consuming project.
 
-This keeps application-specific behavior separate from browser-control mechanics.
+## Responsibility matrix
 
-## Application responsibility versus framework responsibility
-
-| Concern | robo-appian | Consumer project |
-| --- | :---: | :---: |
-| Playwright Python dependency | ✓ | |
-| Playwright runtime fixture | ✓ | |
-| Browser/context/page fixture ownership | ✓ | |
-| Browser/context/page wrappers | ✓ | |
-| Browser binary installation CLI | ✓ | |
-| Generic Appian component mechanics | ✓ | |
-| Generic element lookup / visibility / attribute waits | ✓ | |
-| Appian URL | | ✓ |
-| Credentials and authentication policy | | ✓ |
-| Worker-specific credential mapping | | ✓ |
-| Business workflow orchestration | | ✓ |
-| Application assertions and test data | | ✓ |
-| Application-specific synchronization | | ✓ |
+| Concern | robo-automation | robo-appian | Consumer project |
+| --- | :---: | :---: | :---: |
+| Playwright runtime/browser lifecycle | ✓ | | |
+| `RoboBrowserContext` / `RoboPage` / `RoboLocator` | ✓ | | |
+| Generic pytest fixtures | ✓ | | |
+| Generic element lookup / visibility / attribute waits | ✓ | | |
+| Appian component mechanics | | ✓ | |
+| Browser-binary installation CLI | | ✓ | |
+| Appian URL | | | ✓ |
+| Credentials and authentication policy | | | ✓ |
+| Worker-specific credential mapping | | | ✓ |
+| Business workflow orchestration | | | ✓ |
+| Application assertions and test data | | | ✓ |
+| Application-specific diagnostics policy | | | ✓ |
 
 ## Component APIs and `Scope`
 
-The reusable component layer (`Button`, `InputText`, `Dropdown`, and others) predates the framework wrappers and still exposes the internal `Scope` type in many generated signatures:
+The reusable Appian component layer still exposes `Scope` in many signatures:
 
 ```python
 Scope = Page | Locator
 ```
 
-`Scope` describes the Playwright search boundary used by those component implementations: a page searches the whole document and a locator restricts the operation to a subtree.
+`Scope` is owned by `robo-automation` and describes the Playwright search boundary used by component implementations: a page searches the whole document and a locator restricts the operation to a subtree.
 
-For new consumer lifecycle code, prefer `RoboPage` and `RoboLocator`. The raw Playwright `Scope` type remains a component/internal compatibility boundary while the component layer continues to migrate toward the wrapper model. Some `RoboPage` locator helpers also currently return Playwright `Locator` objects for compatibility with existing components; this does not re-expose the raw browser/context/page resources. See [Scope](../api/scope.md).
+For new consumer lifecycle code, prefer `RoboPage` and `RoboLocator`. See [Scope](../api/scope.md).
 
 ## Attribute-based lookup
 
@@ -122,8 +104,6 @@ user_options = page.get_by_attributes(
 )
 ```
 
-The attribute map can include standard attributes, ARIA attributes, `data-*` attributes, and custom attributes.
-
 For a stable HTML id:
 
 ```python
@@ -132,51 +112,14 @@ agree.to_be_visible()
 agree.click()
 ```
 
-## Exact matching
+## Browser provisioning versus execution
 
-`excat_match` is intentionally the robo-appian parameter name used by the current public API. For `RoboLocator` attribute lookup:
-
-- `True` or `None` → exact attribute equality
-- `False` → substring (`contains`) matching
-
-The Playwright keyword `exact` remains an internal implementation detail at direct Playwright boundaries.
-
-## Visibility and duplicate Appian DOM elements
-
-Appian can render hidden and visible copies of the same control. `RoboLocator.to_be_visible()` filters the current match set by visibility:
-
-- zero visible matches → the visibility assertion waits/fails normally
-- one visible match → the locator narrows to that match
-- multiple visible matches → the visible set remains; use `first()` only when selecting the first visible match is intentional
-
-```python
-user_options.to_be_visible()
-user_options = user_options.first()
-user_options.click()
-```
-
-## Dynamic attribute waits
-
-Wait for one or more attributes without rebuilding the locator:
-
-```python
-user_options.wait_for_attribute(
-    attributes={
-        "aria-expanded": "true",
-    }
-)
-```
-
-`timeout` is optional. When omitted or `None`, Playwright's configured default assertion timeout is used.
-
-## Browser provisioning versus browser execution
-
-Installing `robo-appian` installs the Playwright Python dependency. Browser binaries are installed separately with:
+`robo-appian` provides the browser-install CLI:
 
 ```bash
 robo-appian install-browser [firefox|chromium|webkit|all]
 ```
 
-With no argument, the command installs the full browser set. Browser execution is then controlled by the fixture lifecycle/environment, for example `BROWSER=firefox`.
+The generic browser execution lifecycle is owned by `robo-automation` and selects the runtime browser from automation configuration such as `BROWSER=firefox`.
 
 Next, use [Quick Start](quick-start.md) for the shortest working path or [Pytest Integration](../guides/pytest-integration.md) for lifecycle customization.

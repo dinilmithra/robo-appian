@@ -5,7 +5,7 @@ business rules, workflow names, test data, and assertions belong in the
 consumer project's component layer.
 """
 
-from robo_appian.framework import RoboBrowser, RoboContext, RoboPage, RoboLocator
+from robo_appian.appian import AppianLocator, AppianPage
 from robo_appian.components import (
     Button,
     InputDate,
@@ -23,13 +23,11 @@ from robo_appian.components import (
     RecordList,
     CheckBox,
 )
-from robo_appian.utils import ComponentUtils, Scope
+from robo_appian.utils import ComponentUtils
 
 __all__ = [
-    "RoboBrowser",
-    "RoboContext",
-    "RoboPage",
-    "RoboLocator",
+    "AppianPage",
+    "AppianLocator",
     "Button",
     "InputDate",
     "Dropdown",
@@ -46,5 +44,4 @@ __all__ = [
     "Region",
     "RecordList",
     "CheckBox",
-    "Scope",
 ]

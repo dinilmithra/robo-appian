@@ -5,24 +5,24 @@ The framework layer isolates consuming projects from direct browser-resource own
 ## Object chain
 
 ```text
-RoboBrowser
+Playwright Browser
     ↓ new_context()
-RoboContext
+RoboBrowserContext
     ↓ new_page()
 RoboPage
     ↓ get_by_attributes() / get_by_id()
 RoboLocator
 ```
 
-All four classes live under `robo_appian.framework` and are also exported from `robo_appian`.
+The generic wrapper classes live under `robo_automation.framework` and are exported from `robo_automation`. `robo-appian` builds Appian-specific components on top of them.
 
 ## Resource ownership
 
-`RoboBrowser` owns a Playwright browser internally. `RoboContext` owns a Playwright browser context. `RoboPage` owns a Playwright page. `RoboLocator` owns a Playwright locator.
+Playwright `Browser` is used directly at the top of the generic resource chain. `RoboBrowserContext` wraps a Playwright browser context, `RoboPage` wraps a Playwright page, and `RoboLocator` wraps a Playwright locator.
 
 The wrapped Playwright **browser, context, and page** objects are private implementation details. The public wrappers expose explicit operations instead of public `.browser`, `.context`, or `.page` escape hatches.
 
-## `RoboBrowser`
+## Playwright `Browser`
 
 Typical lifecycle:
 
@@ -30,9 +30,9 @@ Typical lifecycle:
 context = browser.new_context(storage_state=storage_state)
 ```
 
-`new_context()` returns `RoboContext`.
+`Browser.new_context()` itself returns a Playwright `BrowserContext`; the `robo-automation` context fixture wraps that value as `RoboBrowserContext`.
 
-## `RoboContext`
+## `RoboBrowserContext`
 
 ```python
 context.set_default_timeout(90_000)
@@ -69,7 +69,7 @@ user_options.click()
 
 ## Why wrappers instead of raw Playwright resources?
 
-The wrapper boundary lets consuming projects depend on robo-appian rather than Playwright APIs for browser lifecycle and common element operations. It also gives robo-appian one place to evolve browser behavior, diagnostics, synchronization, and Appian-specific behavior without forcing the same changes through every consumer project.
+The generic wrapper boundary in `robo-automation` centralizes browser lifecycle and common element operations. `robo-appian` then adds Appian-specific components on top without owning the generic resource lifecycle. Consuming applications keep their own authentication, navigation, diagnostics policy, and business workflows.
 
 ## Compatibility boundary: `Scope`
 

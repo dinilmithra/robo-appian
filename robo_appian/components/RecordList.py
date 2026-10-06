@@ -7,7 +7,7 @@ components do not need to know the underlying Appian DOM structure.
 from typing import Optional, Sequence
 
 from playwright.sync_api import Locator, expect
-from robo_appian.utils.types import Scope
+from robo_automation import Scope
 
 from robo_appian.components.Region import Region
 

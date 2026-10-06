@@ -43,7 +43,7 @@ hide:
   <section class="ra-target-workbench">
     <div class="ra-target-code">
       <div class="ra-target-panel-title"><span>›_ &nbsp; Quick Start</span><span>🐍 Python</span></div>
-      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_appian <span class="kw">import</span> RoboPage
+      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_automation <span class="kw">import</span> RoboPage
 <span class="ln">2</span>
 <span class="ln">3</span> <span class="kw">def</span> test_user_options(page: RoboPage):
 <span class="ln">4</span>     user_options = page.get_by_attributes(
@@ -59,9 +59,9 @@ hide:
       <div class="ra-target-arch-flow">
         <div class="node"><span class="node-icon">▤</span><strong>Test Cases</strong><small>• Pytest tests<br>• Page objects<br>• Custom workflows</small></div>
         <b>→</b>
-        <div class="node library"><div class="library-brand"><img src="assets/images/robo-appian-icon.png" alt=""><span><strong>robo-appian</strong><small>Automation Framework</small></span></div><ul><li>RoboBrowser / RoboContext</li><li>RoboPage / RoboLocator</li><li>Appian components</li><li>Pytest fixture ownership</li><li>Parallel-friendly sessions</li></ul></div>
+        <div class="node library"><div class="library-brand"><img src="assets/images/robo-appian-icon.png" alt=""><span><strong>robo-appian</strong><small>Appian Component Layer</small></span></div><ul><li>Appian components</li><li>Label-oriented interactions</li><li>Reusable Appian utilities</li><li>Browser install CLI</li><li>Built on robo-automation</li></ul></div>
         <b>→</b>
-        <div class="node"><span class="node-icon">▣</span><strong>Playwright + Appian</strong><small>• Browser engine<br>• Appian UI<br>• Private implementation boundary</small></div>
+        <div class="node"><span class="node-icon">▣</span><strong>robo-automation + Playwright</strong><small>• Generic fixtures<br>• Robo* wrappers<br>• Browser engine</small></div>
       </div>
     </div>
   </section>

@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta
 
 from playwright.sync_api import Locator, expect
-from robo_appian.utils.types import Scope
+from robo_automation import Scope
 
 # Initialize logger for execution tracking
 logger = logging.getLogger(__name__)

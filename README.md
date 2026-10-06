@@ -1,47 +1,44 @@
 # robo-appian
 
-`robo-appian` is a Python automation framework for Appian built on Playwright. It owns the browser/runtime wrapper layer and provides reusable Appian interaction components so consuming projects can focus on application workflows, data, and assertions.
+`robo-appian` provides reusable Appian-specific UI components and interaction utilities. Generic Playwright resource ownership, wrappers, and pytest fixtures live in `robo-automation`.
 
 ## Architecture
 
 ```text
-Consumer pytest project
+Consumer / CORE application code
         ↓
-RoboBrowser → RoboContext → RoboPage → RoboLocator
+robo-appian AppianPage / AppianLocator / components
         ↓
-Reusable Appian components
+robo-automation generic wrappers
+Browser → RoboBrowserContext → RoboPage → RoboLocator
         ↓
-Playwright implementation
+Playwright
         ↓
 Appian
 ```
 
-The public framework wrappers are:
+For Appian consumers, `robo-appian` provides `AppianPage(RoboPage)` and `AppianLocator(RoboLocator)`. Both `robo-automation` and `robo-appian` are pytest plugins discovered through installed `pytest11` entry points. The fixture layering is automatic:
 
-```python
-from robo_appian import RoboBrowser, RoboContext, RoboPage, RoboLocator
+```text
+robo-automation: robo_page -> RoboPage
+                         ↓
+robo-appian:     appian_page -> AppianPage
+                         ↓
+                 page -> AppianPage
 ```
 
-With the pytest plugin enabled, tests normally receive `RoboPage` directly:
+No consumer wrapper-selector fixture is required. A normal Appian test simply requests `page`:
 
 ```python
-# robo-appian is discovered automatically by pytest via the pytest11 entry point
+from robo_appian import AppianPage, Button, InputText
+
+
+def test_example(page: AppianPage) -> None:
+    InputText.fill_by_label(page, "Request Name", "Example Request")
+    Button.click(page, "Submit")
 ```
 
-```python
-from robo_appian import RoboPage
-
-
-def test_example(page: RoboPage) -> None:
-    user_options = page.get_by_attributes(
-        attributes={
-            "role": "button",
-            "aria-label": "User options",
-        }
-    )
-    user_options.to_be_visible()
-    user_options.click()
-```
+A consuming application such as CORE may override only the public `page` fixture to add application-specific navigation/login while depending on `appian_page`; the underlying Playwright page is still created and closed by `robo-automation`.
 
 ## Install
 
@@ -49,17 +46,12 @@ def test_example(page: RoboPage) -> None:
 pip install robo-appian
 ```
 
-Python 3.12 is required. Playwright is installed automatically as a robo-appian dependency.
+Python 3.12 is required. The package depends on `robo-automation` and currently also declares Playwright/pytest directly because its Appian implementation and development tooling use those APIs.
 
-Install all Playwright-managed browser binaries:
+Install Playwright-managed browser binaries with the robo-appian CLI:
 
 ```bash
 robo-appian install-browser
-```
-
-or one engine:
-
-```bash
 robo-appian install-browser firefox
 robo-appian install-browser chromium
 robo-appian install-browser webkit
@@ -69,11 +61,13 @@ robo-appian install-browser webkit
 
 ## Component APIs and Scope
 
-Existing reusable components such as `Button`, `InputText`, `Dropdown`, and `Table` still expose the internal `Scope = Playwright Page | Locator` compatibility boundary in many generated signatures. New browser lifecycle/resource ownership should use the Robo* wrappers; `Scope` remains documented because it is still part of the current component implementation.
+Reusable components such as `Button`, `InputText`, `Dropdown`, and `Table` expose Appian-specific interaction behavior. Many current component signatures still use the generic `Scope = Playwright Page | Locator` compatibility/search-boundary type from `robo-automation`.
+
+Generic lifecycle/resource code should use `RoboBrowserContext`, `RoboPage`, and `RoboLocator` from `robo_automation`; those types are not owned or exported by `robo_appian`.
 
 ## Documentation
 
-Full documentation, guides, framework reference, and component API reference:
+Full documentation and component API reference:
 
 **https://dinilmithra.github.io/robo-appian/**
 

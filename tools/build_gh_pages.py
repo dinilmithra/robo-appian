@@ -15,7 +15,7 @@ SITE = ROOT / "site"
 PKG = ROOT / "robo_appian"
 
 SITE_NAME = "robo-appian"
-SITE_DESCRIPTION = "Reusable Playwright components for Appian UI automation"
+SITE_DESCRIPTION = "Reusable Appian UI components built on robo-automation and Playwright"
 
 NAV = [
     ("Home", "index.html"),
@@ -26,7 +26,6 @@ NAV = [
 ]
 
 API_MAP = {
-    "robo-locator": ("RoboLocator", PKG / "components" / "RoboLocator.py"),
     "button": ("Button", PKG / "components" / "Button.py"),
     "checkbox": ("CheckBox", PKG / "components" / "CheckBox.py"),
     "dropdown": ("Dropdown", PKG / "components" / "Dropdown.py"),
@@ -43,7 +42,6 @@ API_MAP = {
     "table": ("Table", PKG / "components" / "Table.py"),
     "text": ("Text", PKG / "components" / "Text.py"),
     "component-utils": ("ComponentUtils", PKG / "utils" / "ComponentUtils.py"),
-    "scope": ("Scope helpers", PKG / "utils" / "types.py"),
 }
 
 markdown = mistune.create_markdown(plugins=["strikethrough", "table", "task_lists", "url"])
@@ -98,7 +96,7 @@ def page_shell(title: str, body: str, path: str, current: str, description: str 
   <main>{body}</main>
   <footer class="ra-global-footer" role="contentinfo">
     <div class="ra-target-footer">
-      <span>Python 3.9+</span><i></i>
+      <span>Python 3.12</span><i></i>
       <a class="ra-footer-link" href="https://pypi.org/project/robo-appian/">PyPI</a><span class="tag">robo-appian</span><i></i>
       <a class="ra-footer-link" href="https://github.com/dinilmithra/robo-appian">GitHub</a><i></i>
       <a class="ra-footer-link" href="{prefix}license/index.html">License <b class="tag">MIT</b></a>
@@ -196,22 +194,19 @@ def home_body() -> str:
   <section class="ra-target-workbench">
     <div class="ra-target-code">
       <div class="ra-target-panel-title"><span>&gt;_ &nbsp; Quick Start</span><span>Python</span></div>
-      <pre><code>from robo_appian import RoboLocator, Button, InputText
+      <pre><code>from robo_automation import RoboPage
+from robo_appian import Button, InputText
 
-# Interact with Appian controls by visible intent
-InputText.fill_by_label(scope, "Request Name", "Example")
-Button.click(scope, "Submit")
-
-# Semantic generic control
-robo_locator = RoboLocator.get(scope)
-robo_locator.get_by_attributes(robo_locator, attributes={"role": "button", "aria-label": "User options"}, excat_match=True).click()</code></pre>
+def test_request(page: RoboPage):
+    InputText.fill_by_label(page, "Request Name", "Example")
+    Button.click(page, "Submit")</code></pre>
     </div>
     <div class="ra-target-architecture">
       <div class="ra-target-panel-title light"><span>Architecture Overview</span><a href="getting-started/concepts/index.html">How it works &rarr;</a></div>
       <div class="ra-target-arch-flow">
         <div class="node"><span class="node-icon">T</span><strong>Test Cases</strong><small>Pytest tests<br>Page objects<br>Custom workflows</small></div><b>&rarr;</b>
-        <div class="node library"><div class="library-brand"><img src="assets/images/robo-appian-icon.png" alt=""><span><strong>robo-appian</strong><small>Automation Framework</small></span></div><ul><li>Appian components</li><li>Element interactions</li><li>Wait &amp; synchronization</li><li>Reporting &amp; logging</li><li>Parallel-friendly design</li></ul></div><b>&rarr;</b>
-        <div class="node"><span class="node-icon">B</span><strong>Browser + Appian</strong><small>Automate Appian UI<br>Execute processes<br>Validate outcomes</small></div>
+        <div class="node library"><div class="library-brand"><img src="assets/images/robo-appian-icon.png" alt=""><span><strong>robo-appian</strong><small>Appian Component Layer</small></span></div><ul><li>Appian components</li><li>Label-oriented interactions</li><li>Reusable Appian utilities</li><li>Browser install CLI</li><li>Built on robo-automation</li></ul></div><b>&rarr;</b>
+        <div class="node"><span class="node-icon">B</span><strong>robo-automation + Playwright</strong><small>Generic fixtures<br>Robo* wrappers<br>Browser engine</small></div>
       </div>
     </div>
   </section>

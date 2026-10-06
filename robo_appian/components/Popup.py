@@ -1,7 +1,7 @@
 """Generic helpers for validating and interacting with modal/popup content."""
 
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
-from robo_appian.utils.types import Scope
+from robo_automation import Scope
 from robo_appian.components.Button import Button
 
 

@@ -61,14 +61,14 @@ robo-appian install-browser firefox
 Make sure the plugin is loaded in the root `conftest.py`:
 
 ```python
-# robo-appian is discovered automatically by pytest via the pytest11 entry point
+# robo-automation is discovered automatically by pytest via the pytest11 entry point
 ```
 
-The plugin provides `browser`, `context`, and `page` as Robo* wrapper objects.
+The `robo-automation` plugin provides `browser`, `context`, and `page`; `context` and `page` use the generic Robo* wrappers.
 
 ## I need application login before every test
 
-Do not replace the public page fixture just to add login/navigation. Override `robo_appian_page_lifecycle` and return your application lifecycle function. See [Pytest Integration](../guides/pytest-integration.md).
+If an application needs login or navigation before a test starts, override the generic `page` fixture in the consuming project and keep that application logic out of robo-appian. See [Pytest Integration](../guides/pytest-integration.md).
 
 ## I need authenticated storage state
 
@@ -123,7 +123,7 @@ This is expected in the current version. Framework lifecycle code uses Robo* wra
 
 ## Should CORE or another consumer declare Playwright directly?
 
-Not for the standard robo-appian fixture stack. Playwright is a direct dependency of robo-appian. A consumer should declare Playwright separately only if it intentionally contains direct Playwright code outside the wrapper boundary.
+Not for the standard fixture stack. `robo-automation` owns the generic Playwright lifecycle, and `robo-appian` currently also declares Playwright directly for its Appian implementation/tooling. A consumer should add a direct Playwright dependency only when it intentionally owns direct Playwright code.
 
 ## I need exact behavior for a method
 
@@ -131,4 +131,4 @@ Use the [API Reference](../api/index.md). Generated component pages are sourced 
 
 ### Editable-install entry-point refresh
 
-`pytest11` discovery is stored in installed package metadata. If `pyproject.toml` gains or changes the `pytest11` entry point after an editable environment was already created, refresh the environment with `python tools/setup_venv.py`. The setup script verifies that the installed metadata contains `robo_appian = robo_appian.pytest_plugin`.
+`pytest11` discovery is stored in installed package metadata. Appian consumers use both `robo_automation = robo_automation.pytest_plugin` and `robo_appian = robo_appian.pytest_plugin`. If an editable environment is stale, reinstall/refresh both sibling checkouts (CORE local development uses `tools/install_local_libraries.py`) and confirm discovery with `pytest --trace-config`.

@@ -6,7 +6,7 @@ Keep application-specific labels, values, and workflow decisions outside this mo
 from typing import Optional
 
 from playwright.sync_api import Page, expect
-from robo_appian.utils.types import Scope
+from robo_automation import Scope
 
 from robo_appian.components.Dropdown import Dropdown
 from robo_appian.components.InputText import InputText

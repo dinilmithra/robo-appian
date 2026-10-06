@@ -7,7 +7,7 @@ from typing import Any, Mapping
 
 from playwright.sync_api import Locator, expect
 
-from robo_appian.utils.types import Scope
+from robo_automation import Scope
 
 
 class AppianElement:

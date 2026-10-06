@@ -3,7 +3,7 @@
 import logging
 
 from playwright.sync_api import Page, expect
-from robo_appian.utils.types import Scope
+from robo_automation import Scope
 
 from robo_appian.utils import ComponentUtils
 

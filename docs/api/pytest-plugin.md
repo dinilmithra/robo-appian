@@ -1,19 +1,10 @@
 # Pytest Plugin
 
-Load the plugin with:
+`robo-appian` registers `robo_appian.pytest_plugin` through the `pytest11` entry-point group. The plugin does not own Playwright browser/context/page lifecycle; that remains in `robo-automation`.
 
-```python
-# robo-appian is discovered automatically by pytest via the pytest11 entry point
-```
+It contributes two Appian-layer fixtures:
 
-The plugin owns the Playwright runtime and the public wrapper fixtures:
+- `appian_page`: specializes `robo-automation`'s `robo_page` as `AppianPage`.
+- `page`: exposes `appian_page` as the normal public page fixture for Appian consumers.
 
-```text
-browser -> RoboBrowser
-context -> RoboContext
-page    -> RoboPage
-```
-
-Consumer projects can override `storage_state`, `robo_appian_context_lifecycle`, and `robo_appian_page_lifecycle` for application-specific authentication and setup without redefining the public resource fixtures.
-
-See [Pytest Integration](../guides/pytest-integration.md) for lifecycle signatures and examples.
+This provides plug-and-play layering while preserving the dependency direction `robo-automation -> robo-appian -> consumer application`.

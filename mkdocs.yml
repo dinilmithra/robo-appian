@@ -90,13 +90,8 @@ nav:
       - Publishing Docs: guides/publishing-docs.md
   - API Reference:
       - Overview: api/index.md
-      - Framework:
-          - RoboBrowser: api/robo-browser.md
-          - RoboContext: api/robo-context.md
-          - RoboPage: api/robo-page.md
-          - RoboLocator: api/robo-locator.md
-          - Pytest Plugin: api/pytest-plugin.md
-          - CLI: api/cli.md
+      - Appian Page and Locator: api/appian-page.md
+      - CLI: api/cli.md
       - Components:
           - Button: api/button.md
           - CheckBox: api/checkbox.md
@@ -114,5 +109,6 @@ nav:
           - Table: api/table.md
           - Text: api/text.md
           - ComponentUtils: api/component-utils.md
+      - Integration Types:
           - Scope: api/scope.md
   - License: license.md

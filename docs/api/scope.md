@@ -10,13 +10,13 @@ It is a Playwright implementation type, not a separate robo-appian object.
 
 ## How Scope fits with the Robo* wrappers
 
-New consumer lifecycle code should normally receive `RoboPage` from the robo-appian pytest plugin and use `RoboLocator` for generic element lookup.
+New consumer lifecycle code should normally receive `RoboPage` from the `robo-automation` pytest plugin and use `RoboLocator` for generic element lookup.
 
 The component layer still uses `Scope` in many generated signatures because those components directly implement Playwright search mechanics internally. This boundary is retained for compatibility while the framework wrapper migration continues.
 
 ```text
 consumer resource ownership
-    RoboBrowser -> RoboContext -> RoboPage -> RoboLocator
+    Browser -> RoboBrowserContext -> RoboPage -> RoboLocator
 
 component implementation compatibility
     Scope = Playwright Page | Locator
@@ -52,7 +52,7 @@ user_options = page.get_by_attributes(
 )
 ```
 
-That returns `RoboLocator` and keeps raw Playwright resource ownership behind robo-appian.
+That returns `RoboLocator` and keeps raw Playwright resource ownership behind `robo-automation`.
 
 ## When you see `scope` in API reference pages
 

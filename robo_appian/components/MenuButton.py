@@ -1,9 +1,9 @@
 """Generic helpers for opening menu buttons and choosing menu actions."""
 
 from playwright.sync_api import Locator, Page, expect
-from robo_appian.utils.types import Scope
+from robo_automation import Scope
 from robo_appian.utils.ComponentUtils import ComponentUtils
-from robo_appian.framework.robo_page import RoboPage
+from robo_automation import RoboPage
 
 
 class MenuButton:

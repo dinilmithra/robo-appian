@@ -4,7 +4,7 @@ import logging
 from typing import Optional
 
 from playwright.sync_api import Page, expect, Locator
-from robo_appian.utils.types import Scope
+from robo_automation import Scope
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 logger = logging.getLogger(__name__)

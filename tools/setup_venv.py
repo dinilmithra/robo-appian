@@ -127,25 +127,6 @@ print(f"Verified robo-appian {{version}} from {{source}}")
     _run([str(python), "-c", verify_code])
 
 
-def _verify_pytest_entry_point(python: Path) -> None:
-    """Verify the installed editable package exposes the pytest11 plugin entry point."""
-    verify_code = r"""
-from importlib.metadata import entry_points
-
-plugins = {ep.name: ep.value for ep in entry_points(group="pytest11")}
-expected = "robo_appian.pytest_plugin"
-actual = plugins.get("robo_appian")
-if actual != expected:
-    raise SystemExit(
-        "robo-appian pytest11 entry point is missing or stale: "
-        f"expected={expected!r}, actual={actual!r}. "
-        "Re-run tools/setup_venv.py to refresh editable package metadata."
-    )
-print(f"Verified pytest11 entry point: robo_appian = {actual}")
-"""
-    _run([str(python), "-c", verify_code])
-
-
 def _install_browser(python: Path, browser: str) -> None:
     """Provision Playwright browser binaries through the robo-appian CLI."""
     command = [str(python), "-m", "robo_appian.cli", "install-browser"]
@@ -322,7 +303,6 @@ def main(argv: list[str] | None = None) -> int:
         raise RuntimeError(f"Poetry did not create the expected environment: {python}")
 
     _verify_local_install(python)
-    _verify_pytest_entry_point(python)
 
     if args.browser:
         _install_browser(python, args.browser)
