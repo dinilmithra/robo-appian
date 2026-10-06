@@ -1163,19 +1163,17 @@ name = "robo-automation"
 version = "0.1.3"
 description = "Reusable Playwright and pytest automation framework utilities"
 optional = false
-python-versions = ">=3.12,<3.13"
+python-versions = "<3.13,>=3.12"
 groups = ["main"]
-files = []
-develop = true
+files = [
+    {file = "robo_automation-0.1.3-py3-none-any.whl", hash = "sha256:4ef6a06778e765302164e8a2e1dd3f432ce0566610663997877c8ea1e29d62ab"},
+    {file = "robo_automation-0.1.3.tar.gz", hash = "sha256:d02c148e3446f263eef25027f6378bde506c6f1c1f59823fc18680e4e69f3e9f"},
+]
 
 [package.dependencies]
 playwright = "1.63.0"
 psutil = "7.2.2"
 pytest = "9.1.1"
-
-[package.source]
-type = "directory"
-url = "../robo-automation"
 
 [[package]]
 name = "six"
@@ -1265,4 +1263,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "65d6c185e672d04b4d7b3cabf757a343d8a5cf408e4228eecd747ee52a3b030e"
+content-hash = "4677599d06ee730cb44d17ee813c9c203e5ca0bd4edc6cfedad994bfb4f0a387"
