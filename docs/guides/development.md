@@ -87,7 +87,7 @@ python .\robo-appian\tools\setup_venv.py --with-docs --browser firefox
 
 ### Why `robo_appian-*.dist-info` appears in `.venv`
 
-Poetry installs the current project into its development environment. A directory such as `robo_appian-0.1.15.dist-info` under `.venv/Lib/site-packages` is normal package metadata; it does not mean a second source copy should be edited there. The setup script verifies that `robo_appian.__file__` resolves to the local `robo_appian/` source directory.
+Poetry installs the current project into its development environment. A directory such as `robo_appian-0.1.16.dist-info` under `.venv/Lib/site-packages` is normal package metadata; it does not mean a second source copy should be edited there. The setup script verifies that `robo_appian.__file__` resolves to the local `robo_appian/` source directory.
 
 ## Run tests
 
