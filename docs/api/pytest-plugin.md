@@ -3,7 +3,7 @@
 Load the plugin with:
 
 ```python
-pytest_plugins = ("robo_appian.pytest_plugin",)
+# robo-appian is discovered automatically by pytest via the pytest11 entry point
 ```
 
 The plugin owns the Playwright runtime and the public wrapper fixtures:

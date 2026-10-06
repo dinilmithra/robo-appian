@@ -12,10 +12,9 @@ from collections.abc import Callable, Iterator
 from typing import Any, Optional
 
 import pytest
-from playwright.sync_api import Playwright, sync_playwright
+from playwright.sync_api import Browser
 
 from robo_automation import PytestPerformanceMonitor
-from robo_automation.browser import browser_lifecycle as generic_browser_lifecycle
 
 from .framework import RoboBrowser, RoboContext, RoboPage
 
@@ -58,28 +57,26 @@ def _default_page_lifecycle(
 
 
 @pytest.fixture(scope="session")
-def playwright() -> Iterator[Playwright]:
-    """Own the Playwright runtime inside robo-appian.
+def robo_appian_browser(
+    robo_automation_browser: Browser,
+) -> RoboBrowser:
+    """Wrap robo-automation's raw browser as the robo-appian browser boundary.
 
-    Consuming projects do not need pytest-playwright merely to obtain the runtime.
+    The unique fixture name prevents collisions with generic plugins that also
+    expose a public fixture named ``browser``.
     """
-    with sync_playwright() as runtime:
-        yield runtime
+    return RoboBrowser.get(robo_automation_browser)
 
 
 @pytest.fixture(scope="session")
-def browser(
-    playwright: Playwright,
-    performance_monitor: Optional[PytestPerformanceMonitor],
-    request: pytest.FixtureRequest,
-) -> Iterator[RoboBrowser]:
-    """Provide one worker/session-scoped :class:`RoboBrowser`."""
-    lifecycle = generic_browser_lifecycle(playwright, performance_monitor, request)
-    raw_browser = next(lifecycle)
-    try:
-        yield RoboBrowser.get(raw_browser)
-    finally:
-        lifecycle.close()
+def browser(robo_appian_browser: RoboBrowser) -> RoboBrowser:
+    """Public robo-appian browser fixture.
+
+    Consuming projects may override this fixture normally.  Internal robo-appian
+    fixtures depend on ``robo_appian_browser`` so plugin load order cannot replace
+    the wrapper with a raw Playwright browser.
+    """
+    return robo_appian_browser
 
 
 @pytest.fixture(scope="session")
@@ -105,25 +102,37 @@ def robo_appian_page_lifecycle() -> PageLifecycle:
 
 
 @pytest.fixture
-def context(
-    browser: RoboBrowser,
+def robo_appian_context(
+    robo_appian_browser: RoboBrowser,
     storage_state: Any,
     performance_monitor: Optional[PytestPerformanceMonitor],
     robo_appian_context_lifecycle: ContextLifecycle,
 ) -> Iterator[RoboContext]:
-    """Provide one test-scoped :class:`RoboContext`."""
+    """Provide robo-appian's uniquely named test-scoped context fixture."""
     yield from robo_appian_context_lifecycle(
-        browser,
+        robo_appian_browser,
         storage_state,
         performance_monitor,
     )
 
 
 @pytest.fixture
-def page(
-    context: RoboContext,
+def context(robo_appian_context: RoboContext) -> RoboContext:
+    """Public context alias retained for compatibility."""
+    return robo_appian_context
+
+
+@pytest.fixture
+def robo_appian_page(
+    robo_appian_context: RoboContext,
     performance_monitor: Optional[PytestPerformanceMonitor],
     robo_appian_page_lifecycle: PageLifecycle,
 ) -> Iterator[RoboPage]:
-    """Provide one test-scoped :class:`RoboPage`."""
-    yield from robo_appian_page_lifecycle(context, performance_monitor)
+    """Provide robo-appian's uniquely named test-scoped page fixture."""
+    yield from robo_appian_page_lifecycle(robo_appian_context, performance_monitor)
+
+
+@pytest.fixture
+def page(robo_appian_page: RoboPage) -> RoboPage:
+    """Public page alias retained for compatibility."""
+    return robo_appian_page

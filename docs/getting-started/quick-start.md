@@ -16,7 +16,7 @@ Choose the browser engine your environment will run.
 In the consuming project's root `conftest.py`:
 
 ```python
-pytest_plugins = ("robo_appian.pytest_plugin",)
+# robo-appian is discovered automatically by pytest via the pytest11 entry point
 ```
 
 The plugin provides `browser`, `context`, and `page` fixtures as `RoboBrowser`, `RoboContext`, and `RoboPage`.

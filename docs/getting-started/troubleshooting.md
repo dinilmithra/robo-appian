@@ -61,7 +61,7 @@ robo-appian install-browser firefox
 Make sure the plugin is loaded in the root `conftest.py`:
 
 ```python
-pytest_plugins = ("robo_appian.pytest_plugin",)
+# robo-appian is discovered automatically by pytest via the pytest11 entry point
 ```
 
 The plugin provides `browser`, `context`, and `page` as Robo* wrapper objects.
@@ -128,3 +128,7 @@ Not for the standard robo-appian fixture stack. Playwright is a direct dependenc
 ## I need exact behavior for a method
 
 Use the [API Reference](../api/index.md). Generated component pages are sourced from the current Python signatures and docstrings.
+
+### Editable-install entry-point refresh
+
+`pytest11` discovery is stored in installed package metadata. If `pyproject.toml` gains or changes the `pytest11` entry point after an editable environment was already created, refresh the environment with `python tools/setup_venv.py`. The setup script verifies that the installed metadata contains `robo_appian = robo_appian.pytest_plugin`.

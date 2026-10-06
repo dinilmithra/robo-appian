@@ -7,7 +7,7 @@ This walkthrough uses the robo-appian pytest plugin, so the consuming test never
 Create or update the root `conftest.py`:
 
 ```python
-pytest_plugins = ("robo_appian.pytest_plugin",)
+# robo-appian is discovered automatically by pytest via the pytest11 entry point
 ```
 
 The public fixture chain is:

@@ -85,7 +85,7 @@ robo-appian install-browser firefox
 Load the plugin from the consuming project's root `conftest.py`:
 
 ```python
-pytest_plugins = ("robo_appian.pytest_plugin",)
+# robo-appian is discovered automatically by pytest via the pytest11 entry point
 ```
 
 The plugin owns these public fixtures:

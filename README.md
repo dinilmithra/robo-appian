@@ -25,7 +25,7 @@ from robo_appian import RoboBrowser, RoboContext, RoboPage, RoboLocator
 With the pytest plugin enabled, tests normally receive `RoboPage` directly:
 
 ```python
-pytest_plugins = ("robo_appian.pytest_plugin",)
+# robo-appian is discovered automatically by pytest via the pytest11 entry point
 ```
 
 ```python

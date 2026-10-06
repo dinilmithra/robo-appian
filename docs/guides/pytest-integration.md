@@ -5,7 +5,7 @@
 ## Enable the plugin
 
 ```python
-pytest_plugins = ("robo_appian.pytest_plugin",)
+# robo-appian is discovered automatically by pytest via the pytest11 entry point
 ```
 
 ## Public fixtures
@@ -21,6 +21,8 @@ pytest_plugins = ("robo_appian.pytest_plugin",)
 | `robo_appian_page_lifecycle` | test | Page lifecycle provider |
 
 The runtime fixture is intentionally owned by robo-appian, so `pytest-playwright` is not required merely to obtain a Playwright runtime or page fixture.
+
+`robo-appian` uses an internal `robo_appian_browser` fixture to wrap the raw browser supplied by `robo-automation`. This avoids fixture-name collisions when both installed plugins expose a backward-compatible `browser` fixture. Consuming tests can continue requesting `browser`, `context`, or `page`, and a consuming project can override them in its own `conftest.py`.
 
 ## Basic test
 
@@ -114,3 +116,50 @@ This design allows each worker to maintain an independent server session and sup
 ## Plugin dependency boundary
 
 A consuming project that uses this fixture stack normally needs only `robo-appian` as its browser-control dependency. Playwright remains a dependency of robo-appian and is not required as a direct dependency of the consumer package.
+
+
+## Automatic plugin discovery
+
+Installing `robo-appian` registers `robo_appian.pytest_plugin` through pytest's
+`pytest11` entry-point group. Consuming projects therefore do not need a
+`pytest_plugins = ("robo_appian.pytest_plugin",)` declaration in `conftest.py`.
+
+Pytest startup is conceptually:
+
+1. pytest discovers installed `pytest11` plugins, including robo-appian.
+2. project configuration and `conftest.py` files are loaded.
+3. fixtures are resolved for each test.
+4. a fixture defined closer to the test overrides a same-named plugin fixture.
+
+### Overriding `page` in a consuming project
+
+A consuming project may replace robo-appian's `page` fixture while continuing to
+reuse the plugin-provided `browser` and `context` fixtures:
+
+```python
+import pytest
+from robo_appian import RoboContext, RoboPage
+
+
+@pytest.fixture
+def page(context: RoboContext) -> RoboPage:
+    page = context.new_page()
+    page.goto("https://example.test")
+    try:
+        yield page
+    finally:
+        page.close()
+```
+
+When a test requests `page`, pytest uses this consuming-project fixture instead
+of `robo_appian.pytest_plugin.page`. The plugin's `context` fixture still runs
+because the override depends on it. A test-module fixture with the same name can
+override the conftest fixture again for that module.
+
+If plugin autoloading is globally disabled with
+`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, explicitly load robo-appian with
+`pytest -p robo_appian.pytest_plugin ...`.
+
+### Editable-install entry-point refresh
+
+`pytest11` discovery is stored in installed package metadata. If `pyproject.toml` gains or changes the `pytest11` entry point after an editable environment was already created, refresh the environment with `python tools/setup_venv.py`. The setup script verifies that the installed metadata contains `robo_appian = robo_appian.pytest_plugin`.

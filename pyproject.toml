@@ -21,6 +21,9 @@ dependencies = [
 [project.scripts]
 robo-appian = "robo_appian.cli:main"
 
+[project.entry-points.pytest11]
+robo_appian = "robo_appian.pytest_plugin"
+
 [project.urls]
 Documentation = "https://dinilmithra.github.io/robo-appian/"
 Repository = "https://github.com/dinilmithra/robo-appian"
