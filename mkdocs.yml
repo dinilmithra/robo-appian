@@ -91,6 +91,8 @@ nav:
   - API Reference:
       - Overview: api/index.md
       - Appian Page and Locator: api/appian-page.md
+      - Appian Browser Context: api/appian-browser-context.md
+      - Appian Scope: api/appian-scope.md
       - Appian Button: api/appian-button.md
       - CLI: api/cli.md
       - Components:
@@ -109,6 +111,6 @@ nav:
           - Table: api/table.md
           - Text: api/text.md
           - ComponentUtils: api/component-utils.md
-      - Integration Types:
-          - Scope: api/scope.md
+      - Compatibility:
+          - Legacy Scope: api/scope.md
   - License: license.md

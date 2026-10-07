@@ -2,35 +2,22 @@
 
 `robo-appian`'s public API is the Appian component/utility layer. Generic browser/resource wrappers are provided by the dependency `robo-automation` and are shown here only as integration context.
 
-## Generic framework dependency (`robo-automation`)
+## Appian resource API
 
-Prefer package-root imports:
+Prefer package-root Appian imports in consumers:
 
 ```python
-from playwright.sync_api import Browser
-from robo_automation import RoboBrowserContext, RoboPage, RoboLocator
+from robo_appian import AppianBrowserContext, AppianLocator, AppianPage, AppianScope
 ```
 
-| Class | Responsibility |
+| Type | Responsibility |
 | --- | --- |
-| Playwright `Browser` | Used directly by the public `browser` fixture |
-| [`RoboBrowserContext`](robo-browser-context.md) | Context-level wrapper; creates and tracks `RoboPage` |
-| [`RoboPage`](robo-page.md) | Page-level wrapper; navigation and page-level element lookup |
-| [`RoboLocator`](robo-locator.md) | Element wrapper; actions, visibility filtering, attribute waits, nested selection |
+| `AppianBrowserContext` | Appian context specialization that creates/tracks `AppianPage` |
+| [`AppianPage`](appian-page.md) | Appian page abstraction and fluent component entry point |
+| `AppianLocator` | Appian locator specialization used for scoped/subtree operations |
+| [`AppianScope`](appian-scope.md) | `AppianPage | AppianLocator` for APIs that intentionally accept both |
 
-Typical flow:
-
-```python
-user_options = page.get_by_attributes(
-    attributes={
-        "role": "button",
-        "aria-label": "User options",
-    },
-    excat_match=True,
-)
-user_options.to_be_visible()
-user_options.click()
-```
+The generic Robo* inheritance layer belongs to `robo-automation` and is not the preferred consumer API for Appian projects.
 
 ## Pytest and CLI
 
@@ -66,9 +53,9 @@ Component pages are generated from current source signatures/docstrings.
 | [`Text`](text.md) | Visible text queries/waits |
 | [`ComponentUtils`](component-utils.md) | Shared lower-level component utilities |
 
-## `Scope` compatibility boundary
+## Compatibility note
 
-Many current component signatures still expose [`Scope`](scope.md), defined as Playwright `Page | Locator`. `Scope` and the Robo* wrapper chain are owned by `robo-automation`; robo-appian components consume them.
+Some older non-button component helpers still expose the lower-layer generic `Scope` type in generated signatures. New Appian APIs should use `AppianPage`, `AppianLocator`, or `AppianScope`.
 
 ## Relationship to Playwright
 

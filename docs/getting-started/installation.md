@@ -84,21 +84,23 @@ robo-appian install-browser firefox
 
 Installing `robo-automation` registers `robo_automation.pytest_plugin` through pytest's `pytest11` entry-point group. Under normal plugin autoloading, no `conftest.py` import, `pytest_plugins` declaration, or `-p` option is required.
 
-The plugin owns these public fixtures:
+The lower `robo-automation` plugin owns browser/runtime lifecycle, and the `robo-appian` plugin specializes the page fixture for Appian consumers:
 
 ```text
-browser -> Playwright Browser
-context -> RoboBrowserContext
-page    -> RoboPage
+robo-automation: robo_page -> RoboPage
+                         ↓
+robo-appian:     appian_page -> AppianPage
+                         ↓
+                 page -> AppianPage
 ```
 
-A test can therefore consume `RoboPage` without importing Playwright:
+A normal Appian test consumes `AppianPage`:
 
 ```python
-from robo_automation import RoboPage
+from robo_appian import AppianPage
 
 
-def test_home(page: RoboPage) -> None:
+def test_home(page: AppianPage) -> None:
     page.goto("https://your-appian-site.example/")
 ```
 
@@ -109,7 +111,7 @@ Application projects can override generic context inputs such as `storage_state`
 Verify both package layers:
 
 ```bash
-python -c "import robo_appian, robo_automation; from robo_automation import RoboBrowserContext, RoboPage, RoboLocator; print('imports OK')"
+python -c "import robo_appian; from robo_appian import AppianBrowserContext, AppianPage, AppianLocator; print('imports OK')"
 ```
 
 Verify the CLI:

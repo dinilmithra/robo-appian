@@ -78,21 +78,27 @@ A consuming project can override generic context inputs (`storage_state`, `conte
 | Application assertions and test data | | | ✓ |
 | Application-specific diagnostics policy | | | ✓ |
 
-## Component APIs and `Scope`
+## Appian resource types and scoping
 
-The reusable Appian component layer still exposes `Scope` in many signatures:
+Consumer code should use the Appian layer:
 
 ```python
-Scope = Page | Locator
+from robo_appian import AppianBrowserContext, AppianLocator, AppianPage, AppianScope
 ```
 
-`Scope` is owned by `robo-automation` and describes the Playwright search boundary used by component implementations: a page searches the whole document and a locator restricts the operation to a subtree.
+`AppianScope` is defined as:
 
-For new consumer lifecycle code, prefer `RoboPage` and `RoboLocator`. See [Scope](../api/scope.md).
+```python
+AppianScope = AppianPage | AppianLocator
+```
+
+Prefer `AppianPage` for normal page-wide operations. Use `AppianLocator` when an operation must be restricted to a dialog, region, or other subtree. Generic `Robo*` types remain implementation/inheritance details of the lower `robo-automation` layer.
+
+Some older component helpers still expose the lower-layer generic `Scope` type in their generated signatures. That is a compatibility surface in those components, not the preferred API for new Appian consumer code.
 
 ## Attribute-based lookup
 
-Use `RoboPage.get_by_attributes(...)` when an element is best described directly from its HTML or accessibility attributes:
+Use `AppianPage.get_by_attributes(...)` when an element is best described directly from its HTML or accessibility attributes:
 
 ```python
 user_options = page.get_by_attributes(

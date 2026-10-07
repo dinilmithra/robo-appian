@@ -119,7 +119,7 @@ Avoid arbitrary sleeps; synchronize on a meaningful UI state.
 
 ## `Scope` mentions Playwright even though my test uses `RoboPage`
 
-This is expected in the current version. Framework lifecycle code uses Robo* wrappers, while many existing component signatures still expose the internal `Scope = Page | Locator` compatibility boundary. The API reference reflects the actual current source signatures.
+Some older non-button components still expose the lower-layer generic `Scope` compatibility annotation. New Appian-facing code should use `AppianPage`, `AppianLocator`, or `AppianScope`; generated API pages reflect the actual signature of each component.
 
 ## Should CORE or another consumer declare Playwright directly?
 

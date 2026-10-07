@@ -71,23 +71,24 @@ user_options.click()
 
 The generic wrapper boundary in `robo-automation` centralizes browser lifecycle and common element operations. `robo-appian` then adds Appian-specific components on top without owning the generic resource lifecycle. Consuming applications keep their own authentication, navigation, diagnostics policy, and business workflows.
 
-## Compatibility boundary: `Scope`
+## Appian abstraction boundary
 
-Existing component APIs still use `Scope = Playwright Page | Locator` in their generated signatures. This is a compatibility/internal boundary for the component layer, not the preferred resource-ownership model for new consuming projects.
-
-The intended direction is:
+The preferred consumer chain is:
 
 ```text
-consumer lifecycle code -> Robo* wrappers
-component internals      -> Scope / Playwright implementation boundary
+AppianBrowserContext
+    ↓
+AppianPage
+    ↓
+AppianLocator / Appian components
 ```
 
-## Current compatibility surface
+These types specialize the generic `RoboBrowserContext`, `RoboPage`, and `RoboLocator` implementation owned by `robo-automation`. Consumer projects such as CORE should depend on the Appian types rather than importing the generic Robo* resource types directly.
 
-The browser/context/page ownership migration is complete, but the component layer still has a Playwright-locator compatibility surface:
+`AppianScope = AppianPage | AppianLocator` is available when reusable Appian code genuinely supports either a whole page or a scoped subtree. Prefer the concrete `AppianPage` annotation when locator scoping is not needed.
 
-- `Scope` is still `Playwright Page | Locator` in existing component signatures.
-- Some `RoboPage` locator helpers (`locator`, `get_by_role`, `get_by_text`, and related methods) return Playwright `Locator` objects because current components consume them.
-- `RoboLocator.locator` currently exposes the wrapped locator for compatibility.
+### Legacy component signatures
 
-These are locator-level compatibility points, not public raw browser/context/page ownership. New consumer code should prefer `RoboPage.get_by_attributes()`, `RoboPage.get_by_id()`, and `RoboLocator` operations when they cover the use case.
+Some older non-button component modules still use the lower-layer generic `Scope` annotation. Those signatures are retained for compatibility and are visible in their generated API pages. New Appian abstractions should use Appian-layer types instead.
+
+`AppianButton` follows the new model completely: it lives under `robo_appian.appian`, is created with `page.button(name="...")`, and does not reuse the removed legacy `components.Button` implementation.

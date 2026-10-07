@@ -34,10 +34,17 @@ from robo_appian import Table
 # See the Table API reference for supported table/grid operations.
 ```
 
-## Component `Scope` compatibility
+## Appian scoping
 
-The current generated component signatures still use `Scope = Playwright Page | Locator`. That type describes the component implementation's search boundary and is retained for compatibility while the framework wrapper migration continues.
+For new Appian APIs, use `AppianPage` for page-wide operations and `AppianLocator` for dialog/subtree operations. Reusable code that intentionally accepts both can use `AppianScope = AppianPage | AppianLocator`.
 
-For new consuming-project browser/resource code, use `RoboPage` and `RoboLocator`. Do not create duplicate raw Playwright browser/page fixtures when using the generic `robo-automation` pytest plugin.
+Some older non-button component helpers still expose the generic lower-layer `Scope` annotation. Treat that as a compatibility signature. New component work should follow the Appian-layer model.
 
-The generated API reference is authoritative for the exact current component signatures and defaults.
+`AppianButton` is the reference fluent component API:
+
+```python
+button = page.button(name="Save")
+button.click()
+```
+
+Button identity requires `<button type="button">`. The presence of the HTML `disabled` attribute means the button is disabled; its absence means the button is enabled. CSS classes are not used to determine enabled state.
