@@ -1,62 +1,64 @@
 # Publishing Documentation
 
-Documentation source lives on the normal development branch with the Python
-source. Generated HTML is published to the automation-owned `gh-pages` branch.
+Documentation source lives on `main` with the robo-appian source code. GitHub
+Actions builds the MkDocs site and publishes the generated HTML to `gh-pages`.
 
-## Branch model
+## Automatic publishing
+
+Every push to `main` triggers the **Publish robo-appian docs** workflow:
 
 ```text
-main
-  Python source
-  docs/ Markdown source
-  mkdocs.yml
-  GitHub Actions workflow
-
-        | automated publish
+git push origin main
+        |
         v
-
+Publish robo-appian docs
+        |
+        +-- mkdocs build --strict
+        |
+        v
 gh-pages
-  generated HTML only
+        |
+        v
+GitHub Pages
 ```
 
-Do not manually edit `gh-pages`. The repository workflow
-`.github/workflows/publish-robo-appian-docs.yml` rebuilds and replaces the
-generated site automatically.
+The workflow is defined in:
 
-The workflow runs when a commit is pushed to `main` and changes any of these
-robo-appian documentation inputs:
-
-- `robo-appian/docs/**`
-- `robo-appian/robo_appian/**`
-- `robo-appian/mkdocs.yml`
-- `robo-appian/pyproject.toml`
-- `robo-appian/poetry.lock`
+```text
+.github/workflows/publish-robo-appian-docs.yml
+```
 
 It can also be started manually from **Actions > Publish robo-appian docs > Run
-workflow**. The job first runs `mkdocs build --strict`; only a successful build
-is published to `gh-pages`.
+workflow**.
+
+Do not manually edit `gh-pages`. It contains generated site files and is
+replaced by the workflow when documentation is published.
 
 ## GitHub Pages setting
 
-In the repository, open **Settings > Pages** and select:
+In the repository, open **Settings > Pages** and configure:
 
 - **Source:** Deploy from a branch
 - **Branch:** `gh-pages`
 - **Folder:** `/ (root)`
 
-The first successful publish creates the `gh-pages` branch automatically.
+After the workflow updates `gh-pages`, GitHub's **pages build and deployment**
+job publishes the site.
 
-## Manual local validation
+## Local validation
 
-Before pushing documentation changes:
+Before pushing documentation changes, you can validate the site locally:
 
 ```powershell
 poetry install --with docs
 poetry run mkdocs build --strict
 ```
 
-To publish manually from an authenticated clone (normally GitHub Actions does this):
+For an interactive local preview:
 
 ```powershell
-poetry run mkdocs gh-deploy --force --clean
+poetry run mkdocs serve
 ```
+
+Normal publishing does not require running `mkdocs gh-deploy` locally; pushing
+to `main` starts the publishing workflow automatically.
