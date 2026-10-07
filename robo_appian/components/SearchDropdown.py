@@ -9,7 +9,6 @@ from playwright.sync_api import Page, expect
 from robo_automation import Scope
 
 from robo_appian.components.Dropdown import Dropdown
-from robo_appian.components.InputText import InputText
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 
@@ -143,7 +142,8 @@ class SearchDropdown:
             dropdown_panel.get_by_label("Search", exact=True).filter(visible=True).first
         )
         _expect_visible(search_input)
-        InputText.fill_by_locator(search_input, normalized_option)
+        expect(search_input, "Search input was not enabled.").to_be_enabled()
+        search_input.fill(normalized_option)
 
         visible_options = listbox.get_by_role("option").filter(visible=True)
         _expect_visible(visible_options.first)

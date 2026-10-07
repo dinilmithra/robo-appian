@@ -196,6 +196,18 @@ def test_legacy_components_button_is_removed() -> None:
     assert "components.Button" not in components_init
 
 
+def test_legacy_components_input_text_is_removed() -> None:
+    """The legacy static InputText component must not return to robo-appian."""
+    package_root = Path(__file__).resolve().parents[1] / "robo_appian"
+    assert not (package_root / "components" / "InputText.py").exists()
+
+    components_init = (package_root / "components" / "__init__.py").read_text(
+        encoding="utf-8"
+    )
+    assert "components.InputText" not in components_init
+    assert '"InputText"' not in components_init
+
+
 def test_appian_page_textbox_by_label_returns_appian_textbox() -> None:
     from robo_appian import AppianTextbox
 

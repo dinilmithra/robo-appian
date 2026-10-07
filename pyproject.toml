@@ -15,7 +15,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "playwright==1.63.0",
     "pytest==9.1.1",
-    "robo-automation (>=0.1.5,<0.2.0)",
+    "robo-automation (>=0.1.6,<0.2.0)",
 ]
 
 [project.scripts]
@@ -32,7 +32,7 @@ Issues = "https://github.com/dinilmithra/robo-appian/issues"
 Developer = "https://www.linkedin.com/in/dinilmithra/"
 
 [tool.poetry]
-version = "0.1.17"
+version = "0.1.18"
 packages = [{ include = "robo_appian" }]
 exclude = ["scripts/**", "tools/**"]
 

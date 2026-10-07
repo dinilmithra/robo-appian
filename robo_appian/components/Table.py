@@ -8,7 +8,6 @@ from robo_automation import Scope
 
 from robo_appian.components.InputDate import InputDate
 from robo_appian.components.Dropdown import Dropdown
-from robo_appian.components.InputText import InputText
 from robo_appian.components.RadioSelect import RadioSelect
 from robo_appian.components.SearchInput import SearchInput
 from robo_appian.utils.ComponentUtils import ComponentUtils
@@ -591,10 +590,8 @@ class Table:
             ),
         ).to_be_visible()
 
-        InputText.fill_by_locator(
-            textbox,
-            value,
-        )
+        expect(textbox, "Text input was not enabled.").to_be_enabled()
+        textbox.fill(str(value or ""))
 
         logger.debug(
             "Filled '%s' in row '%s', column '%s'.",
@@ -640,7 +637,8 @@ class Table:
         )
         textbox = cell.get_by_role("textbox").filter(visible=True).first
         expect(textbox, "Text input was not found in the resolved table cell.").to_be_visible()
-        InputText.fill_by_locator(textbox, value)
+        expect(textbox, "Text input was not enabled.").to_be_enabled()
+        textbox.fill(str(value or ""))
 
     @staticmethod
     def fill_date_in_named_row(

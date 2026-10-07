@@ -6,7 +6,6 @@ workflow rules or selectors based on generated CSS class names.
 
 from robo_appian.components.InputDate import InputDate
 from robo_appian.components.Dropdown import Dropdown
-from robo_appian.components.InputText import InputText
 from robo_appian.components.Link import Link
 from robo_appian.components.MenuButton import MenuButton
 from robo_appian.components.SearchDropdown import SearchDropdown
@@ -22,7 +21,6 @@ from robo_appian.components.CheckBox import CheckBox
 __all__ = [
     "InputDate",
     "Dropdown",
-    "InputText",
     "Link",
     "MenuButton",
     "SearchDropdown",
