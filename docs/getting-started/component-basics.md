@@ -5,10 +5,10 @@ Start from the Appian control you want to interact with. Prefer the most specifi
 | I need to… | Start with |
 | --- | --- |
 | Click or wait for a button | [`AppianButton`](../api/appian-button.md) |
+| Fill a text field | [`AppianTextbox`](../api/appian-textbox.md) |
 | Select or inspect a checkbox | [`CheckBox`](../api/checkbox.md) |
 | Select a standard dropdown value | [`Dropdown`](../api/dropdown.md) |
 | Enter or inspect a date | [`InputDate`](../api/input-date.md) |
-| Fill or inspect text input | [`InputText`](../api/input-text.md) |
 | Find or activate a link | [`Link`](../api/link.md) |
 | Choose an item from a menu button | [`MenuButton`](../api/menu-button.md) |
 | Select a radio option | [`RadioSelect`](../api/radio-select.md) |
@@ -19,7 +19,7 @@ Start from the Appian control you want to interact with. Prefer the most specifi
 | Select or inspect a tab | [`Tab`](../api/tab.md) |
 | Read or interact with table/grid content | [`Table`](../api/table.md) |
 | Read or wait for visible text | [`Text`](../api/text.md) |
-| Locate by arbitrary HTML attributes | [`AppianLocator`](../api/robo-locator.md) |
+| Locate by arbitrary HTML attributes | [`AppianLocator`](../api/appian-page.md) |
 
 ## Framework lookup or component helper?
 
@@ -39,9 +39,9 @@ user_options.click()
 Use a component helper when robo-appian has reusable Appian-specific behavior for that control:
 
 ```python
-from robo_appian import AppianPage, InputText
+from robo_appian import AppianPage
 
-InputText.fill_by_label(page, "Request Name", "Example Request")
+page.textbox(label="Request Name").fill("Example Request")
 page.button(name="Submit").click()
 ```
 
@@ -49,9 +49,14 @@ page.button(name="Submit").click()
 
 Use `Dropdown` for the standard Appian dropdown interaction. Use `SearchDropdown` when the control requires typing search text and selecting from dynamic results.
 
-## `InputText` methods
+## Fluent input textbox
 
-Start with `InputText.fill_by_label` when the field has a usable accessible label. Specialized methods exist for placeholders, ids, locators, and visible-label structures. Use the generated [InputText API](../api/input-text.md) as the signature authority.
+Use the page-level API for text fields:
+
+```python
+page.textbox(label="Request Name").fill("Example Request")
+page.textbox(placeholder="example@example.com").fill("user@example.com")
+```
 
 ## Understanding `Scope`
 

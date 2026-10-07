@@ -93,11 +93,11 @@ nav:
       - Appian Page and Locator: api/appian-page.md
       - Appian Scope: api/appian-scope.md
       - Appian Button: api/appian-button.md
+      - Appian Textbox: api/appian-textbox.md
       - Components:
           - CheckBox: api/checkbox.md
           - Dropdown: api/dropdown.md
           - InputDate: api/input-date.md
-          - InputText: api/input-text.md
           - Link: api/link.md
           - MenuButton: api/menu-button.md
           - RadioSelect: api/radio-select.md

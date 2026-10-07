@@ -3,7 +3,7 @@
 The preferred import style is through the package-level API:
 
 ```python
-from robo_appian import AppianPage, Dropdown, InputText, Table
+from robo_appian import AppianPage, Dropdown, Table
 ```
 
 Component helpers encapsulate reusable Appian-specific interaction mechanics. Browser lifecycle belongs to `robo-automation`; Appian component interactions use `AppianPage` and `AppianLocator`.
@@ -17,7 +17,7 @@ page.button(name="Submit").click()
 ## Text inputs
 
 ```python
-InputText.fill_by_label(page, "Request Name", "Example Request")
+page.textbox(label="Request Name").fill("Example Request")
 ```
 
 ## Dropdowns
@@ -45,4 +45,13 @@ Some older non-button component helpers still expose the generic lower-layer `Sc
 ```python
 button = page.button(name="Save")
 button.click()
+```
+
+## Input textbox
+
+Use `AppianPage.textbox(...)` for text fields:
+
+```python
+page.textbox(label="Request Name").fill("Example Request")
+page.textbox(placeholder="example@example.com").fill("user@example.com")
 ```

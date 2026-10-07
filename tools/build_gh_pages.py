@@ -30,7 +30,6 @@ API_MAP = {
     "checkbox": ("CheckBox", PKG / "components" / "CheckBox.py"),
     "dropdown": ("Dropdown", PKG / "components" / "Dropdown.py"),
     "input-date": ("InputDate", PKG / "components" / "InputDate.py"),
-    "input-text": ("InputText", PKG / "components" / "InputText.py"),
     "link": ("Link", PKG / "components" / "Link.py"),
     "menu-button": ("MenuButton", PKG / "components" / "MenuButton.py"),
     "radio-select": ("RadioSelect", PKG / "components" / "RadioSelect.py"),
@@ -194,10 +193,10 @@ def home_body() -> str:
   <section class="ra-target-workbench">
     <div class="ra-target-code">
       <div class="ra-target-panel-title"><span>&gt;_ &nbsp; Quick Start</span><span>Python</span></div>
-      <pre><code>from robo_appian import AppianPage, InputText
+      <pre><code>from robo_appian import AppianPage
 
 def test_request(page: AppianPage):
-    InputText.fill_by_label(page, "Request Name", "Example")
+    page.textbox(label="Request Name").fill("Example")
     page.button(name="Submit").click()</code></pre>
     </div>
     <div class="ra-target-architecture">

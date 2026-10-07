@@ -27,7 +27,7 @@ The generic Robo* inheritance layer belongs to `robo-automation` and is not the 
 The package also exposes reusable Appian component helpers:
 
 ```python
-from robo_appian import AppianPage, Dropdown, InputText, Table
+from robo_appian import AppianPage, Dropdown, Table
 ```
 
 Component pages are generated from current source signatures/docstrings.
@@ -38,7 +38,6 @@ Component pages are generated from current source signatures/docstrings.
 | [`CheckBox`](checkbox.md) | Checkbox state/actions |
 | [`Dropdown`](dropdown.md) | Standard dropdowns |
 | [`InputDate`](input-date.md) | Date fields |
-| [`InputText`](input-text.md) | Text/paragraph fields |
 | [`Link`](link.md) | Links |
 | [`MenuButton`](menu-button.md) | Menu-button actions |
 | [`RadioSelect`](radio-select.md) | Radio options |
@@ -54,3 +53,14 @@ Component pages are generated from current source signatures/docstrings.
 ## Compatibility note
 
 Some older non-button component helpers still expose the lower-layer generic `Scope` type in generated signatures. New Appian APIs should use `AppianPage`, `AppianLocator`, or `AppianScope`.
+
+## Appian input textbox
+
+Create a text field from `AppianPage` by label or placeholder:
+
+```python
+page.textbox(label="Title").fill("Example request")
+page.textbox(placeholder="example@example.com").fill("user@example.com")
+```
+
+See [Appian Textbox](appian-textbox.md).

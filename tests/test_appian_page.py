@@ -194,3 +194,202 @@ def test_legacy_components_button_is_removed() -> None:
         encoding="utf-8"
     )
     assert "components.Button" not in components_init
+
+
+def test_appian_page_textbox_by_label_returns_appian_textbox() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    textbox = appian_page.textbox(label="Title")
+
+    assert isinstance(textbox, AppianTextbox)
+    assert textbox.label == "Title"
+    assert textbox.placeholder is None
+
+
+def test_appian_page_textbox_by_placeholder_returns_appian_textbox() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    textbox = appian_page.textbox(placeholder="example@example.com")
+
+    assert isinstance(textbox, AppianTextbox)
+    assert textbox.placeholder == "example@example.com"
+    assert textbox.label is None
+
+
+def test_appian_textbox_requires_exactly_one_identifier() -> None:
+    import pytest
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    with pytest.raises(ValueError):
+        appian_page.textbox()
+
+    with pytest.raises(ValueError):
+        appian_page.textbox(label="Title", placeholder="Title")
+
+
+def test_appian_textbox_label_uses_label_for_and_text_input_id() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    label_locator = MagicMock(spec=Locator)
+    input_locator = MagicMock(spec=Locator)
+    label_locator.count.return_value = 1
+    label_locator.first.get_attribute.return_value = "field-123"
+    page.locator.side_effect = [label_locator, input_locator]
+    appian_page = AppianPage.get(page)
+
+    result = AppianTextbox(page=appian_page, label="Title")._locator()
+
+    assert result is input_locator
+    label_xpath = page.locator.call_args_list[0].args[0]
+    input_xpath = page.locator.call_args_list[1].args[0]
+    assert ".//label[@for" in label_xpath
+    assert "TITLE" in label_xpath
+    assert "self::input" in input_xpath
+    assert "@type='text'" in input_xpath
+    assert "self::textarea" in input_xpath
+    assert "@role='textbox'" in input_xpath
+    assert "@id='field-123'" in input_xpath
+
+
+def test_appian_textbox_placeholder_requires_text_input() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    AppianTextbox(
+        page=appian_page,
+        placeholder="example@example.com",
+    )._locator()
+
+    xpath = page.locator.call_args.args[0]
+    assert "self::input" in xpath
+    assert "@type='text'" in xpath
+    assert "self::textarea" in xpath
+    assert "@role='textbox'" in xpath
+    assert "@placeholder" in xpath
+    assert "EXAMPLE@EXAMPLE.COM" in xpath
+
+
+
+def test_appian_textbox_label_supports_multiline_textarea() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    label_locator = MagicMock(spec=Locator)
+    textbox_locator = MagicMock(spec=Locator)
+    label_locator.count.return_value = 1
+    label_locator.first.get_attribute.return_value = "description-123"
+    page.locator.side_effect = [label_locator, textbox_locator]
+    appian_page = AppianPage.get(page)
+
+    result = AppianTextbox(page=appian_page, label="Description")._locator()
+
+    assert result is textbox_locator
+    xpath = page.locator.call_args_list[1].args[0]
+    assert "self::textarea" in xpath
+    assert "@role='textbox'" in xpath
+    assert "@id='description-123'" in xpath
+
+
+def test_appian_textbox_placeholder_supports_multiline_textarea() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    AppianTextbox(page=appian_page, placeholder="Comment")._locator()
+
+    xpath = page.locator.call_args.args[0]
+    assert "self::textarea" in xpath
+    assert "@role='textbox'" in xpath
+    assert "@placeholder" in xpath
+    assert "COMMENT" in xpath
+
+def test_appian_textbox_label_supports_password_input() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    label_locator = MagicMock(spec=Locator)
+    textbox_locator = MagicMock(spec=Locator)
+    label_locator.count.return_value = 1
+    label_locator.first.get_attribute.return_value = "pw"
+    page.locator.side_effect = [label_locator, textbox_locator]
+    appian_page = AppianPage.get(page)
+
+    result = AppianTextbox(page=appian_page, label="Password")._locator()
+
+    assert result is textbox_locator
+    xpath = page.locator.call_args_list[1].args[0]
+    assert "@type='text'" in xpath
+    assert "@type='password'" in xpath
+    assert "@id='pw'" in xpath
+
+
+def test_appian_textbox_placeholder_supports_password_input() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    AppianTextbox(page=appian_page, placeholder="Password")._locator()
+
+    xpath = page.locator.call_args.args[0]
+    assert "@type='text'" in xpath
+    assert "@type='password'" in xpath
+    assert "@placeholder" in xpath
+    assert "PASSWORD" in xpath
+
+def test_appian_textbox_does_not_import_legacy_components() -> None:
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "robo_appian"
+        / "appian"
+        / "appian_textbox.py"
+    ).read_text(encoding="utf-8")
+
+    assert "robo_appian.components" not in source
+
+
+def test_appian_textbox_label_falls_back_to_accessible_textbox_name() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    missing_label = MagicMock(spec=Locator)
+    role_locator = MagicMock(spec=Locator)
+    first_locator = MagicMock(spec=Locator)
+    missing_label.count.return_value = 0
+    role_locator.first = first_locator
+    page.locator.return_value = missing_label
+    page.get_by_role.return_value = role_locator
+    appian_page = AppianPage.get(page)
+
+    result = AppianTextbox(
+        page=appian_page, label="Description", exact=False
+    )._locator()
+
+    assert result is first_locator
+    page.get_by_role.assert_called_once_with(
+        "textbox", name="Description", exact=False
+    )
+
+
+def test_appian_textbox_accessible_name_fallback_does_not_use_visible_text() -> None:
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "robo_appian"
+        / "appian"
+        / "appian_textbox.py"
+    ).read_text(encoding="utf-8")
+
+    assert "visible_label =" not in source
+    assert "following-sibling" not in source

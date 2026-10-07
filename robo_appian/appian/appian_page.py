@@ -3,6 +3,7 @@
 from robo_automation import RoboPage
 
 from .appian_button import AppianButton
+from .appian_textbox import AppianTextbox
 from .appian_locator import AppianLocator
 
 
@@ -29,6 +30,26 @@ class AppianPage(RoboPage):
             The Appian button component bound to this page.
         """
         return AppianButton(page=self, name=name, exact=exact, scope=scope)
+
+    def textbox(
+        self,
+        *,
+        label: str | None = None,
+        placeholder: str | None = None,
+        exact: bool = True,
+        scope: AppianLocator | None = None,
+    ) -> AppianTextbox:
+        """Return an Appian textbox identified by label or placeholder.
+
+        Specify exactly one of ``label`` or ``placeholder``.
+        """
+        return AppianTextbox(
+            page=self,
+            label=label,
+            placeholder=placeholder,
+            exact=exact,
+            scope=scope,
+        )
 
 
 __all__ = ["AppianPage"]

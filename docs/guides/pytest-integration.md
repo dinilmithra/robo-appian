@@ -1,27 +1,10 @@
 # Pytest Integration
 
-`robo-automation` and `robo-appian` are layered pytest plugins. Each is registered through the package's `pytest11` entry point, so normal consumers do not need a `pytest_plugins` declaration or `-p` option.
+`robo-automation` and `robo-appian` are discovered automatically through their installed pytest plugins. Consumers normally do not need a `pytest_plugins` declaration or `-p` option.
 
-## Fixture layers
+## Public Appian page fixture
 
-The generic layer owns resource lifecycle; the Appian layer specializes the generic page without recreating that lifecycle.
-
-| Package | Fixture | Scope | Purpose |
-| --- | --- | --- | --- |
-| `robo-automation` | `browser` | session | raw Playwright `Browser` |
-| `robo-automation` | `storage_state` | session | neutral `None` default; consumers may override |
-| `robo-automation` | `context_options` | test | options for `Browser.new_context()` |
-| `robo-automation` | `wait_time` | session | timeout in seconds; default `90` |
-| `robo-automation` | `context_page_handler` | test | optional new-page callback |
-| `robo-automation` | `context` | test | browser context lifecycle |
-| `robo-automation` | `robo_page` | test | owns generic page creation/close |
-| `robo-automation` | `page` | test | generic public alias for `robo_page` |
-| `robo-appian` | `appian_page` | test | specializes the same `robo_page` as `AppianPage` |
-| `robo-appian` | `page` | test | public Appian page fixture |
-
-`AppianPage` derives from `AppianPage` and selects `AppianLocator` for wrapped locator APIs. The specialization reuses the same underlying Playwright page; it does not create a second browser page and does not own teardown.
-
-## Appian test
+A normal Appian test requests `page` as `AppianPage`:
 
 ```python
 from robo_appian import AppianPage
@@ -29,26 +12,27 @@ from robo_appian import AppianPage
 
 def test_example(page: AppianPage) -> None:
     page.goto("https://your-appian-site.example/")
-    page.get_by_id("jsAcceptButton").click()
+    page.button(name="Submit").is_visible()
 ```
+
+Generic resource creation and teardown remain owned by `robo-automation`. `robo-appian` specializes the page for Appian interactions without duplicating that lifecycle.
 
 ## Application-specific overrides
 
-Applications should override only their policy layer. Authentication state, URLs, credentials, diagnostics policy, and workflow startup do not belong in `robo-appian`.
+Applications should override only application policy such as authenticated storage state, URLs, diagnostics, and startup navigation.
 
 ### Authenticated storage state
 
 ```python
 import pytest
-from playwright.sync_api import Browser
 
 
 @pytest.fixture(scope="session")
-def storage_state(browser: Browser, worker_id: str):
+def storage_state(browser, worker_id: str):
     return create_worker_authenticated_state(browser, worker_id)
 ```
 
-Keep authenticated state worker-aware when xdist workers may use different credentials or server sessions.
+Keep authenticated state worker-aware when parallel workers may use different credentials or server sessions.
 
 ### Context options
 
@@ -75,11 +59,9 @@ def wait_time() -> int:
     return get_application_timeout_seconds()
 ```
 
-`robo-automation` performs the seconds-to-milliseconds conversion only at the Playwright timeout boundary.
-
 ### Application page policy
 
-A higher-level application can override `page` while consuming `appian_page`. This is the preferred plug-and-play pattern:
+A consuming application can override `page` while consuming `appian_page`:
 
 ```python
 from collections.abc import Iterator
@@ -95,48 +77,15 @@ def page(appian_page: AppianPage) -> Iterator[AppianPage]:
     yield appian_page
 ```
 
-The application fixture does **not** close the page. `robo-automation` owns the lower `robo_page` lifecycle and closes the underlying Playwright page after all higher-layer fixtures finish.
-
-## Execution order
-
-For a CORE-style consumer, the effective chain is:
-
-```text
-robo-automation browser
-        ↓
-robo-automation context
-        ↓
-robo-automation robo_page (owns create/close)
-        ↓
-robo-appian appian_page (specializes wrapper)
-        ↓
-CORE page (navigation/login policy)
-        ↓
-test
-```
-
-Teardown runs in reverse order. CORE finishes its page policy first, then `robo-automation` closes the underlying page and context.
+The application fixture does not close the page; lower-layer lifecycle ownership remains in `robo-automation`.
 
 ## Plugin discovery
 
-Both packages register pytest plugins in package metadata:
-
-```text
-robo_automation = robo_automation.pytest_plugin
-robo_appian = robo_appian.pytest_plugin
-```
-
-If an editable environment predates an entry-point change, refresh both editable installs and verify discovery with:
+If an editable environment predates an entry-point change, refresh the editable installs and verify discovery with:
 
 ```powershell
 pytest --trace-config
-pytest --fixtures -q | findstr "robo_page appian_page page context browser"
+pytest --fixtures -q | findstr "appian_page page context browser"
 ```
 
-If `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` is set, installed `pytest11` plugins are not auto-loaded.
-
-## Plugin registration in application consumers
-
-Do not add `pytest_plugins = ("robo_appian.pytest_plugin",)` when `robo-appian` is installed normally or as an editable dependency. Pytest auto-loads the plugin through the package's `pytest11` entry point. Explicitly registering the same module after entry-point discovery causes a duplicate-plugin error.
-
-After changing entry-point metadata in a local checkout, refresh the editable installation and verify registration with `pytest --trace-config`.
+Do not explicitly register `robo_appian.pytest_plugin` when the package is installed normally or as an editable dependency.
