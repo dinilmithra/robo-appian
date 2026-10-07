@@ -96,7 +96,7 @@ class InputDate:
         """Fill a labeled date input.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible label used to locate the input.
             date_str: Excel, US, or ISO-style date to normalize when possible.
             excat_match: Whether the accessible label must match exactly.
@@ -110,7 +110,7 @@ class InputDate:
         """Fill a date input by literal HTML ID.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             input_id: Exact HTML ID, including IDs that begin with numbers.
             date_str: Excel, US, or ISO-style date to normalize when possible.
         """
@@ -129,7 +129,7 @@ class InputDate:
         layouts are ignored by selecting the first visible matching input.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible label used to locate the input.
             excat_match: Whether the accessible label must match exactly.
 
@@ -151,7 +151,7 @@ class InputDate:
         The expected value is compared as supplied and is not normalized.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible label used to locate the input.
             expected_date_str: Exact rendered input value to expect.
             excat_match: Whether the accessible label must match exactly.

@@ -18,7 +18,7 @@ class Region:
         """Return the first visible semantic region identified by its accessible name.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name used to identify the control.
             excat_match: Whether matching must use the complete label or text.
 
@@ -52,7 +52,7 @@ class Region:
         and semantic region boundaries rather than CSS classes.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             region_name: Optional region name used to narrow the lookup.
             label: Visible or accessible label used to identify the control.
             exact_region: Value supplied for ``exact_region``.

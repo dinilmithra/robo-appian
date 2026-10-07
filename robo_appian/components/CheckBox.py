@@ -23,7 +23,7 @@ class CheckBox:
            contains the native checkbox input.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Visible checkbox option label or boolean field label.
 
         Returns:
@@ -68,7 +68,7 @@ class CheckBox:
         """Return whether the requested Appian checkbox is present.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Visible text used to identify the target element.
 
 
@@ -94,7 +94,7 @@ class CheckBox:
         inspect the current state immediately.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Visible option label or boolean field label.
             timeout: Optional timeout in seconds to wait for a checked state.
 
@@ -132,7 +132,7 @@ class CheckBox:
         the control during a SAIL re-render.
 
         Args:
-            scope: Playwright scope containing the checkbox.
+            scope: browser automation scope containing the checkbox.
             text: Visible checkbox option label or boolean field label.
             selected: ``True`` to check, ``False`` to uncheck.
         """

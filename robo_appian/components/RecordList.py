@@ -69,7 +69,7 @@ class RecordList:
         """Return the number of visible records in the named record region.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             region_name: Optional region name used to narrow the lookup.
             record_labels: Labels used to identify candidate records.
 
@@ -92,7 +92,7 @@ class RecordList:
         visible row count may remain constant when a new record is prepended.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             region_name: Optional region name used to narrow the lookup.
             record_labels: Labels used to identify candidate records.
 
@@ -118,10 +118,10 @@ class RecordList:
         """Return a live locator for the newest record when it matches all texts.
 
         The returned locator stays live across Appian rerenders. If the newest
-        record changes, Playwright reevaluates ``first`` against the current DOM.
+        record changes, browser automation reevaluates ``first`` against the current DOM.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             region_name: Optional region name used to narrow the lookup.
             record_labels: Labels used to identify candidate records.
             expected_texts: Text values that must be present in the matching record.
@@ -154,12 +154,12 @@ class RecordList:
     ) -> Locator:
         """Wait until the newest visible record contains all expected texts.
 
-        The locator remains live across Appian rerenders. Playwright re-evaluates
+        The locator remains live across Appian rerenders. browser automation re-evaluates
         the newest record and its text until the expectation succeeds or the
-        configured Playwright default timeout expires; no manual polling or sleeps are used.
+        configured browser automation default timeout expires; no manual polling or sleeps are used.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             region_name: Optional region name used to narrow the lookup.
             record_labels: Labels used to identify candidate records.
             expected_texts: Text values that must be present in the matching record.
@@ -202,7 +202,7 @@ class RecordList:
         """Read a strong-text value from the newest adjacent value column.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             region_name: Optional region name used to narrow the lookup.
             label_block_texts: Labels used to identify the record block containing the value.
             value_index: Zero-based index of the adjacent strong value to return.

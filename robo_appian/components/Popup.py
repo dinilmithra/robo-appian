@@ -36,7 +36,7 @@ class Popup:
         """Click an action in a matching dialog only when the dialog appears.
 
         Use this for a conditional confirmation dialog. ``expected_text`` is a
-        substring filter. Playwright waits up to the caller-supplied timeout and,
+        substring filter. browser automation waits up to the caller-supplied timeout and,
         when the dialog appears, returns only after the action closes it.
 
         Args:

@@ -54,7 +54,7 @@ from robo_appian import Button, InputText
 
 def test_create_request(page: RoboPage) -> None:
     InputText.fill_by_label(page, "Request Name", "Example Request")
-    Button.click(page, "Submit")
+    page.button(name="Submit").click()
 ```
 
 `robo-appian` owns Appian-specific component behavior; `robo-automation` owns the generic browser/page/locator wrappers and pytest lifecycle.

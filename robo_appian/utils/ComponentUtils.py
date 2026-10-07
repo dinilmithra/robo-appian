@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class ComponentUtils:
-    """Shared Playwright operations used by Appian components."""
+    """Shared browser automation operations used by Appian components."""
 
     @staticmethod
     def xpath_literal(value: str) -> str:
@@ -41,10 +41,10 @@ class ComponentUtils:
     def click(locator: Locator) -> None:
         """Click a visible, enabled locator and log the dispatched interaction.
 
-        Playwright's actionability checks determine when the target is ready. The
+        browser automation's actionability checks determine when the target is ready. The
         method logs immediately before dispatch and after ``click()`` returns so
         failures can distinguish a click that never became actionable from one
-        that Playwright successfully dispatched. One force-click recovery is
+        that browser automation successfully dispatched. One force-click recovery is
         retained only for the existing pointer-interception case.
 
         Args:
@@ -84,7 +84,7 @@ class ComponentUtils:
         itself. Duplicate matches are resolved by choosing the first visible one.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Text to locate.
             excat_match: Whether the element text must match exactly.
         """
@@ -97,7 +97,7 @@ class ComponentUtils:
         """Click the first visible element with the requested title attribute.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             title: Title attribute value to locate.
         """
         link = scope.get_by_title(title).filter(visible=True).first
@@ -109,7 +109,7 @@ class ComponentUtils:
         """Click the first visible, enabled element with an exact HTML ID.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             button_id: Literal HTML ID, including IDs that begin with numbers.
         """
         locator = scope.locator(f'[id="{button_id}"]:not([disabled])')
@@ -123,7 +123,7 @@ class ComponentUtils:
         """Return whether at least one XPath match is currently visible.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression without application-specific CSS classes.
 
         Returns:
@@ -145,7 +145,7 @@ class ComponentUtils:
         """Return whether an element with an exact attribute value is visible.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             attribute: HTML attribute name to match.
             value: Exact attribute value to match.
 
@@ -172,13 +172,13 @@ class ComponentUtils:
         """Return the first component matching an exact attribute value.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             attribute: HTML attribute name used to locate the component.
             value: Exact attribute value used to locate the component.
             visible_only: When true, require the component to be visible.
 
         Returns:
-            Optional[Locator]: The first matching Playwright locator, or ``None`` when no matching
+            Optional[Locator]: The first matching framework locator, or ``None`` when no matching
             component exists.
         """
         attribute_name = str(attribute or "").strip()
@@ -204,7 +204,7 @@ class ComponentUtils:
         """Read an attribute from the nearest ancestor that defines it.
 
         Args:
-            component: Playwright locator whose ancestors are searched.
+            component: framework locator whose ancestors are searched.
             attribute: HTML attribute to read from the nearest matching ancestor.
 
         Returns:
@@ -235,7 +235,7 @@ class ComponentUtils:
         """Read descendant text under the component with the supplied DOM ID.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             component_id: Exact DOM ``id`` of the parent component.
             descendant_xpath: Relative XPath selecting descendants, for example
                 ``.//p``.
@@ -274,7 +274,7 @@ class ComponentUtils:
         """Return unique normalized text from elements matching XPath.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression without application-specific CSS classes.
             visible_only: When true, read only currently visible matches.
 
@@ -309,7 +309,7 @@ class ComponentUtils:
         """Return unique normalized text from visible XPath matches.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression evaluated within the supplied scope.
 
 
@@ -332,7 +332,7 @@ class ComponentUtils:
         """Return unique non-empty attribute values from XPath matches.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression without application-specific CSS classes.
             attribute: Attribute name to read from each matching element.
             visible_only: When true, inspect only currently visible matches.
@@ -365,12 +365,12 @@ class ComponentUtils:
     def wait_for_appian_action_completed(scope: Scope) -> None:
         """Wait until Appian global processing indicators are absent.
 
-        The completion assertion uses the configured Playwright expectation
+        The completion assertion uses the configured browser automation expectation
         timeout and returns only after Appian global processing indicators are
         absent.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to use the whole document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to use the whole document; pass a ``Locator`` to restrict the operation to that locator/container.
         """
         logger.info("Before wait_for_appian_action_completed.")
 
@@ -393,7 +393,7 @@ class ComponentUtils:
         """Wait until a scope or locator is visible.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             message: Optional assertion message used when the wait fails.
         """
         expect(scope, message).to_be_visible()
@@ -403,7 +403,7 @@ class ComponentUtils:
         """Wait until a scope or locator is hidden or detached.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
         """
         expect(scope).to_be_hidden()
 
@@ -415,7 +415,7 @@ class ComponentUtils:
         When ``occurrence`` is omitted, Tab is pressed once.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             occurrence: Optional number of Tab key presses. Defaults to 1 when
                 omitted.
 
@@ -448,7 +448,7 @@ class ComponentUtils:
         the first generic file input is used.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             directory_path: Local directory containing the upload file.
             file_name: File name relative to ``directory_path``.
 
@@ -476,11 +476,11 @@ class ComponentUtils:
     def wait_for_text_visible(scope: Scope, text: str) -> None:
         """Waits for an exact text string to become visible.
 
-        Timeout is inherited from the Playwright default configured by
+        Timeout is inherited from the browser automation default configured by
         conftest.py.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Visible text used to identify the target element.
         """
         logger.info("Waiting for text '%s' to be visible...", text)
@@ -501,7 +501,7 @@ class ComponentUtils:
         locator is not awaited or validated; the caller owns visibility checks.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             field_label: Visible field text required inside the region.
             header_text: Visible text whose ancestor region is selected.
 
@@ -520,7 +520,7 @@ class ComponentUtils:
         """Build a locator using an XPath expression.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression to locate the element.
 
         Returns:
@@ -534,7 +534,7 @@ class ComponentUtils:
         """Build a locator using an XPath expression.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             xpath: XPath expression to locate the element.
 
         Returns:

@@ -18,7 +18,7 @@ class Link:
         """Return whether a link with the semantic name is visible.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name used to identify the control.
             excat_match: Whether matching must use the complete label or text.
 
@@ -38,7 +38,7 @@ class Link:
         """Wait until a link with the semantic name becomes visible.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name used to identify the control.
             excat_match: Whether matching must use the complete label or text.
         """
@@ -58,7 +58,7 @@ class Link:
         """Return visible/accessibility text for a link by semantic name.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name used to identify the control.
             excat_match: Whether matching must use the complete label or text.
 
@@ -85,7 +85,7 @@ class Link:
         method does not perform an exact accessible-name match.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             link_text: Text substring expected within the link.
 
         Raises:

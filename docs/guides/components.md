@@ -11,7 +11,7 @@ Component helpers encapsulate reusable Appian-specific interaction mechanics. Br
 ## Buttons
 
 ```python
-Button.click(page, "Submit")
+page.button(name="Submit").click()
 ```
 
 ## Text inputs

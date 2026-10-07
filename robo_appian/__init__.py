@@ -1,11 +1,17 @@
-"""Reusable Playwright helpers for Appian UI automation.
+"""Reusable browser automation helpers for Appian UI automation.
 
 `robo_appian` contains generic interaction mechanics only. Application-specific
 business rules, workflow names, test data, and assertions belong in the
 consumer project's component layer.
 """
 
-from robo_appian.appian import AppianLocator, AppianPage
+from robo_appian.appian import (
+    AppianBrowserContext,
+    AppianButton,
+    AppianLocator,
+    AppianPage,
+    AppianScope,
+)
 from robo_appian.components import (
     Button,
     InputDate,
@@ -26,8 +32,11 @@ from robo_appian.components import (
 from robo_appian.utils import ComponentUtils
 
 __all__ = [
+    "AppianBrowserContext",
     "AppianPage",
+    "AppianButton",
     "AppianLocator",
+    "AppianScope",
     "Button",
     "InputDate",
     "Dropdown",

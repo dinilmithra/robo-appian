@@ -16,7 +16,7 @@ class Text:
         """Return normalized text from the first visible element matching the supplied text.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Visible text used to identify the target element.
             excat_match: Whether matching must use the complete label or text.
 
@@ -37,7 +37,7 @@ class Text:
         """Return normalized paragraph text containing the requested text fragment.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Visible text used to identify the target element.
 
 
@@ -63,7 +63,7 @@ class Text:
         no locator; use ``get_visible_text`` when the displayed text is needed.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Text to wait for.
             excat_match: Whether rendered text must match exactly.
         """
@@ -76,7 +76,7 @@ class Text:
         """Wait until matching text is hidden or detached.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Visible text used to identify the target element.
             excat_match: Whether matching must use the complete label or text.
         """
@@ -90,7 +90,7 @@ class Text:
         owning a visible field label.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Visible or accessible label used to identify the control.
 
 

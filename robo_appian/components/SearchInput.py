@@ -25,7 +25,7 @@ class SearchInput:
         """Find the nearest visible section containing a heading and field.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             header_text: Unique heading for the section to search.
             field_label: Exact label of the field within that section.
 
@@ -34,7 +34,7 @@ class SearchInput:
 
         Raises:
             AssertionError: If the shared section container does not become
-                visible within the configured Playwright timeout.
+                visible within the configured browser automation timeout.
         """
         # Single XPath: find the nearest common ancestor of the section header text
         # and the target field label text, without using CSS classes.
@@ -124,8 +124,8 @@ class SearchInput:
         be disabled or adjusted for a particular picker.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            accessible_name: Accessible field name used by Playwright's
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            accessible_name: Accessible field name used by browser automation's
                 role-based locator.
             placeholder_text: Exact placeholder used to identify the picker
                 when it does not have a suitable accessible name.
@@ -139,7 +139,7 @@ class SearchInput:
                 ``accessible_name`` and ``placeholder_text`` is not supplied.
             Exception: If the picker has no suggestion list or no exact match.
             AssertionError: If the picker, list, or matching option does not
-                become available within the configured Playwright timeout.
+                become available within the configured browser automation timeout.
         """
         field_name = placeholder_text or accessible_name or "SearchInput"
         logger.info("Search input selection starting: field='%s'.", field_name)
@@ -179,7 +179,7 @@ class SearchInput:
         visible suggestion, excluding Appian's ``No results found`` sentinel.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             index: 1-based index of the visible suggestion to select.
             accessible_name: Accessible field name used to locate the picker.
             placeholder_text: Exact placeholder used when no suitable accessible
@@ -242,7 +242,7 @@ class SearchInput:
         """Choose a visible suggestion by 1-based index for a resolved picker.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             lookup: Locator or lookup value used to resolve the search input.
             index: Zero-based index of the matching search input.
             search_text: Text to type into the search input.
@@ -353,7 +353,7 @@ class SearchInput:
             ValueError: If ``search_text`` is empty.
             Exception: If the picker has no suggestion list or no exact match.
             AssertionError: If the picker, list, or matching option does not
-                become available within the configured Playwright timeout.
+                become available within the configured browser automation timeout.
         """
         if not str(search_text or "").strip():
             raise ValueError("Search text cannot be empty or whitespace.")

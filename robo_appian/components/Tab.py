@@ -110,7 +110,7 @@ class Tab:
         """Return True when the requested tab is currently selected.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             tab_name: Value supplied for ``tab_name``.
             excat_match: Whether matching must use the complete label or text.
 
@@ -147,7 +147,7 @@ class Tab:
         before returning.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             tab_name: Value supplied for ``tab_name``.
             excat_match: Whether matching must use the complete label or text.
         """

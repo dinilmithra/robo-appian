@@ -60,7 +60,7 @@ from robo_appian import Button, InputText
 
 def test_create_request(page: RoboPage) -> None:
     InputText.fill_by_label(page, "Request Name", "Example Request")
-    Button.click(page, "Submit")
+    page.button(name="Submit").click()
 ```
 
 The component classes keep reusable Appian lookup and interaction mechanics out of application workflows. Their current signatures may still expose the generic `Scope` compatibility type from `robo-automation`.

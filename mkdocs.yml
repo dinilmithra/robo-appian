@@ -1,5 +1,5 @@
 site_name: robo-appian
-site_description: Label-oriented Appian UI automation components built on Playwright
+site_description: Appian UI automation components and abstractions
 copyright: Copyright &copy; 2026 Dinil Mithra
 
 extra:
@@ -91,6 +91,7 @@ nav:
   - API Reference:
       - Overview: api/index.md
       - Appian Page and Locator: api/appian-page.md
+      - Appian Button: api/appian-button.md
       - CLI: api/cli.md
       - Components:
           - Button: api/button.md

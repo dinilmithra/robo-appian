@@ -19,7 +19,7 @@ class InputText:
         """Return whether a visible input exists for the supplied label.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Visible or accessible label used to identify the control.
             excat_match: Whether matching must use the complete label or text.
 
@@ -45,7 +45,7 @@ class InputText:
         """Return whether a visible Appian input exists for the supplied input type.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             input_type: Input type used to identify the Appian field.
 
 
@@ -72,7 +72,7 @@ class InputText:
         their own semantic scope without duplicating input interaction logic.
 
         Args:
-            locator: Playwright locator for the target control.
+            locator: framework locator for the target control.
             value: Value to enter or select.
         """
         expect(
@@ -109,7 +109,7 @@ class InputText:
         ensures this API resolves only an editable text input or textarea.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible label of the textbox.
             value: Value to enter.
             excat_match: Whether the accessible label must match exactly.
@@ -166,7 +166,7 @@ class InputText:
         changing ``fill_by_label`` or adding a fallback to it.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Visible or accessible label used to identify the control.
             value: Value to enter or select.
             excat_match: Whether matching must use the complete label or text.
@@ -215,7 +215,7 @@ class InputText:
         a concrete input id before delegating text interaction to InputText.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             element_id: DOM id of the input or textarea.
             value: Value to enter.
 
@@ -248,7 +248,7 @@ class InputText:
         """Fill a visible input using its placeholder.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             placeholder: Placeholder text used to identify the input.
             value: Value to enter or select.
             excat_match: Whether matching must use the complete label or text.
@@ -284,7 +284,7 @@ class InputText:
         sections of a scope.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             field_label: Visible label of the target field.
             header_text: Header text identifying the container that holds the field.
             value: Value to enter or select.

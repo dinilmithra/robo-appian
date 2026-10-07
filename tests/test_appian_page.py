@@ -1,9 +1,10 @@
+from pathlib import Path
 from unittest.mock import MagicMock, Mock
 
-from playwright.sync_api import Locator, Page
+from playwright.sync_api import BrowserContext, Locator, Page
 
 from robo_automation import RoboPage
-from robo_appian import AppianLocator, AppianPage
+from robo_appian import AppianBrowserContext, AppianLocator, AppianPage, AppianScope
 
 
 def _mock_page() -> Page:
@@ -46,3 +47,138 @@ def test_pytest11_entry_point_declared() -> None:
     assert metadata["project"]["entry-points"]["pytest11"]["robo_appian"] == (
         "robo_appian.pytest_plugin"
     )
+
+
+def test_appian_page_button_returns_appian_button() -> None:
+    from robo_appian import AppianButton
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    button = appian_page.button(name="Save")
+
+    assert isinstance(button, AppianButton)
+    assert button.name == "Save"
+
+
+def test_appian_button_does_not_import_legacy_components() -> None:
+    from pathlib import Path
+
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "robo_appian"
+        / "appian"
+        / "appian_button.py"
+    ).read_text(encoding="utf-8")
+
+    assert "robo_appian.components" not in source
+
+
+def test_appian_page_button_requires_name_keyword() -> None:
+    import pytest
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    with pytest.raises(TypeError):
+        appian_page.button("Save")  # type: ignore[misc]
+
+
+def test_button_locator_requires_type_button() -> None:
+    from robo_appian import AppianButton
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    AppianButton(page=appian_page, name="Submit", exact=True)._locator()
+
+    xpath = page.locator.call_args.args[0]
+    assert ".//button[@type='button'" in xpath
+    assert ".//input[" not in xpath
+
+
+def test_button_locator_matches_name_without_using_css_classes() -> None:
+    from robo_appian import AppianButton
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    AppianButton(page=appian_page, name="Submit", exact=True)._locator()
+
+    xpath = page.locator.call_args.args[0]
+    assert "@type='button'" in xpath
+    assert "@class" not in xpath
+    assert "SUBMIT" in xpath
+
+
+def test_appian_button_disabled_uses_disabled_attribute() -> None:
+    from robo_appian import AppianButton
+
+    page = _mock_page()
+    locator = page.locator.return_value
+    locator.filter.return_value.first.get_attribute.return_value = ""
+    appian_page = AppianPage.get(page)
+
+    assert AppianButton(page=appian_page, name="Submit").is_disabled() is True
+
+
+def test_appian_button_enabled_when_disabled_attribute_absent() -> None:
+    from robo_appian import AppianButton
+
+    page = _mock_page()
+    locator = page.locator.return_value
+    locator.filter.return_value.first.get_attribute.return_value = None
+    appian_page = AppianPage.get(page)
+
+    assert AppianButton(page=appian_page, name="Submit").is_enabled() is True
+
+
+def test_appian_button_disabled_is_not_enabled() -> None:
+    from robo_appian import AppianButton
+
+    page = _mock_page()
+    locator = page.locator.return_value
+    locator.filter.return_value.first.get_attribute.return_value = ""
+    appian_page = AppianPage.get(page)
+
+    assert AppianButton(page=appian_page, name="Submit").is_enabled() is False
+
+
+def test_appian_page_button_can_preserve_locator_scope() -> None:
+    page = _mock_page()
+    raw_scope = MagicMock(spec=Locator)
+    raw_scope.locator.return_value = MagicMock(spec=Locator)
+    scoped_locator = AppianLocator.get(raw_scope)
+    appian_page = AppianPage.get(page)
+
+    button = appian_page.button(name="Confirm", scope=scoped_locator)
+    button._locator()
+
+    raw_scope.locator.assert_called_once()
+    page.locator.assert_not_called()
+
+
+def test_appian_browser_context_creates_appian_page() -> None:
+    raw_context = MagicMock(spec=BrowserContext)
+    raw_page = MagicMock(spec=Page)
+    raw_context.new_page.return_value = raw_page
+
+    context = AppianBrowserContext.get(raw_context)
+
+    assert isinstance(context.new_page(), AppianPage)
+
+
+def test_appian_scope_contains_only_appian_abstractions() -> None:
+    from typing import get_args
+
+    assert set(get_args(AppianScope)) == {AppianPage, AppianLocator}
+
+
+def test_core_does_not_reference_generic_robo_resource_types() -> None:
+    core_root = Path(__file__).resolve().parents[2] / "core-automation"
+    forbidden = ("RoboPage", "RoboBrowserContext", "RoboLocator", "from robo_automation import Scope")
+
+    for path in core_root.rglob("*"):
+        if not path.is_file() or path.suffix not in {".py", ".md"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        for token in forbidden:
+            assert token not in text, f"{token!r} found in {path}"

@@ -38,7 +38,7 @@ class AppianElement:
         user_options.click()
 
     Args:
-        scope: Playwright ``Page`` or ``Locator`` used as the search root.
+        scope: browser automation ``Page`` or ``Locator`` used as the search root.
         attributes: One or more HTML attributes used to identify the element.
             Attribute names are used directly in the XPath expression, so
             standard, ARIA, ``data-*``, and application-specific attributes
@@ -126,7 +126,7 @@ class AppianElement:
         """Create an ``AppianElement`` located by its HTML ``id`` attribute.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator`` used as the search root.
+            scope: browser automation ``Page`` or ``Locator`` used as the search root.
             element_id: HTML ``id`` attribute value to locate.
             excat_match: Matching mode for the id value. ``True`` (or ``None``)
                 uses exact equality; ``False`` uses substring matching.
@@ -148,7 +148,7 @@ class AppianElement:
 
     @property
     def locator(self) -> Locator:
-        """Return the wrapped Playwright ``Locator``."""
+        """Return the wrapped framework locator."""
         return self._locator
 
     def click(self, **kwargs: Any) -> None:
@@ -184,9 +184,9 @@ class AppianElement:
 
         Args:
             timeout: Optional timeout in milliseconds. When ``None``, the
-                timeout argument is omitted so Playwright uses its configured
+                timeout argument is omitted so browser automation uses its configured
                 default assertion timeout.
-            **kwargs: Additional keyword arguments forwarded to Playwright's
+            **kwargs: Additional keyword arguments forwarded to browser automation's
                 ``LocatorAssertions.to_be_visible`` method.
         """
         assertion = expect(self._locator)
@@ -225,7 +225,7 @@ class AppianElement:
 
         ``attributes`` accepts any valid HTML attribute name, including ARIA,
         ``data-*``, standard, and application-specific attributes. Each
-        attribute is asserted with Playwright's retrying ``to_have_attribute``
+        attribute is asserted with browser automation's retrying ``to_have_attribute``
         assertion, so dynamic state changes such as ``aria-expanded="true"``
         becoming ``aria-expanded="false"`` are handled without manual polling.
 
@@ -233,7 +233,7 @@ class AppianElement:
             attributes: Attribute/value pairs to wait for. Example:
                 ``{"aria-expanded": "false", "data-state": "ready"}``.
             timeout: Optional timeout in milliseconds. When ``None``, the
-                timeout argument is omitted so Playwright uses its configured
+                timeout argument is omitted so browser automation uses its configured
                 default assertion timeout.
 
         Raises:
@@ -254,7 +254,7 @@ class AppianElement:
                 assertion.to_have_attribute(name, expected, timeout=timeout)
 
     def wait_for(self, **kwargs: Any) -> None:
-        """Wait for the wrapped element using Playwright locator semantics."""
+        """Wait for the wrapped element using framework locator semantics."""
         self._locator.wait_for(**kwargs)
 
     def __getattr__(self, name: str) -> Any:

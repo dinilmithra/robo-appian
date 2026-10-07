@@ -416,7 +416,7 @@ class Table:
         excluded.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Optional region or heading text identifying the table.
             column_name: Optional header used when no table name is available.
             region_name: Optional accessible region name identifying the table container.
@@ -454,7 +454,7 @@ class Table:
         Column: column_number > column_name.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             region_name: Optional region name used to narrow the lookup.
             table_column_name: Optional table-column identifier used when resolving a cell.
@@ -498,7 +498,7 @@ class Table:
         column_name. Numeric selectors take precedence when both are supplied.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
@@ -533,7 +533,7 @@ class Table:
         """Return text from a named-row/named-column intersection.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
@@ -563,10 +563,10 @@ class Table:
         """Fill a text input or textarea at a named-row/column intersection.
 
         This supports Appian TextInput and ParagraphWidget controls because
-        both expose textbox semantics to Playwright.
+        both expose textbox semantics to browser automation.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
@@ -618,7 +618,7 @@ class Table:
         """Fill a textbox using flexible table/row/column selectors.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
@@ -656,7 +656,7 @@ class Table:
         """Fill a date input at a named row and resolved column.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
@@ -693,7 +693,7 @@ class Table:
         """Select a dropdown using flexible table/row/column selectors.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
@@ -737,7 +737,7 @@ class Table:
         responsibility for interacting with the Appian component.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
@@ -787,7 +787,7 @@ class Table:
         SearchInput performs the actual picker interaction.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
@@ -837,7 +837,7 @@ class Table:
         This public compatibility API delegates to ``get_cell_text``.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
@@ -863,7 +863,7 @@ class Table:
         """Fill a textbox using flexible table/row/column selectors.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
@@ -900,7 +900,7 @@ class Table:
         """Fill a date control using flexible table/row/column selectors.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
@@ -939,7 +939,7 @@ class Table:
         """Select a radio option using flexible table/row/column selectors.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
@@ -983,7 +983,7 @@ class Table:
         supporting both Appian action representations.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
@@ -1072,7 +1072,7 @@ class Table:
         """Click a one-based data row in a named Appian table.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             excat_match: Whether matching must use the complete label or text.
@@ -1095,7 +1095,7 @@ class Table:
         """Check or uncheck the checkbox contained in a named table row.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             checked: Desired checkbox state.
@@ -1130,7 +1130,7 @@ class Table:
         """Select a radio option from a named-row/column intersection.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             table_name: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.

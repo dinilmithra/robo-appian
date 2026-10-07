@@ -199,7 +199,7 @@ from robo_appian import Button, InputText
 
 def test_request(page: RoboPage):
     InputText.fill_by_label(page, "Request Name", "Example")
-    Button.click(page, "Submit")</code></pre>
+    page.button(name="Submit").click()</code></pre>
     </div>
     <div class="ra-target-architecture">
       <div class="ra-target-panel-title light"><span>Architecture Overview</span><a href="getting-started/concepts/index.html">How it works &rarr;</a></div>
@@ -373,7 +373,7 @@ def build() -> None:
     (SITE / "assets").mkdir(parents=True)
 
     # Homepage
-    write_page("index.html", "Home", home_body(), "Home", "Reusable Playwright helpers for reliable Appian UI automation.")
+    write_page("index.html", "Home", home_body(), "Home", "Reusable automation helpers for reliable Appian application testing.")
 
     # Markdown-backed content pages
     md_pages = [

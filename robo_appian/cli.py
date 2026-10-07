@@ -11,10 +11,10 @@ _SUPPORTED_BROWSERS = ("chromium", "firefox", "webkit", "all")
 
 
 def install_browser(browser: str | None = None) -> int:
-    """Install Playwright-managed browser binaries using this Python environment.
+    """Install browser-managed browser binaries using this Python environment.
 
     If ``browser`` is omitted or set to ``"all"``, install the full set of
-    Playwright-managed browsers.
+    browser-managed browsers.
     """
     normalized = (browser or "all").strip().lower()
     if normalized not in _SUPPORTED_BROWSERS:

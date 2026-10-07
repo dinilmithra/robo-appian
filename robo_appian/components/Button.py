@@ -25,7 +25,7 @@ class Button:
         """Return whether a matching Appian button control is visible.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Visible or accessible label used to identify the control.
             excat_match: Whether matching must use the complete label or text.
 
@@ -92,17 +92,14 @@ class Button:
         aria_label = normalized_xpath("@aria-label")
         title = normalized_xpath("@title")
         data_label = normalized_xpath("@data-owl-test-label")
-        input_value = normalized_xpath("@value")
-
         if excat_match:
             compare = lambda expr: f"{expr} = {expected}"
         else:
             compare = lambda expr: f"contains({expr}, {expected})"
 
-        # For <button>, match either the full normalized text/accessibility
-        # metadata or any descendant's normalized text. The descendant branch
-        # is important for Appian buttons whose visible label is nested inside
-        # spans while extra accessibility text is also present.
+        # Appian action buttons are native <button type="button"> elements.
+        # Match their rendered/accessibility label while requiring that DOM
+        # contract. Disabled state is intentionally not part of identity.
         descendant_text = normalized_xpath("string(.)")
         button_predicate = " or ".join(
             [
@@ -114,20 +111,9 @@ class Button:
             ]
         )
 
-        input_predicate = " or ".join(
-            [
-                compare(input_value),
-                compare(aria_label),
-                compare(title),
-                compare(data_label),
-            ]
-        )
-
         xpath = (
-            "xpath=(.//button[" + button_predicate + "]"
-            " | .//input["
-            "(@type='button' or @type='submit' or @type='reset') and ("
-            + input_predicate
+            "xpath=(.//button[@type='button' and ("
+            + button_predicate
             + ")])[1]"
         )
 
@@ -139,15 +125,15 @@ class Button:
         label: str,
         excat_match: bool = False,
     ) -> Locator:
-        """Wait using Playwright auto-waiting until a button is actionable.
+        """Wait using browser automation auto-waiting until a button is actionable.
 
         The XPath locator is live: if Appian removes and recreates the button
-        during a SAIL rerender, Playwright re-evaluates the locator until the
+        during a SAIL rerender, browser automation re-evaluates the locator until the
         current element is visible and enabled. No manual polling or sleeps are
         required.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Visible or accessible label used to identify the control.
             excat_match: Whether matching must use the complete label or text.
 
@@ -172,8 +158,8 @@ class Button:
 
         expect(
             button,
-            f"Button '{label}' was visible but not enabled.",
-        ).to_be_enabled()
+            f"Button '{label}' was visible but remained disabled.",
+        ).not_to_have_attribute("disabled", re.compile(".*"))
 
         return button
 
@@ -191,7 +177,7 @@ class Button:
         must be present; another value requires an exact attribute match.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Accessible or rendered button label.
             attributes: HTML attribute constraints used to disambiguate the
                 button. Values of ``None`` require attribute presence.
@@ -251,7 +237,7 @@ class Button:
         """Wait for an Appian button control to be actionable, then click it.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Visible or accessible label used to identify the control.
             excat_match: Whether matching must use the complete label or text.
         """
@@ -276,7 +262,7 @@ class Button:
         """Wait until a matching Appian button control is hidden or detached.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Visible or accessible label used to identify the control.
             excat_match: Whether matching must use the complete label or text.
         """

@@ -94,7 +94,7 @@ class RadioSelect:
         Yes/No options elsewhere on the same scope.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             group_label: Accessible label of the radio-button group.
             option_name: Visible option text to select.
             excat_match: Whether matching must use the complete label or text.
@@ -117,7 +117,7 @@ class RadioSelect:
         """Select a visible Appian radio option on the scope.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             option_text: Visible option text to select.
         """
         RadioSelect.__select_in_scope(scope, option_text)

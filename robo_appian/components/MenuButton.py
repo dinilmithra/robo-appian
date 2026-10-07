@@ -90,12 +90,12 @@ class MenuButton:
         reaches ``domcontentloaded``.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label: Visible menu-button label.
             value: Visible option text to select.
 
         Returns:
-            Page: The newly opened Playwright scope; subsequent interactions must use it.
+            Page: The newly opened browser automation scope; subsequent interactions must use it.
 
         Raises:
             ValueError: If the menu button has no valid ARIA-owned menu ID.

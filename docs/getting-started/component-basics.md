@@ -42,7 +42,7 @@ Use a component helper when robo-appian has reusable Appian-specific behavior fo
 from robo_appian import InputText, Button
 
 InputText.fill_by_label(page, "Request Name", "Example Request")
-Button.click(page, "Submit")
+page.button(name="Submit").click()
 ```
 
 ## `Dropdown` or `SearchDropdown`?

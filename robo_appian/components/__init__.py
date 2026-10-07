@@ -1,4 +1,4 @@
-"""Reusable UI component helpers for Appian/Playwright automation.
+"""Reusable UI component helpers for Appian/browser automation automation.
 
 Components should expose semantic operations and avoid application-specific
 workflow rules or selectors based on generated CSS class names.

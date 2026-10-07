@@ -31,7 +31,7 @@ class Dropdown:
         CSS class names are used.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Visible field label.
             excat_match: Whether the label text must match exactly.
             editable_only: When True, exclude comboboxes with
@@ -104,7 +104,7 @@ class Dropdown:
         Resolve a visible Appian dropdown by accessible label.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name of the dropdown.
             excat_match: Whether the accessible-name match must match exactly.
             allow_required_marker: Whether excat_match matching may accept Appian's
@@ -188,7 +188,7 @@ class Dropdown:
         ``aria-controls`` attribute.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             dropdown: Expanded Appian dropdown locator.
 
         Returns:
@@ -341,7 +341,7 @@ class Dropdown:
         - selects the requested option.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             dropdown: Already-resolved Appian dropdown locator.
             option_text: Option text to select.
             excat_match: Whether the option text must match exactly.
@@ -388,7 +388,7 @@ class Dropdown:
         Select an option from an Appian dropdown identified by label.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name of the dropdown.
             option_text: Option text to select.
             excat_match: Whether label and option matching must match exactly.
@@ -433,7 +433,7 @@ class Dropdown:
         and so on. Placeholder entries such as "Select a Value" are excluded.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name used to identify the control.
             option_index: Zero-based option index to select.
             excat_match: Whether matching must use the complete label or text.
@@ -503,7 +503,7 @@ class Dropdown:
         dropdown expansion and option-selection behavior remains centralized.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             placeholder_text: Placeholder text used to identify the dropdown.
             option_text: Visible option text to select.
             excat_match: Whether matching must use the complete label or text.
@@ -556,7 +556,7 @@ class Dropdown:
         Return whether a visible Appian dropdown exists by label.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name to locate.
             excat_match: Whether the accessible-name match must match exactly.
             container: Optional locator used to restrict lookup.
@@ -601,11 +601,11 @@ class Dropdown:
         dropdowns and read-only display fields.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Visible label text of the dropdown.
             excat_match: Whether the label-text match must match exactly.
             immediate: Whether to inspect the current DOM without waiting.
-            timeout: Optional timeout in seconds. When omitted, Playwright's
+            timeout: Optional timeout in seconds. When omitted, browser automation's
                 configured default timeout is used.
 
         Returns:
@@ -654,7 +654,7 @@ class Dropdown:
         Return the currently displayed value of a dropdown.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible name of the dropdown.
             excat_match: Whether the accessible-name match must match exactly.
             container: Optional locator used to restrict lookup.

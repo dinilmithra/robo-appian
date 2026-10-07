@@ -35,7 +35,7 @@ from robo_appian import AppianPage, Button, InputText
 
 def test_example(page: AppianPage) -> None:
     InputText.fill_by_label(page, "Request Name", "Example Request")
-    Button.click(page, "Submit")
+    page.button(name="Submit").click()
 ```
 
 A consuming application such as CORE may override only the public `page` fixture to add application-specific navigation/login while depending on `appian_page`; the underlying Playwright page is still created and closed by `robo-automation`.

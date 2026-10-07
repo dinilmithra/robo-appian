@@ -21,3 +21,11 @@ page
 ```
 
 A consuming application may override `page` for application-specific startup while depending on `appian_page`. Page creation and teardown remain owned by `robo-automation`.
+
+
+## Fluent components
+
+```python
+button = page.button(name="Save")
+button.click()
+```

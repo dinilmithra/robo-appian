@@ -31,7 +31,7 @@ class SearchDropdown:
         to filter the available options.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible combobox name to match.
             option_text: Option name to search for and select.
             exact_label: When True, require the rendered Appian label to match
@@ -39,7 +39,7 @@ class SearchDropdown:
                 marker variants (``Label*`` and ``Label *``).
             timeout: Optional timeout in seconds for dropdown/listbox/search/option
                 visibility and final selection assertions. When omitted,
-                Playwright's configured expectation timeout is used.
+                browser automation's configured expectation timeout is used.
 
         Raises:
             AssertionError: If required ARIA linkage is missing or the combobox,
@@ -177,7 +177,7 @@ class SearchDropdown:
         option ordering is stable.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible combobox name to match.
             option_index: One-based index of the selectable option.
             exact_label: When True, require the rendered Appian label to match
@@ -185,7 +185,7 @@ class SearchDropdown:
                 marker variants (``Label*`` and ``Label *``).
             timeout: Optional timeout in seconds for dropdown/listbox/option
                 visibility and final selection assertions. When omitted,
-                Playwright's configured expectation timeout is used.
+                browser automation's configured expectation timeout is used.
 
         Raises:
             ValueError: If the accessible name is blank or ``option_index`` is
@@ -325,7 +325,7 @@ class SearchDropdown:
         """Wait until a visible dropdown displays the expected rendered text.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             accessible_name: Accessible combobox name.
             expected_value: Text expected inside the selected dropdown.
             excat_match: Whether ``accessible_name`` must exactly match; this does
@@ -358,7 +358,7 @@ class SearchDropdown:
         represented as ``Label or ID Not Found`` rather than raised.
 
         Args:
-            scope: Playwright ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
+            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             label_text: Exact visible label text to inspect.
 
         Returns:
