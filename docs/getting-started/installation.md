@@ -87,7 +87,7 @@ Installing `robo-automation` registers `robo_automation.pytest_plugin` through p
 The lower `robo-automation` plugin owns browser/runtime lifecycle, and the `robo-appian` plugin specializes the page fixture for Appian consumers:
 
 ```text
-robo-automation: robo_page -> RoboPage
+robo-automation: robo_page -> AppianPage
                          ↓
 robo-appian:     appian_page -> AppianPage
                          ↓
@@ -111,7 +111,7 @@ Application projects can override generic context inputs such as `storage_state`
 Verify both package layers:
 
 ```bash
-python -c "import robo_appian; from robo_appian import AppianBrowserContext, AppianPage, AppianLocator; print('imports OK')"
+python -c "import robo_appian; from robo_appian import AppianPage, AppianLocator; print('imports OK')"
 ```
 
 Verify the CLI:

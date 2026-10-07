@@ -8,30 +8,29 @@ Installing `robo-automation` registers its pytest plugin through the `pytest11` 
 
 ```text
 browser -> Playwright Browser
-context -> RoboBrowserContext
-page    -> RoboPage
+page    -> AppianPage
 ```
 
-## 2. Write a test with `RoboPage`
+## 2. Write a test with `AppianPage`
 
 ```python
-from robo_automation import RoboPage
+from robo_appian import AppianPage
 
 
-def test_open_appian(page: RoboPage) -> None:
+def test_open_appian(page: AppianPage) -> None:
     page.goto("https://your-appian-site.example/")
     assert "your-appian-site" in page.url
 ```
 
 Authentication and the target URL are application-specific and belong in the consuming project.
 
-## 3. Locate and act through `RoboLocator`
+## 3. Locate and act through `AppianLocator`
 
 ```python
-from robo_automation import RoboPage
+from robo_appian import AppianPage
 
 
-def test_user_menu(page: RoboPage) -> None:
+def test_user_menu(page: AppianPage) -> None:
     user_options = page.get_by_attributes(
         attributes={
             "role": "button",
@@ -54,11 +53,11 @@ agree.click()
 ## 5. Use reusable Appian component helpers
 
 ```python
-from robo_automation import RoboPage
+from robo_appian import AppianPage
 from robo_appian import AppianPage, InputText
 
 
-def test_create_request(page: RoboPage) -> None:
+def test_create_request(page: AppianPage) -> None:
     InputText.fill_by_label(page, "Request Name", "Example Request")
     page.button(name="Submit").click()
 ```

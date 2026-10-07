@@ -43,9 +43,9 @@ hide:
   <section class="ra-target-workbench">
     <div class="ra-target-code">
       <div class="ra-target-panel-title"><span>›_ &nbsp; Quick Start</span><span>🐍 Python</span></div>
-      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_automation <span class="kw">import</span> RoboPage
+      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_automation <span class="kw">import</span> AppianPage
 <span class="ln">2</span>
-<span class="ln">3</span> <span class="kw">def</span> test_user_options(page: RoboPage):
+<span class="ln">3</span> <span class="kw">def</span> test_user_options(page: AppianPage):
 <span class="ln">4</span>     user_options = page.get_by_attributes(
 <span class="ln">5</span>         attributes={<span class="st">"role"</span>: <span class="st">"button"</span>, <span class="st">"aria-label"</span>: <span class="st">"User options"</span>},
 <span class="ln">6</span>         excat_match=<span class="kw">True</span>,

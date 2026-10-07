@@ -19,11 +19,11 @@ Start from the Appian control you want to interact with. Prefer the most specifi
 | Select or inspect a tab | [`Tab`](../api/tab.md) |
 | Read or interact with table/grid content | [`Table`](../api/table.md) |
 | Read or wait for visible text | [`Text`](../api/text.md) |
-| Locate by arbitrary HTML attributes | [`RoboLocator`](../api/robo-locator.md) |
+| Locate by arbitrary HTML attributes | [`AppianLocator`](../api/robo-locator.md) |
 
 ## Framework lookup or component helper?
 
-Use `RoboPage` / `RoboLocator` when the control is best described by generic DOM/accessibility attributes:
+Use `AppianPage` / `AppianLocator` when the control is best described by generic DOM/accessibility attributes:
 
 ```python
 user_options = page.get_by_attributes(
@@ -61,11 +61,11 @@ New consuming projects should use the Robo* fixture/wrapper model for browser ow
 
 ## When to use `ComponentUtils`
 
-[`ComponentUtils`](../api/component-utils.md) contains shared lower-level operations. Application tests should normally prefer `RoboPage`, `RoboLocator`, or a component-specific API because those express intent more clearly.
+[`ComponentUtils`](../api/component-utils.md) contains shared lower-level operations. Application tests should normally prefer `AppianPage`, `AppianLocator`, or a component-specific API because those express intent more clearly.
 
 ## Arbitrary attribute lookup
 
-`RoboLocator` accepts arbitrary HTML attributes, including standard, ARIA, `data-*`, and application-specific attributes:
+`AppianLocator` accepts arbitrary HTML attributes, including standard, ARIA, `data-*`, and application-specific attributes:
 
 ```python
 user_options = page.get_by_attributes(

@@ -6,7 +6,6 @@ consumer project's component layer.
 """
 
 from robo_appian.appian import (
-    AppianBrowserContext,
     AppianButton,
     AppianLocator,
     AppianPage,
@@ -31,7 +30,6 @@ from robo_appian.components import (
 from robo_appian.utils import ComponentUtils
 
 __all__ = [
-    "AppianBrowserContext",
     "AppianPage",
     "AppianButton",
     "AppianLocator",

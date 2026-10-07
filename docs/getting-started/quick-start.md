@@ -19,17 +19,16 @@ The generic fixture chain is:
 
 ```text
 browser -> Playwright Browser
-context -> RoboBrowserContext
-page    -> RoboPage
+page    -> AppianPage
 ```
 
-## 3. Use `RoboPage`
+## 3. Use `AppianPage`
 
 ```python
-from robo_automation import RoboPage
+from robo_appian import AppianPage
 
 
-def test_user_options(page: RoboPage) -> None:
+def test_user_options(page: AppianPage) -> None:
     page.goto("https://your-appian-site.example/")
 
     user_options = page.get_by_attributes(
@@ -44,7 +43,7 @@ def test_user_options(page: RoboPage) -> None:
     user_options.click()
 ```
 
-`get_by_attributes(...)` returns a `RoboLocator` from `robo-automation`.
+`get_by_attributes(...)` returns an `AppianLocator` from `robo-appian`.
 
 ## 4. Use Appian components for reusable control behavior
 
@@ -52,7 +51,7 @@ def test_user_options(page: RoboPage) -> None:
 from robo_appian import AppianPage, InputText
 
 
-def test_create_request(page: RoboPage) -> None:
+def test_create_request(page: AppianPage) -> None:
     InputText.fill_by_label(page, "Request Name", "Example Request")
     page.button(name="Submit").click()
 ```

@@ -7,12 +7,11 @@
 Prefer package-root Appian imports in consumers:
 
 ```python
-from robo_appian import AppianBrowserContext, AppianLocator, AppianPage, AppianScope
+from robo_appian import AppianLocator, AppianPage, AppianScope
 ```
 
 | Type | Responsibility |
 | --- | --- |
-| `AppianBrowserContext` | Appian context specialization that creates/tracks `AppianPage` |
 | [`AppianPage`](appian-page.md) | Appian page abstraction and fluent component entry point |
 | `AppianLocator` | Appian locator specialization used for scoped/subtree operations |
 | [`AppianScope`](appian-scope.md) | `AppianPage | AppianLocator` for APIs that intentionally accept both |

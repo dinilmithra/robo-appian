@@ -76,7 +76,7 @@ Override the session-scoped `storage_state` fixture. For xdist, keep the state w
 
 ## An element resolves to hidden and visible duplicates
 
-Appian may render hidden and visible copies of the same control. `RoboLocator.to_be_visible()` filters the current match set to visible elements.
+Appian may render hidden and visible copies of the same control. `AppianLocator.to_be_visible()` filters the current match set to visible elements.
 
 ```python
 user_options.to_be_visible()
@@ -113,11 +113,11 @@ Check:
 3. whether exact versus partial matching is correct;
 4. whether a repeated control should be narrowed to a smaller scope;
 5. whether the correct component type is being used;
-6. whether generic `RoboPage.get_by_attributes()` is a better fit for the element.
+6. whether generic `AppianPage.get_by_attributes()` is a better fit for the element.
 
 Avoid arbitrary sleeps; synchronize on a meaningful UI state.
 
-## `Scope` mentions Playwright even though my test uses `RoboPage`
+## `Scope` mentions Playwright even though my test uses `AppianPage`
 
 Some older non-button components still expose the lower-layer generic `Scope` compatibility annotation. New Appian-facing code should use `AppianPage`, `AppianLocator`, or `AppianScope`; generated API pages reflect the actual signature of each component.
 

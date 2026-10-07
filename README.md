@@ -7,20 +7,20 @@
 ```text
 Consumer / CORE application code
         ↓
-robo-appian AppianBrowserContext / AppianPage / AppianLocator / components
+robo-appian AppianPage / AppianLocator / components
         ↓
 robo-automation generic wrappers
-Browser → RoboBrowserContext → RoboPage → RoboLocator
+Browser lifecycle → AppianPage → AppianLocator
         ↓
 Playwright
         ↓
 Appian
 ```
 
-For Appian consumers, `robo-appian` provides `AppianBrowserContext`, `AppianPage`, and `AppianLocator` specializations over the generic lower layer. Both `robo-automation` and `robo-appian` are pytest plugins discovered through installed `pytest11` entry points. The fixture layering is automatic:
+For Appian consumers, `robo-appian` provides `AppianPage` and `AppianLocator` specializations over the generic lower layer. Both `robo-automation` and `robo-appian` are pytest plugins discovered through installed `pytest11` entry points. The fixture layering is automatic:
 
 ```text
-robo-automation: robo_page -> RoboPage
+robo-automation: robo_page -> AppianPage
                          ↓
 robo-appian:     appian_page -> AppianPage
                          ↓
@@ -61,9 +61,9 @@ robo-appian install-browser webkit
 
 ## Component APIs and Scope
 
-The preferred Appian-facing API uses `AppianPage`, `AppianLocator`, `AppianBrowserContext`, and `AppianScope`. `AppianScope` is `AppianPage | AppianLocator`; use `AppianPage` for page-wide operations and `AppianLocator` only when a dialog or subtree must constrain the search.
+The preferred Appian-facing API uses `AppianPage`, `AppianLocator`, and `AppianScope`. `AppianScope` is `AppianPage | AppianLocator`; use `AppianPage` for page-wide operations and `AppianLocator` only when a dialog or subtree must constrain the search.
 
-`AppianButton` is implemented fresh inside `robo_appian.appian` and is created through `page.button(name="...")`. The removed legacy `robo_appian.components.Button` and `AppianElement` APIs are not part of the package. Some older non-button component helpers still have generic lower-layer `Scope` annotations; those are compatibility signatures, not the preferred consumer resource model.
+`AppianButton` is implemented fresh inside `robo_appian.appian` and is created through `page.button(name="...")`. The legacy component APIs are not part of the preferred consumer resource model. Some older non-button component helpers still have generic lower-layer `Scope` annotations; those are compatibility signatures, not the preferred consumer resource model.
 
 ## Documentation
 

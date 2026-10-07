@@ -1,10 +1,10 @@
 from pathlib import Path
 from unittest.mock import MagicMock, Mock
 
-from playwright.sync_api import BrowserContext, Locator, Page
+from playwright.sync_api import Locator, Page
 
 from robo_automation import RoboPage
-from robo_appian import AppianBrowserContext, AppianLocator, AppianPage, AppianScope
+from robo_appian import AppianLocator, AppianPage, AppianScope
 
 
 def _mock_page() -> Page:
@@ -156,15 +156,13 @@ def test_appian_page_button_can_preserve_locator_scope() -> None:
     page.locator.assert_not_called()
 
 
-def test_appian_browser_context_creates_appian_page() -> None:
-    raw_context = MagicMock(spec=BrowserContext)
-    raw_page = MagicMock(spec=Page)
-    raw_context.new_page.return_value = raw_page
 
-    context = AppianBrowserContext.get(raw_context)
+def test_appian_browser_context_is_not_public_api() -> None:
+    import robo_appian
 
-    assert isinstance(context.new_page(), AppianPage)
-
+    package_root = Path(__file__).resolve().parents[1] / "robo_appian"
+    assert not (package_root / "appian" / "appian_browser_context.py").exists()
+    assert not hasattr(robo_appian, "AppianBrowserContext")
 
 def test_appian_scope_contains_only_appian_abstractions() -> None:
     from typing import get_args

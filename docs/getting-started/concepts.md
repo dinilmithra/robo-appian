@@ -11,7 +11,7 @@ robo-appian
 Appian components and interaction utilities
         ↓
 robo-automation
-Browser -> RoboBrowserContext -> RoboPage -> RoboLocator
+Browser lifecycle -> AppianPage -> AppianLocator
         ↓
 Playwright
         ↓
@@ -22,7 +22,7 @@ The generic wrapper classes are exported by `robo_automation`:
 
 ```python
 from playwright.sync_api import Browser
-from robo_automation import RoboBrowserContext, RoboPage, RoboLocator
+from robo_appian import AppianPage, AppianLocator
 ```
 
 `robo-appian` consumes these generic types; it does not own or export them.
@@ -33,15 +33,11 @@ from robo_automation import RoboBrowserContext, RoboPage, RoboLocator
 
 The public `browser` fixture is a Playwright `Browser` supplied by the `robo-automation` pytest plugin.
 
-### `RoboBrowserContext`
+### `AppianPage`
 
-Wraps a Playwright browser context. `new_page()` and `pages` return `RoboPage` objects and the wrapper exposes the context lifecycle operations needed by the generic pytest layer.
+Wraps a Playwright page and provides framework-level navigation and lookup helpers. Attribute-based lookup methods return `AppianLocator` objects.
 
-### `RoboPage`
-
-Wraps a Playwright page and provides framework-level navigation and lookup helpers. Attribute-based lookup methods return `RoboLocator` objects.
-
-### `RoboLocator`
+### `AppianLocator`
 
 Wraps a resolved Playwright locator and provides operations such as visibility filtering, attribute waits, click, nested lookup, and `first()`.
 
@@ -54,9 +50,9 @@ robo-automation: Playwright runtime
       ↓
 robo-automation: browser -> Playwright Browser
       ↓
-robo-automation: context -> RoboBrowserContext
+robo-automation: context lifecycle
       ↓
-robo-automation: page -> RoboPage
+robo-automation: page -> AppianPage
 ```
 
 A consuming project can override generic context inputs (`storage_state`, `context_options`, `wait_time`, `context_page_handler`) and can override `page` for application navigation/login. Application-specific behavior remains in the consuming project.
@@ -66,7 +62,8 @@ A consuming project can override generic context inputs (`storage_state`, `conte
 | Concern | robo-automation | robo-appian | Consumer project |
 | --- | :---: | :---: | :---: |
 | Playwright runtime/browser lifecycle | ✓ | | |
-| `RoboBrowserContext` / `RoboPage` / `RoboLocator` | ✓ | | |
+| Generic browser/context lifecycle | ✓ | | |
+| `AppianPage` / `AppianLocator` | | ✓ | |
 | Generic pytest fixtures | ✓ | | |
 | Generic element lookup / visibility / attribute waits | ✓ | | |
 | Appian component mechanics | | ✓ | |
@@ -83,7 +80,7 @@ A consuming project can override generic context inputs (`storage_state`, `conte
 Consumer code should use the Appian layer:
 
 ```python
-from robo_appian import AppianBrowserContext, AppianLocator, AppianPage, AppianScope
+from robo_appian import AppianLocator, AppianPage, AppianScope
 ```
 
 `AppianScope` is defined as:

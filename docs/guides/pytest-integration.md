@@ -13,13 +13,13 @@ The generic layer owns resource lifecycle; the Appian layer specializes the gene
 | `robo-automation` | `context_options` | test | options for `Browser.new_context()` |
 | `robo-automation` | `wait_time` | session | timeout in seconds; default `90` |
 | `robo-automation` | `context_page_handler` | test | optional new-page callback |
-| `robo-automation` | `context` | test | configured `RoboBrowserContext` |
-| `robo-automation` | `robo_page` | test | owns creation/close of a generic `RoboPage` |
+| `robo-automation` | `context` | test | browser context lifecycle |
+| `robo-automation` | `robo_page` | test | owns generic page creation/close |
 | `robo-automation` | `page` | test | generic public alias for `robo_page` |
 | `robo-appian` | `appian_page` | test | specializes the same `robo_page` as `AppianPage` |
 | `robo-appian` | `page` | test | public Appian page fixture |
 
-`AppianPage` derives from `RoboPage` and selects `AppianLocator` for wrapped locator APIs. The specialization reuses the same underlying Playwright page; it does not create a second browser page and does not own teardown.
+`AppianPage` derives from `AppianPage` and selects `AppianLocator` for wrapped locator APIs. The specialization reuses the same underlying Playwright page; it does not create a second browser page and does not own teardown.
 
 ## Appian test
 
