@@ -94,7 +94,6 @@ nav:
       - Appian Browser Context: api/appian-browser-context.md
       - Appian Scope: api/appian-scope.md
       - Appian Button: api/appian-button.md
-      - CLI: api/cli.md
       - Components:
           - CheckBox: api/checkbox.md
           - Dropdown: api/dropdown.md
@@ -113,4 +112,5 @@ nav:
           - ComponentUtils: api/component-utils.md
       - Compatibility:
           - Legacy Scope: api/scope.md
+  - Command-Line Interface: api/cli.md
   - License: license.md

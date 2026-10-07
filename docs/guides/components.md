@@ -46,5 +46,3 @@ Some older non-button component helpers still expose the generic lower-layer `Sc
 button = page.button(name="Save")
 button.click()
 ```
-
-Button identity requires `<button type="button">`. The presence of the HTML `disabled` attribute means the button is disabled; its absence means the button is enabled. CSS classes are not used to determine enabled state.

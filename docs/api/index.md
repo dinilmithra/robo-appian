@@ -19,10 +19,9 @@ from robo_appian import AppianBrowserContext, AppianLocator, AppianPage, AppianS
 
 The generic Robo* inheritance layer belongs to `robo-automation` and is not the preferred consumer API for Appian projects.
 
-## Pytest and CLI
+## Pytest Integration
 
 - [Pytest Integration](../guides/pytest-integration.md) — `robo-automation` fixture ownership and extension points
-- [Command-Line Interface](cli.md) — `robo-appian` browser binary provisioning
 
 ## Component API
 
@@ -56,19 +55,3 @@ Component pages are generated from current source signatures/docstrings.
 ## Compatibility note
 
 Some older non-button component helpers still expose the lower-layer generic `Scope` type in generated signatures. New Appian APIs should use `AppianPage`, `AppianLocator`, or `AppianScope`.
-
-## Relationship to Playwright
-
-```text
-consumer project
-      ↓
-robo-appian components
-      ↓
-robo-automation pytest plugin / Robo* wrappers
-      ↓
-Playwright implementation dependency
-      ↓
-Appian
-```
-
-The generic wrapper/fixture stack is owned by `robo-automation`. `robo-appian` currently also declares Playwright directly because its Appian implementation and tooling use Playwright APIs.
