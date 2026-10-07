@@ -2,6 +2,7 @@
 
 from playwright.sync_api import Page, expect
 from robo_automation import Scope
+from robo_appian.utils.ComponentUtils import ComponentUtils
 
 
 class Text:
@@ -48,7 +49,7 @@ class Text:
         if not value:
             raise ValueError("Text cannot be empty or whitespace.")
 
-        paragraph = scope.locator("p", has_text=value).filter(visible=True).first
+        paragraph = ComponentUtils.unwrap_scope(scope).locator("p", has_text=value).filter(visible=True).first
         expect(
             paragraph,
             f"No visible paragraph containing '{value}' was found.",
@@ -108,7 +109,7 @@ class Text:
         link = (
             container.get_by_role("link")
             .filter(visible=True)
-            .filter(has_not=scope.locator("a[href='#']"))
+            .filter(has_not=ComponentUtils.unwrap_scope(scope).locator("a[href='#']"))
             .first
         )
         expect(link, f"No link was found near label '{value}'.").to_be_visible()

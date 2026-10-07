@@ -2,6 +2,7 @@
 
 from playwright.sync_api import Locator, expect
 from robo_automation import Scope
+from robo_appian.utils.ComponentUtils import ComponentUtils
 
 
 class RadioSelect:
@@ -28,7 +29,7 @@ class RadioSelect:
         # Appian renders the interactive label immediately after its native
         # radio input. Keep this locator live across SAIL rerenders.
         literal = RadioSelect.__xpath_literal(label_text)
-        label = scope.locator(
+        label = ComponentUtils.unwrap_scope(scope).locator(
             "xpath=(.//label[@for and normalize-space(string(.))=" + literal + "])[1]"
         )
         expect(

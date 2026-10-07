@@ -37,7 +37,7 @@ Component pages are generated from current source signatures/docstrings.
 | [`AppianButton`](appian-button.md) | Appian button interactions through `AppianPage.button(...)` |
 | [`CheckBox`](checkbox.md) | Checkbox state/actions |
 | [`Dropdown`](dropdown.md) | Standard dropdowns |
-| [`InputDate`](input-date.md) | Date fields |
+| [`AppianDate`](appian-date.md) | Appian date fields |
 | [`Link`](link.md) | Links |
 | [`MenuButton`](menu-button.md) | Menu-button actions |
 | [`RadioSelect`](radio-select.md) | Radio options |
@@ -61,6 +61,7 @@ Create a text field from `AppianPage` by label or placeholder:
 ```python
 page.textbox(label="Title").fill("Example request")
 page.textbox(placeholder="example@example.com").fill("user@example.com")
+page.date(label="Required Award Date").fill("10/07/2026")
 ```
 
 See [Appian Textbox](appian-textbox.md).

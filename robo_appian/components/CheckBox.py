@@ -47,7 +47,7 @@ class CheckBox:
             "//input[@type='checkbox']"
             ")[1]"
         )
-        return scope.locator(xpath)
+        return ComponentUtils.unwrap_scope(scope).locator(xpath)
 
     @staticmethod
     def __label_for_checkbox(scope: Scope, checkbox: Locator, text: str) -> Locator:
@@ -58,7 +58,7 @@ class CheckBox:
 
         safe_checkbox_id = ComponentUtils.xpath_literal(checkbox_id)
         return (
-            scope.locator(f"xpath=//label[@for={safe_checkbox_id}]")
+            ComponentUtils.unwrap_scope(scope).locator(f"xpath=//label[@for={safe_checkbox_id}]")
             .filter(visible=True)
             .first
         )

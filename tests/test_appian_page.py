@@ -380,7 +380,9 @@ def test_appian_textbox_label_falls_back_to_accessible_textbox_name() -> None:
     role_locator = MagicMock(spec=Locator)
     first_locator = MagicMock(spec=Locator)
     missing_label.count.return_value = 0
+    filtered_locator = MagicMock(spec=Locator)
     role_locator.first = first_locator
+    first_locator.locator.return_value.first = filtered_locator
     page.locator.return_value = missing_label
     page.get_by_role.return_value = role_locator
     appian_page = AppianPage.get(page)
@@ -389,10 +391,12 @@ def test_appian_textbox_label_falls_back_to_accessible_textbox_name() -> None:
         page=appian_page, label="Description", exact=False
     )._locator()
 
-    assert result is first_locator
+    assert result is filtered_locator
     page.get_by_role.assert_called_once_with(
         "textbox", name="Description", exact=False
     )
+    filter_xpath = first_locator.locator.call_args.args[0]
+    assert "not(@data-testid='DatePickerWidget-textInput')" in filter_xpath
 
 
 def test_appian_textbox_accessible_name_fallback_does_not_use_visible_text() -> None:
@@ -405,3 +409,101 @@ def test_appian_textbox_accessible_name_fallback_does_not_use_visible_text() -> 
 
     assert "visible_label =" not in source
     assert "following-sibling" not in source
+
+
+def test_appian_page_date_returns_appian_date() -> None:
+    from robo_appian import AppianDate
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    date = appian_page.date(label="Required Award Date")
+
+    assert isinstance(date, AppianDate)
+    assert date.label == "Required Award Date"
+
+
+def test_appian_date_inherits_appian_textbox() -> None:
+    from robo_appian import AppianDate, AppianTextbox
+
+    assert issubclass(AppianDate, AppianTextbox)
+
+
+def test_appian_textbox_excludes_date_picker_test_id() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    label_locator = MagicMock(spec=Locator)
+    textbox_locator = MagicMock(spec=Locator)
+    label_locator.count.return_value = 1
+    label_locator.first.get_attribute.return_value = "title-id"
+    page.locator.side_effect = [label_locator, textbox_locator]
+    appian_page = AppianPage.get(page)
+
+    AppianTextbox(page=appian_page, label="Title")._locator()
+
+    xpath = page.locator.call_args_list[1].args[0]
+    assert "@type='text'" in xpath
+    assert "not(@data-testid='DatePickerWidget-textInput')" in xpath
+    assert "@class" not in xpath
+
+
+def test_appian_date_requires_date_picker_test_id() -> None:
+    from robo_appian import AppianDate
+
+    page = _mock_page()
+    label_locator = MagicMock(spec=Locator)
+    date_locator = MagicMock(spec=Locator)
+    label_locator.count.return_value = 1
+    label_locator.first.get_attribute.return_value = "award-date-id"
+    page.locator.side_effect = [label_locator, date_locator]
+    appian_page = AppianPage.get(page)
+
+    AppianDate(page=appian_page, label="Required Award Date")._locator()
+
+    xpath = page.locator.call_args_list[1].args[0]
+    assert "@type='text'" in xpath
+    assert "@data-testid='DatePickerWidget-textInput'" in xpath
+    assert "@id='award-date-id'" in xpath
+    assert "@class" not in xpath
+
+
+def test_appian_date_placeholder_uses_date_picker_test_id() -> None:
+    from robo_appian import AppianDate
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    AppianDate(page=appian_page, placeholder="mm/dd/yyyy")._locator()
+
+    xpath = page.locator.call_args.args[0]
+    assert "@data-testid='DatePickerWidget-textInput'" in xpath
+    assert "@placeholder" in xpath
+    assert "MM/DD/YYYY" in xpath
+    assert "@class" not in xpath
+
+
+def test_component_utils_unwraps_appian_locator_for_low_level_locator_calls() -> None:
+    """Legacy helpers must unwrap AppianLocator before calling locator(...)."""
+    from unittest.mock import patch
+
+    from robo_appian import ComponentUtils
+
+    raw_scope = MagicMock(spec=Locator)
+    processing = MagicMock(spec=Locator)
+    raw_scope.locator.return_value = processing
+    wrapped_scope = AppianLocator.get(raw_scope)
+
+    assert ComponentUtils.unwrap_scope(wrapped_scope) is raw_scope
+
+    with patch("robo_appian.utils.ComponentUtils.expect") as expect_mock:
+        ComponentUtils.wait_for_appian_action_completed(wrapped_scope)
+
+    raw_scope.locator.assert_called_once_with(
+        "#appian-nprogress, #appian-working-indicator-hidden"
+    )
+    expect_mock.assert_called_once_with(
+        processing,
+        "The application continued processing longer than expected.",
+    )
+    expect_mock.return_value.to_have_count.assert_called_once_with(0)

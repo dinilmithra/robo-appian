@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 class AppianTextbox:
     """Represent an Appian text field bound to a page."""
 
+    DATE_TEST_ID = "DatePickerWidget-textInput"
+
     def __init__(
         self,
         *,
@@ -86,6 +88,33 @@ class AppianTextbox:
             return f"{normalized} = {expected}"
         return f"contains({normalized}, {expected})"
 
+    def _control_predicate(self) -> str:
+        """Return the XPath predicate that identifies this component type."""
+        return (
+            "((self::input and (@type='text' or @type='password') and "
+            f"not(@data-testid='{self.DATE_TEST_ID}')) or "
+            "(self::textarea and @role='textbox'))"
+        )
+
+    def _accessible_name_locator(self) -> Locator:
+        """Resolve this textbox by its accessible name."""
+        assert self._label is not None
+        if self._scope is not None:
+            locator = self._scope.locator.get_by_role(
+                "textbox",
+                name=self._label,
+                exact=self._exact,
+            ).first
+        else:
+            locator = self._page.get_by_role(
+                "textbox",
+                name=self._label,
+                exact=self._exact,
+            ).first
+        return locator.locator(
+            "xpath=self::*[" + self._control_predicate() + "]"
+        ).first
+
     def _locator_by_label(self) -> Locator:
         assert self._label is not None
         label_xpath = (
@@ -99,8 +128,9 @@ class AppianTextbox:
             if input_id:
                 input_id_literal = self._xpath_literal(input_id)
                 linked = self._root_locator(
-                    "xpath=(.//*[((self::input and (@type='text' or @type='password')) or "
-                    "(self::textarea and @role='textbox')) and "
+                    "xpath=(.//*[("
+                    f"{self._control_predicate()}"
+                    ") and "
                     f"@id={input_id_literal}])[1]"
                 )
                 return linked
@@ -109,24 +139,15 @@ class AppianTextbox:
         # semantics even when there is no usable label[for] relationship.
         # Resolve the textbox by its accessible name instead of matching
         # arbitrary visible text, which may also occur in tables or headings.
-        if self._scope is not None:
-            return self._scope.locator.get_by_role(
-                "textbox",
-                name=self._label,
-                exact=self._exact,
-            ).first
-        return self._page.get_by_role(
-            "textbox",
-            name=self._label,
-            exact=self._exact,
-        ).first
+        return self._accessible_name_locator()
 
     def _locator_by_placeholder(self) -> Locator:
         assert self._placeholder is not None
         predicate = self._comparison("@placeholder", self._placeholder)
         return self._root_locator(
-            "xpath=(.//*[((self::input and (@type='text' or @type='password')) or "
-            "(self::textarea and @role='textbox')) and @placeholder and "
+            "xpath=(.//*[("
+            f"{self._control_predicate()}"
+            ") and @placeholder and "
             f"({predicate})])[1]"
         )
 

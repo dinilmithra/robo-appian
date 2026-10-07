@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from playwright.sync_api import Locator, expect
 from robo_automation import Scope
+from robo_appian.utils.ComponentUtils import ComponentUtils
 
 # Initialize logger for execution tracking
 logger = logging.getLogger(__name__)
@@ -115,7 +116,7 @@ class InputDate:
             date_str: Excel, US, or ISO-style date to normalize when possible.
         """
         # Use attribute selector [id="..."] instead of # to prevent CSS SyntaxErrors
-        locator = scope.locator(f'[id="{input_id}"]')
+        locator = ComponentUtils.unwrap_scope(scope).locator(f'[id="{input_id}"]')
         InputDate.fill_by_locator(scope, locator, date_str)
 
     @staticmethod

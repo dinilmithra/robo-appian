@@ -19,3 +19,11 @@ Common operations include `fill()`, `clear()`, `click()`, `is_visible()`, `is_en
     options:
       show_root_heading: true
       members_order: source
+## Date fields
+
+Use `page.date(...)` for Appian date fields rather than `page.textbox(...)`.
+
+```python
+page.date(label="Required Award Date").fill("10/07/2026")
+```
+

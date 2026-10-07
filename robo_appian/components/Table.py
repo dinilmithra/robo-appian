@@ -128,7 +128,7 @@ class Table:
 
         lookup_column = normalized_table_column or normalized_column
         if lookup_column:
-            tables = scope.locator("table").filter(visible=True)
+            tables = ComponentUtils.unwrap_scope(scope).locator("table").filter(visible=True)
             for index in range(tables.count()):
                 table = tables.nth(index)
                 if Table.__has_column(table, lookup_column):
@@ -137,7 +137,7 @@ class Table:
                 f"No visible table contains column '{lookup_column}'."
             )
 
-        table = scope.locator("table").filter(visible=True).first
+        table = ComponentUtils.unwrap_scope(scope).locator("table").filter(visible=True).first
         expect(table, "No visible table was found.").to_be_visible()
         return table
 

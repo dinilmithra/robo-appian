@@ -125,7 +125,7 @@ class SearchDropdown:
         label_id_literal = ComponentUtils.xpath_literal(f" {aria_labelledby} ")
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            scope.locator(
+            ComponentUtils.unwrap_scope(scope).locator(
                 "xpath=//*[@role='listbox' and @id="
                 + listbox_id_literal
                 + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
@@ -273,7 +273,7 @@ class SearchDropdown:
         label_id_literal = ComponentUtils.xpath_literal(f" {aria_labelledby} ")
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            scope.locator(
+            ComponentUtils.unwrap_scope(scope).locator(
                 "xpath=//*[@role='listbox' and @id="
                 + listbox_id_literal
                 + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
@@ -370,7 +370,7 @@ class SearchDropdown:
         try:
             safe_label_text = ComponentUtils.xpath_literal(label_text.strip())
             label_locator = (
-                scope.locator(f"xpath=//*[@id and normalize-space(.)={safe_label_text}]")
+                ComponentUtils.unwrap_scope(scope).locator(f"xpath=//*[@id and normalize-space(.)={safe_label_text}]")
                 .filter(visible=True)
                 .first
             )
@@ -383,7 +383,7 @@ class SearchDropdown:
                 return "Label or ID Not Found"
 
             label_id_literal = ComponentUtils.xpath_literal(f" {label_id} ")
-            linked_containers = scope.locator(
+            linked_containers = ComponentUtils.unwrap_scope(scope).locator(
                 "xpath=//*[@role='combobox' and contains("
                 "concat(' ', normalize-space(@aria-labelledby), ' '), "
                 + label_id_literal

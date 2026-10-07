@@ -17,7 +17,7 @@ class MenuButton:
         role_buttons = scope.get_by_role("button", name=label, exact=False)
         menu_button = (
             role_buttons.and_(
-                scope.locator(
+                ComponentUtils.unwrap_scope(scope).locator(
                     "button[type='button'][data-owl-test-label='menuLayout-button']"
                 )
             )
@@ -63,7 +63,7 @@ class MenuButton:
         Finds the visible menu listbox <ul> for the given menu id.
         Example: menu_id='abc123' -> ul id='abc123_menuItems'.
         """
-        listbox = scope.locator(f'ul[id="{menu_id}_menuItems"][role="listbox"]').first
+        listbox = ComponentUtils.unwrap_scope(scope).locator(f'ul[id="{menu_id}_menuItems"][role="listbox"]').first
         expect(listbox).to_be_visible()
         return listbox
 

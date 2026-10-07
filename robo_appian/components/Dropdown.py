@@ -91,7 +91,7 @@ class Dropdown:
             + f"preceding::span[@id and {label_condition}]/@id"
             + "]"
         )
-        return scope.locator(f"xpath={xpath}")
+        return ComponentUtils.unwrap_scope(scope).locator(f"xpath={xpath}")
 
     @staticmethod
     def _get_dropdown(
@@ -222,7 +222,7 @@ class Dropdown:
 
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         label_id_literal = ComponentUtils.xpath_literal(f" {combobox_label_id} ")
-        listbox = scope.locator(
+        listbox = ComponentUtils.unwrap_scope(scope).locator(
             "xpath=//*[@role='listbox' and @id="
             + listbox_id_literal
             + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
@@ -290,7 +290,7 @@ class Dropdown:
 
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         return (
-            scope.locator(
+            ComponentUtils.unwrap_scope(scope).locator(
                 "xpath=//*[@role='combobox' and @aria-controls="
                 + listbox_id_literal
                 + "]"
@@ -523,7 +523,7 @@ class Dropdown:
             if excat_match
             else f"contains({displayed_text}, {expected})"
         )
-        dropdown = scope.locator(
+        dropdown = ComponentUtils.unwrap_scope(scope).locator(
             "xpath=(//*[@role='combobox' and " + placeholder_match + "])[1]"
         ).filter(visible=True)
 

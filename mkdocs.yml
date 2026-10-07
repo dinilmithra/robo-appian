@@ -94,6 +94,7 @@ nav:
       - Appian Scope: api/appian-scope.md
       - Appian Button: api/appian-button.md
       - Appian Textbox: api/appian-textbox.md
+      - Appian Date: api/appian-date.md
       - Components:
           - CheckBox: api/checkbox.md
           - Dropdown: api/dropdown.md

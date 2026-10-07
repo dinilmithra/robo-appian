@@ -8,7 +8,7 @@ Start from the Appian control you want to interact with. Prefer the most specifi
 | Fill a text field | [`AppianTextbox`](../api/appian-textbox.md) |
 | Select or inspect a checkbox | [`CheckBox`](../api/checkbox.md) |
 | Select a standard dropdown value | [`Dropdown`](../api/dropdown.md) |
-| Enter or inspect a date | [`InputDate`](../api/input-date.md) |
+| Enter or inspect a date | [`AppianDate`](../api/appian-date.md) |
 | Find or activate a link | [`Link`](../api/link.md) |
 | Choose an item from a menu button | [`MenuButton`](../api/menu-button.md) |
 | Select a radio option | [`RadioSelect`](../api/radio-select.md) |
@@ -56,6 +56,7 @@ Use the page-level API for text fields:
 ```python
 page.textbox(label="Request Name").fill("Example Request")
 page.textbox(placeholder="example@example.com").fill("user@example.com")
+page.date(label="Required Award Date").fill("10/07/2026")
 ```
 
 ## Understanding `Scope`

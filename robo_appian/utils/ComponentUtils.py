@@ -11,13 +11,26 @@ from playwright.sync_api import (
     TimeoutError as PlaywrightTimeoutError,
     expect,
 )
-from robo_automation import Scope
+from robo_automation import RoboLocator, Scope
 
 logger = logging.getLogger(__name__)
 
 
 class ComponentUtils:
     """Shared browser automation operations used by Appian components."""
+
+    @staticmethod
+    def unwrap_scope(scope):
+        """Return the underlying browser scope for framework locator wrappers.
+
+        AppianLocator derives from RoboLocator and exposes its underlying locator
+        through the ``locator`` property. Legacy helpers in this module perform
+        low-level scoped lookups, so they must operate on that underlying locator
+        rather than treating the property as a callable locator factory.
+        """
+        if isinstance(scope, RoboLocator):
+            return scope.locator
+        return scope
 
     @staticmethod
     def xpath_literal(value: str) -> str:
@@ -88,7 +101,8 @@ class ComponentUtils:
             text: Text to locate.
             excat_match: Whether the element text must match exactly.
         """
-        link = scope.get_by_text(text, exact=excat_match).filter(visible=True).first
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        link = raw_scope.get_by_text(text, exact=excat_match).filter(visible=True).first
         expect(link).to_be_visible()
         link.click()
 
@@ -100,7 +114,8 @@ class ComponentUtils:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             title: Title attribute value to locate.
         """
-        link = scope.get_by_title(title).filter(visible=True).first
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        link = raw_scope.get_by_title(title).filter(visible=True).first
         expect(link).to_be_visible()
         link.click()
 
@@ -112,7 +127,8 @@ class ComponentUtils:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             button_id: Literal HTML ID, including IDs that begin with numbers.
         """
-        locator = scope.locator(f'[id="{button_id}"]:not([disabled])')
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        locator = raw_scope.locator(f'[id="{button_id}"]:not([disabled])')
         active_locator = locator.filter(visible=True).first
         expect(active_locator).to_be_visible()
         active_locator.click()
@@ -133,7 +149,8 @@ class ComponentUtils:
         if not expression:
             raise ValueError("XPath cannot be empty or whitespace.")
 
-        return scope.locator(f"xpath={expression}").filter(visible=True).count() > 0
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        return raw_scope.locator(f"xpath={expression}").filter(visible=True).count() > 0
 
 
     @staticmethod
@@ -186,7 +203,8 @@ class ComponentUtils:
             raise ValueError("Attribute cannot be empty or whitespace.")
 
         value_literal = ComponentUtils.xpath_literal(str(value or ""))
-        components = scope.locator(
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        components = raw_scope.locator(
             f"xpath=//*[@{attribute_name}={value_literal}]"
         )
         if visible_only:
@@ -285,7 +303,8 @@ class ComponentUtils:
         if not expression:
             raise ValueError("XPath cannot be empty or whitespace.")
 
-        matches = scope.locator(f"xpath={expression}")
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        matches = raw_scope.locator(f"xpath={expression}")
         if visible_only:
             matches = matches.filter(visible=True)
 
@@ -348,7 +367,8 @@ class ComponentUtils:
         if not attribute_name:
             raise ValueError("Attribute cannot be empty or whitespace.")
 
-        matches = scope.locator(f"xpath={expression}")
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        matches = raw_scope.locator(f"xpath={expression}")
         if visible_only:
             matches = matches.filter(visible=True)
 
@@ -374,7 +394,8 @@ class ComponentUtils:
         """
         logger.info("Before wait_for_appian_action_completed.")
 
-        processing = scope.locator(
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        processing = raw_scope.locator(
             "#appian-nprogress, #appian-working-indicator-hidden"
         )
 
@@ -396,7 +417,7 @@ class ComponentUtils:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             message: Optional assertion message used when the wait fails.
         """
-        expect(scope, message).to_be_visible()
+        expect(ComponentUtils.unwrap_scope(scope), message).to_be_visible()
 
     @staticmethod
     def wait_until_hidden(scope: Scope) -> None:
@@ -405,7 +426,7 @@ class ComponentUtils:
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
         """
-        expect(scope).to_be_hidden()
+        expect(ComponentUtils.unwrap_scope(scope)).to_be_hidden()
 
     @staticmethod
     def tab(scope: Scope, occurrence: Optional[int] = None) -> None:
@@ -427,13 +448,14 @@ class ComponentUtils:
         elif isinstance(occurrence, bool) or not isinstance(occurrence, int) or occurrence < 1:
             raise ValueError("Tab occurrence must be a positive integer.")
 
+        raw_scope = ComponentUtils.unwrap_scope(scope)
         for _ in range(occurrence):
             if hasattr(scope, "press_key"):
                 scope.press_key("Tab")
-            elif isinstance(scope, Page):
-                scope.keyboard.press("Tab")
+            elif isinstance(raw_scope, Page):
+                raw_scope.keyboard.press("Tab")
             else:
-                scope.press("Tab")
+                raw_scope.press("Tab")
 
     @staticmethod
     def upload_document(
@@ -462,13 +484,14 @@ class ComponentUtils:
         if not resolved_path.is_file():
             raise FileNotFoundError(f"Upload file not found at: {resolved_path}")
 
-        widget_input = scope.locator(
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        widget_input = raw_scope.locator(
             "div.MultipleFileUploadWidget---upload_field input[type='file']"
         )
         if widget_input.count() > 0:
             widget_input.first.set_input_files(str(resolved_path))
         else:
-            scope.locator("input[type='file']").first.set_input_files(str(resolved_path))
+            raw_scope.locator("input[type='file']").first.set_input_files(str(resolved_path))
 
         return str(resolved_path)
 
@@ -484,7 +507,8 @@ class ComponentUtils:
             text: Visible text used to identify the target element.
         """
         logger.info("Waiting for text '%s' to be visible...", text)
-        text_locator = scope.get_by_text(text, exact=True).filter(visible=True).first
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        text_locator = raw_scope.get_by_text(text, exact=True).filter(visible=True).first
 
         try:
             text_locator.wait_for(state="visible")
@@ -513,7 +537,8 @@ class ComponentUtils:
             f"/ancestor::*[@role='region']"
             f"[.//*[normalize-space()='{field_label}']][1]"
         )
-        return scope.locator(f"xpath={xpath}")
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        return raw_scope.locator(f"xpath={xpath}")
 
     @staticmethod
     def find_locator_by_xpath(scope: Scope, xpath: str) -> Locator:
@@ -526,7 +551,8 @@ class ComponentUtils:
         Returns:
             Locator: A live locator for the element matching the XPath.
         """
-        locator = scope.locator(f"xpath={xpath}").filter(visible=True).first
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        locator = raw_scope.locator(f"xpath={xpath}").filter(visible=True).first
         return locator
 
     @staticmethod

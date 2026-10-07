@@ -3,6 +3,7 @@
 from robo_automation import RoboPage
 
 from .appian_button import AppianButton
+from .appian_date import AppianDate
 from .appian_textbox import AppianTextbox
 from .appian_locator import AppianLocator
 
@@ -44,6 +45,26 @@ class AppianPage(RoboPage):
         Specify exactly one of ``label`` or ``placeholder``.
         """
         return AppianTextbox(
+            page=self,
+            label=label,
+            placeholder=placeholder,
+            exact=exact,
+            scope=scope,
+        )
+
+    def date(
+        self,
+        *,
+        label: str | None = None,
+        placeholder: str | None = None,
+        exact: bool = True,
+        scope: AppianLocator | None = None,
+    ) -> AppianDate:
+        """Return an Appian date field identified by label or placeholder.
+
+        Specify exactly one of ``label`` or ``placeholder``.
+        """
+        return AppianDate(
             page=self,
             label=label,
             placeholder=placeholder,

@@ -10,6 +10,7 @@ Use `AppianPage` for normal page interactions and fluent components:
 
 ```python
 page.textbox(label="Title").fill("Example request")
+page.date(label="Required Award Date").fill("10/07/2026")
 page.button(name="Save").click()
 ```
 

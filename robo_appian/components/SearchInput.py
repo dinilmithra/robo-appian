@@ -49,7 +49,7 @@ class SearchInput:
             + "]][1]"
         )
 
-        section_container = scope.locator(f"xpath={common_root_xpath}")
+        section_container = ComponentUtils.unwrap_scope(scope).locator(f"xpath={common_root_xpath}")
         expect(section_container).to_be_visible()
         return section_container
 
@@ -80,7 +80,7 @@ class SearchInput:
 
         if placeholder_text:
             placeholder_literal = ComponentUtils.xpath_literal(placeholder_text)
-            lookup_candidates = search_scope.locator(
+            lookup_candidates = ComponentUtils.unwrap_scope(search_scope).locator(
                 "xpath=.//input[@role='combobox' and @placeholder="
                 + placeholder_literal
                 + "]"
@@ -279,7 +279,7 @@ class SearchInput:
 
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            scope.locator(
+            ComponentUtils.unwrap_scope(scope).locator(
                 "xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]"
             )
             .filter(visible=True)
@@ -390,7 +390,7 @@ class SearchInput:
         # Each Appian picker identifies its own dynamically rendered suggestion list.
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            scope.locator(
+            ComponentUtils.unwrap_scope(scope).locator(
                 "xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]"
             )
             .filter(visible=True)
