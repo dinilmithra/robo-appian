@@ -50,6 +50,7 @@ job publishes the site.
 Before pushing documentation changes, you can validate the site locally:
 
 ```powershell
+poetry lock
 poetry install --with docs
 poetry run mkdocs build --strict
 ```
