@@ -94,7 +94,6 @@ nav:
       - Appian Button: api/appian-button.md
       - CLI: api/cli.md
       - Components:
-          - Button: api/button.md
           - CheckBox: api/checkbox.md
           - Dropdown: api/dropdown.md
           - InputDate: api/input-date.md

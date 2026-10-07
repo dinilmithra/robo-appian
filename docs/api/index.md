@@ -42,14 +42,14 @@ user_options.click()
 The package also exposes reusable Appian component helpers:
 
 ```python
-from robo_appian import Button, Dropdown, InputText, Table
+from robo_appian import AppianPage, Dropdown, InputText, Table
 ```
 
 Component pages are generated from current source signatures/docstrings.
 
 | Component | Use it for |
 | --- | --- |
-| [`Button`](button.md) | Appian button interactions |
+| [`AppianButton`](appian-button.md) | Appian button interactions through `AppianPage.button(...)` |
 | [`CheckBox`](checkbox.md) | Checkbox state/actions |
 | [`Dropdown`](dropdown.md) | Standard dropdowns |
 | [`InputDate`](input-date.md) | Date fields |

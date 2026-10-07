@@ -3,7 +3,7 @@
 The preferred import style is through the package-level API:
 
 ```python
-from robo_appian import Button, Dropdown, InputText, Table
+from robo_appian import AppianPage, Dropdown, InputText, Table
 ```
 
 Component helpers encapsulate reusable Appian-specific interaction mechanics. Browser lifecycle and generic element ownership belong to the framework wrappers (Playwright `Browser`, `RoboBrowserContext`, `RoboPage`, and `RoboLocator`).

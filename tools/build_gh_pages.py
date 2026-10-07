@@ -189,15 +189,14 @@ def home_body() -> str:
     <article><span class="ico">P</span><div><strong>Pytest Ready</strong><p>Works cleanly with pytest fixtures, assertions, and test projects.</p></div></article>
     <article><span class="ico">||</span><div><strong>Parallel Friendly</strong><p>Designed to work with isolated workers and parallel execution.</p></div></article>
     <article><span class="ico">CI</span><div><strong>CI/CD Friendly</strong><p>Fits Jenkins and modern CI/CD automation pipelines.</p></div></article>
-    <article><span class="ico">D</span><div><strong>Clear Diagnostics</strong><p>Playwright-native behavior works with logs, screenshots, and reports.</p></div></article>
+    <article><span class="ico">D</span><div><strong>Clear Diagnostics</strong><p>Automation diagnostics work with logs, screenshots, and reports.</p></div></article>
   </section>
   <section class="ra-target-workbench">
     <div class="ra-target-code">
       <div class="ra-target-panel-title"><span>&gt;_ &nbsp; Quick Start</span><span>Python</span></div>
-      <pre><code>from robo_automation import RoboPage
-from robo_appian import Button, InputText
+      <pre><code>from robo_appian import AppianPage, InputText
 
-def test_request(page: RoboPage):
+def test_request(page: AppianPage):
     InputText.fill_by_label(page, "Request Name", "Example")
     page.button(name="Submit").click()</code></pre>
     </div>

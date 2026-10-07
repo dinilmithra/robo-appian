@@ -55,7 +55,7 @@ agree.click()
 
 ```python
 from robo_automation import RoboPage
-from robo_appian import Button, InputText
+from robo_appian import AppianPage, InputText
 
 
 def test_create_request(page: RoboPage) -> None:

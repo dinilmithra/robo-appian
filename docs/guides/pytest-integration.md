@@ -11,7 +11,7 @@ The generic layer owns resource lifecycle; the Appian layer specializes the gene
 | `robo-automation` | `browser` | session | raw Playwright `Browser` |
 | `robo-automation` | `storage_state` | session | neutral `None` default; consumers may override |
 | `robo-automation` | `context_options` | test | options for `Browser.new_context()` |
-| `robo-automation` | `wait_time` | session | timeout in seconds; default `180` |
+| `robo-automation` | `wait_time` | session | timeout in seconds; default `90` |
 | `robo-automation` | `context_page_handler` | test | optional new-page callback |
 | `robo-automation` | `context` | test | configured `RoboBrowserContext` |
 | `robo-automation` | `robo_page` | test | owns creation/close of a generic `RoboPage` |

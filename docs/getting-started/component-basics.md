@@ -4,7 +4,7 @@ Start from the Appian control you want to interact with. Prefer the most specifi
 
 | I need to… | Start with |
 | --- | --- |
-| Click or wait for a button | [`Button`](../api/button.md) |
+| Click or wait for a button | [`AppianButton`](../api/appian-button.md) |
 | Select or inspect a checkbox | [`CheckBox`](../api/checkbox.md) |
 | Select a standard dropdown value | [`Dropdown`](../api/dropdown.md) |
 | Enter or inspect a date | [`InputDate`](../api/input-date.md) |
@@ -39,7 +39,7 @@ user_options.click()
 Use a component helper when robo-appian has reusable Appian-specific behavior for that control:
 
 ```python
-from robo_appian import InputText, Button
+from robo_appian import AppianPage, InputText
 
 InputText.fill_by_label(page, "Request Name", "Example Request")
 page.button(name="Submit").click()

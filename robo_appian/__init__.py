@@ -13,7 +13,6 @@ from robo_appian.appian import (
     AppianScope,
 )
 from robo_appian.components import (
-    Button,
     InputDate,
     Dropdown,
     InputText,
@@ -37,7 +36,6 @@ __all__ = [
     "AppianButton",
     "AppianLocator",
     "AppianScope",
-    "Button",
     "InputDate",
     "Dropdown",
     "InputText",

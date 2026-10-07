@@ -182,3 +182,17 @@ def test_core_does_not_reference_generic_robo_resource_types() -> None:
         text = path.read_text(encoding="utf-8")
         for token in forbidden:
             assert token not in text, f"{token!r} found in {path}"
+
+
+def test_legacy_components_button_is_removed() -> None:
+    """The legacy static Button component must not return to robo-appian."""
+    import robo_appian
+
+    package_root = Path(__file__).resolve().parents[1] / "robo_appian"
+    assert not (package_root / "components" / "Button.py").exists()
+    assert not hasattr(robo_appian, "Button")
+
+    components_init = (package_root / "components" / "__init__.py").read_text(
+        encoding="utf-8"
+    )
+    assert "components.Button" not in components_init

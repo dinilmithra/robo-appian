@@ -30,7 +30,7 @@ robo-appian:     appian_page -> AppianPage
 No consumer wrapper-selector fixture is required. A normal Appian test simply requests `page`:
 
 ```python
-from robo_appian import AppianPage, Button, InputText
+from robo_appian import AppianPage, InputText
 
 
 def test_example(page: AppianPage) -> None:
@@ -61,7 +61,7 @@ robo-appian install-browser webkit
 
 ## Component APIs and Scope
 
-Reusable components such as `Button`, `InputText`, `Dropdown`, and `Table` expose Appian-specific interaction behavior. Many current component signatures still use the generic `Scope = Playwright Page | Locator` compatibility/search-boundary type from `robo-automation`.
+Reusable components such as `AppianButton`, `InputText`, `Dropdown`, and `Table` expose Appian-specific interaction behavior. Many current component signatures still use the generic `Scope = Playwright Page | Locator` compatibility/search-boundary type from `robo-automation`.
 
 Generic lifecycle/resource code should use `RoboBrowserContext`, `RoboPage`, and `RoboLocator` from `robo_automation`; those types are not owned or exported by `robo_appian`.
 
