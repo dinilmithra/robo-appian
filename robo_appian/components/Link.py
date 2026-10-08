@@ -14,7 +14,9 @@ class Link:
     """Reusable operations for Appian link controls."""
 
     @staticmethod
-    def is_visible(scope: Scope, accessible_name: str, excat_match: bool = False) -> bool:
+    def is_visible(
+        scope: Scope, accessible_name: str, excat_match: bool = False
+    ) -> bool:
         """Return whether a link with the semantic name is visible.
 
         Args:
@@ -34,7 +36,9 @@ class Link:
         return link.count() > 0
 
     @staticmethod
-    def wait_visible(scope: Scope, accessible_name: str, excat_match: bool = False) -> None:
+    def wait_visible(
+        scope: Scope, accessible_name: str, excat_match: bool = False
+    ) -> None:
         """Wait until a link with the semantic name becomes visible.
 
         Args:

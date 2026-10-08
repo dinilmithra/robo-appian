@@ -25,3 +25,8 @@ Use `AppianLocator` when an operation needs to be restricted to a specific dialo
     options:
       show_root_heading: true
       members_order: source
+
+
+## Visible text
+
+Use `page.get_by_text("...")` when a workflow needs to locate rendered text that is not a component-specific control.

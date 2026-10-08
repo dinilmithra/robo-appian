@@ -49,7 +49,9 @@ class SearchInput:
             + "]][1]"
         )
 
-        section_container = ComponentUtils.unwrap_scope(scope).locator(f"xpath={common_root_xpath}")
+        section_container = ComponentUtils.unwrap_scope(scope).locator(
+            f"xpath={common_root_xpath}"
+        )
         expect(section_container).to_be_visible()
         return section_container
 
@@ -80,11 +82,15 @@ class SearchInput:
 
         if placeholder_text:
             placeholder_literal = ComponentUtils.xpath_literal(placeholder_text)
-            lookup_candidates = ComponentUtils.unwrap_scope(search_scope).locator(
-                "xpath=.//input[@role='combobox' and @placeholder="
-                + placeholder_literal
-                + "]"
-            ).filter(visible=True)
+            lookup_candidates = (
+                ComponentUtils.unwrap_scope(search_scope)
+                .locator(
+                    "xpath=.//input[@role='combobox' and @placeholder="
+                    + placeholder_literal
+                    + "]"
+                )
+                .filter(visible=True)
+            )
         else:
             lookup_candidates = search_scope.get_by_role(
                 "combobox", name=accessible_name, exact=True
@@ -257,9 +263,9 @@ class SearchInput:
 
         expect(lookup, f"SearchInput '{field_name}' was not visible.").to_be_visible()
         expect(lookup, f"SearchInput '{field_name}' was not enabled.").to_be_enabled()
-        expect(lookup, f"SearchInput '{field_name}' was not a combobox.").to_have_attribute(
-            "role", "combobox"
-        )
+        expect(
+            lookup, f"SearchInput '{field_name}' was not a combobox."
+        ).to_have_attribute("role", "combobox")
 
         listbox_id = lookup.get_attribute("aria-controls")
         if not lookup.get_attribute("aria-labelledby"):
@@ -279,9 +285,8 @@ class SearchInput:
 
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            ComponentUtils.unwrap_scope(scope).locator(
-                "xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]"
-            )
+            ComponentUtils.unwrap_scope(scope)
+            .locator("xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]")
             .filter(visible=True)
             .first
         )
@@ -390,9 +395,8 @@ class SearchInput:
         # Each Appian picker identifies its own dynamically rendered suggestion list.
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            ComponentUtils.unwrap_scope(scope).locator(
-                "xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]"
-            )
+            ComponentUtils.unwrap_scope(scope)
+            .locator("xpath=//*[@role='listbox' and @id=" + listbox_id_literal + "]")
             .filter(visible=True)
             .first
         )

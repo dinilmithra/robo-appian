@@ -54,4 +54,5 @@ Use `AppianPage.textbox(...)` for text fields:
 ```python
 page.textbox(label="Request Name").fill("Example Request")
 page.textbox(placeholder="example@example.com").fill("user@example.com")
+page.textbox(header="Conference Description").fill("General conference details")
 ```

@@ -37,17 +37,20 @@ class AppianPage(RoboPage):
         *,
         label: str | None = None,
         placeholder: str | None = None,
+        header: str | None = None,
         exact: bool = True,
         scope: AppianLocator | None = None,
     ) -> AppianTextbox:
-        """Return an Appian textbox identified by label or placeholder.
+        """Return an Appian textbox identified by label, placeholder, or header.
 
-        Specify exactly one of ``label`` or ``placeholder``.
+        Specify exactly one identifier. Header lookup binds the matching header
+        text to the first supported textbox that follows it.
         """
         return AppianTextbox(
             page=self,
             label=label,
             placeholder=placeholder,
+            header=header,
             exact=exact,
             scope=scope,
         )
@@ -57,17 +60,16 @@ class AppianPage(RoboPage):
         *,
         label: str | None = None,
         placeholder: str | None = None,
+        header: str | None = None,
         exact: bool = True,
         scope: AppianLocator | None = None,
     ) -> AppianDate:
-        """Return an Appian date field identified by label or placeholder.
-
-        Specify exactly one of ``label`` or ``placeholder``.
-        """
+        """Return an Appian date field identified by label, placeholder, or header."""
         return AppianDate(
             page=self,
             label=label,
             placeholder=placeholder,
+            header=header,
             exact=exact,
             scope=scope,
         )

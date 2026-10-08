@@ -98,7 +98,6 @@ nav:
       - Components:
           - CheckBox: api/checkbox.md
           - Dropdown: api/dropdown.md
-          - InputDate: api/input-date.md
           - Link: api/link.md
           - MenuButton: api/menu-button.md
           - RadioSelect: api/radio-select.md
@@ -108,7 +107,6 @@ nav:
           - SearchInput: api/search-input.md
           - Tab: api/tab.md
           - Table: api/table.md
-          - Text: api/text.md
           - ComponentUtils: api/component-utils.md
       - Compatibility:
           - Legacy Scope: api/scope.md

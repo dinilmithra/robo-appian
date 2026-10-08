@@ -47,7 +47,6 @@ Component pages are generated from current source signatures/docstrings.
 | [`SearchInput`](search-input.md) | Search suggestions |
 | [`Tab`](tab.md) | Tabs |
 | [`Table`](table.md) | Tables/grids |
-| [`Text`](text.md) | Visible text queries/waits |
 | [`ComponentUtils`](component-utils.md) | Shared lower-level component utilities |
 
 ## Compatibility note
@@ -56,11 +55,12 @@ Some older non-button component helpers still expose the lower-layer generic `Sc
 
 ## Appian input textbox
 
-Create a text field from `AppianPage` by label or placeholder:
+Create a text field from `AppianPage` by label, placeholder, or nearby header text:
 
 ```python
 page.textbox(label="Title").fill("Example request")
 page.textbox(placeholder="example@example.com").fill("user@example.com")
+page.textbox(header="Conference Description").fill("General conference details")
 page.date(label="Required Award Date").fill("10/07/2026")
 ```
 

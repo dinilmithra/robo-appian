@@ -10,7 +10,6 @@ from robo_appian.utils.ComponentUtils import ComponentUtils
 logger = logging.getLogger(__name__)
 
 
-
 class Dropdown:
     """Reusable operations for Appian dropdown controls."""
 
@@ -118,12 +117,16 @@ class Dropdown:
             AssertionError: If the dropdown is not visible.
         """
         normalized_name = str(accessible_name or "").strip()
-        dropdown = Dropdown._dropdown_locator(
-            scope,
-            normalized_name,
-            excat_match=excat_match,
-            allow_required_marker=allow_required_marker,
-        ).filter(visible=True).first
+        dropdown = (
+            Dropdown._dropdown_locator(
+                scope,
+                normalized_name,
+                excat_match=excat_match,
+                allow_required_marker=allow_required_marker,
+            )
+            .filter(visible=True)
+            .first
+        )
 
         expect(
             dropdown,
@@ -290,7 +293,8 @@ class Dropdown:
 
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         return (
-            ComponentUtils.unwrap_scope(scope).locator(
+            ComponentUtils.unwrap_scope(scope)
+            .locator(
                 "xpath=//*[@role='combobox' and @aria-controls="
                 + listbox_id_literal
                 + "]"
@@ -523,9 +527,11 @@ class Dropdown:
             if excat_match
             else f"contains({displayed_text}, {expected})"
         )
-        dropdown = ComponentUtils.unwrap_scope(scope).locator(
-            "xpath=(//*[@role='combobox' and " + placeholder_match + "])[1]"
-        ).filter(visible=True)
+        dropdown = (
+            ComponentUtils.unwrap_scope(scope)
+            .locator("xpath=(//*[@role='combobox' and " + placeholder_match + "])[1]")
+            .filter(visible=True)
+        )
 
         expect(
             dropdown,

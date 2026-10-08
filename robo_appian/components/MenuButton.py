@@ -63,7 +63,11 @@ class MenuButton:
         Finds the visible menu listbox <ul> for the given menu id.
         Example: menu_id='abc123' -> ul id='abc123_menuItems'.
         """
-        listbox = ComponentUtils.unwrap_scope(scope).locator(f'ul[id="{menu_id}_menuItems"][role="listbox"]').first
+        listbox = (
+            ComponentUtils.unwrap_scope(scope)
+            .locator(f'ul[id="{menu_id}_menuItems"][role="listbox"]')
+            .first
+        )
         expect(listbox).to_be_visible()
         return listbox
 

@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator, expect
 
-
 if TYPE_CHECKING:
     from .appian_locator import AppianLocator
     from .appian_page import AppianPage

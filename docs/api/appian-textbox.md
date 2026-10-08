@@ -1,6 +1,6 @@
 # Appian Textbox
 
-Use `AppianPage.textbox(...)` to work with a text field by its label or placeholder.
+Use `AppianPage.textbox(...)` to work with a text field by its label, placeholder, or nearby header text.
 
 ```python
 textbox = page.textbox(label="Title")
@@ -11,6 +11,7 @@ A placeholder can be used when that is the natural identifier for the field:
 
 ```python
 page.textbox(placeholder="example@example.com").fill("user@example.com")
+page.textbox(header="Conference Description").fill("General conference details")
 ```
 
 Common operations include `fill()`, `clear()`, `click()`, `is_visible()`, `is_enabled()`, `is_disabled()`, `value()`, and `wait_until_ready()`.

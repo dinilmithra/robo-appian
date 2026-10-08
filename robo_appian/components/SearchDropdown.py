@@ -75,6 +75,7 @@ class SearchDropdown:
                 assertion.to_contain_text(value)
             else:
                 assertion.to_contain_text(value, timeout=timeout_ms)
+
         if not normalized_name:
             raise ValueError(
                 "Search dropdown accessible name cannot be empty or whitespace."
@@ -125,7 +126,8 @@ class SearchDropdown:
         label_id_literal = ComponentUtils.xpath_literal(f" {aria_labelledby} ")
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            ComponentUtils.unwrap_scope(scope).locator(
+            ComponentUtils.unwrap_scope(scope)
+            .locator(
                 "xpath=//*[@role='listbox' and @id="
                 + listbox_id_literal
                 + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
@@ -199,9 +201,7 @@ class SearchDropdown:
                 "Search dropdown accessible name cannot be empty or whitespace."
             )
         if option_index < 1:
-            raise ValueError(
-                "Search dropdown option index must be 1 or greater."
-            )
+            raise ValueError("Search dropdown option index must be 1 or greater.")
 
         timeout_ms = None if timeout is None else max(0.0, float(timeout)) * 1000
 
@@ -273,7 +273,8 @@ class SearchDropdown:
         label_id_literal = ComponentUtils.xpath_literal(f" {aria_labelledby} ")
         listbox_id_literal = ComponentUtils.xpath_literal(listbox_id)
         listbox = (
-            ComponentUtils.unwrap_scope(scope).locator(
+            ComponentUtils.unwrap_scope(scope)
+            .locator(
                 "xpath=//*[@role='listbox' and @id="
                 + listbox_id_literal
                 + " and contains(concat(' ', normalize-space(@aria-labelledby), ' '), "
@@ -370,7 +371,8 @@ class SearchDropdown:
         try:
             safe_label_text = ComponentUtils.xpath_literal(label_text.strip())
             label_locator = (
-                ComponentUtils.unwrap_scope(scope).locator(f"xpath=//*[@id and normalize-space(.)={safe_label_text}]")
+                ComponentUtils.unwrap_scope(scope)
+                .locator(f"xpath=//*[@id and normalize-space(.)={safe_label_text}]")
                 .filter(visible=True)
                 .first
             )
@@ -383,12 +385,16 @@ class SearchDropdown:
                 return "Label or ID Not Found"
 
             label_id_literal = ComponentUtils.xpath_literal(f" {label_id} ")
-            linked_containers = ComponentUtils.unwrap_scope(scope).locator(
-                "xpath=//*[@role='combobox' and contains("
-                "concat(' ', normalize-space(@aria-labelledby), ' '), "
-                + label_id_literal
-                + ")]"
-            ).filter(visible=True)
+            linked_containers = (
+                ComponentUtils.unwrap_scope(scope)
+                .locator(
+                    "xpath=//*[@role='combobox' and contains("
+                    "concat(' ', normalize-space(@aria-labelledby), ' '), "
+                    + label_id_literal
+                    + ")]"
+                )
+                .filter(visible=True)
+            )
 
             if linked_containers.count() == 0:
                 return "READ_ONLY"

@@ -209,6 +209,7 @@ def _create_poetry_bootstrap(bootstrap_dir: Path, timeout: int) -> list[str]:
     _run([*poetry_command, "--version"])
     return poetry_command
 
+
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse setup options."""
     parser = argparse.ArgumentParser(

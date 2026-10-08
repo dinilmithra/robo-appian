@@ -32,7 +32,7 @@ Issues = "https://github.com/dinilmithra/robo-appian/issues"
 Developer = "https://www.linkedin.com/in/dinilmithra/"
 
 [tool.poetry]
-version = "0.1.18"
+version = "0.1.19"
 packages = [{ include = "robo_appian" }]
 exclude = ["scripts/**", "tools/**"]
 

@@ -29,6 +29,7 @@ def test_cli_dispatches_browser_install() -> None:
         assert main(["install-browser", "firefox"]) == 0
         install.assert_called_once_with("firefox")
 
+
 def test_install_browser_without_name_installs_all() -> None:
     with patch("robo_appian.cli.subprocess.call", return_value=0) as call:
         assert install_browser() == 0
@@ -40,4 +41,3 @@ def test_cli_without_browser_installs_all() -> None:
     with patch("robo_appian.cli.install_browser", return_value=0) as install:
         assert main(["install-browser"]) == 0
         install.assert_called_once_with("all")
-

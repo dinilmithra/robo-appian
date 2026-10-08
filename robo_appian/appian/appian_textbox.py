@@ -25,20 +25,25 @@ class AppianTextbox:
         page: "AppianPage",
         label: str | None = None,
         placeholder: str | None = None,
+        header: str | None = None,
         exact: bool = True,
         scope: "AppianLocator | None" = None,
     ) -> None:
         normalized_label = self._normalize_optional(label)
         normalized_placeholder = self._normalize_optional(placeholder)
+        normalized_header = self._normalize_optional(header)
 
-        if (normalized_label is None) == (normalized_placeholder is None):
+        identifiers = (normalized_label, normalized_placeholder, normalized_header)
+        if sum(value is not None for value in identifiers) != 1:
             raise ValueError(
-                "Specify exactly one of 'label' or 'placeholder' for a textbox."
+                "Specify exactly one of 'label', 'placeholder', or 'header' "
+                "for a textbox."
             )
 
         self._page = page
         self._label = normalized_label
         self._placeholder = normalized_placeholder
+        self._header = normalized_header
         self._exact = exact
         self._scope = scope
 
@@ -111,9 +116,7 @@ class AppianTextbox:
                 name=self._label,
                 exact=self._exact,
             ).first
-        return locator.locator(
-            "xpath=self::*[" + self._control_predicate() + "]"
-        ).first
+        return locator.locator("xpath=self::*[" + self._control_predicate() + "]").first
 
     def _locator_by_label(self) -> Locator:
         assert self._label is not None
@@ -151,10 +154,29 @@ class AppianTextbox:
             f"({predicate})])[1]"
         )
 
+    def _locator_by_header(self) -> Locator:
+        """Resolve the first supported textbox following semantic header text."""
+        assert self._header is not None
+        header_comparison = self._comparison("string(.)", self._header)
+        header_xpath = (
+            "xpath=(.//*[(self::strong or self::h1 or self::h2 or self::h3 "
+            "or self::h4 or self::h5 or self::h6 or @role='heading') and "
+            f"({header_comparison})])[1]"
+        )
+        header = self._root_locator(header_xpath)
+        if header.count() == 0:
+            return self._root_locator("xpath=(.//*[false()])[1]")
+
+        return header.first.locator(
+            "xpath=(following::*[" + self._control_predicate() + "])[1]"
+        ).first
+
     def _locator(self) -> Locator:
         if self._label is not None:
             return self._locator_by_label()
-        return self._locator_by_placeholder()
+        if self._placeholder is not None:
+            return self._locator_by_placeholder()
+        return self._locator_by_header()
 
     def _visible_locator(self) -> Locator:
         return self._locator().filter(visible=True).first
@@ -169,11 +191,20 @@ class AppianTextbox:
         """Return the placeholder used to identify this textbox, when applicable."""
         return self._placeholder
 
+    @property
+    def header(self) -> str | None:
+        """Return the header text used to identify this textbox, when applicable."""
+        return self._header
+
     def fill(self, value: object) -> None:
         """Wait until the textbox is ready, then replace its value."""
         textbox = self._wait_until_ready_locator()
         textbox.fill("" if value is None else str(value))
+        self._after_fill(textbox)
         logger.info("Filled Appian textbox: %s.", self._description())
+
+    def _after_fill(self, textbox: Locator) -> None:
+        """Run component-specific behavior after a value is filled."""
 
     def clear(self) -> None:
         """Wait until the textbox is ready, then clear its value."""
@@ -219,7 +250,9 @@ class AppianTextbox:
     def _description(self) -> str:
         if self._label is not None:
             return f"with label '{self._label}'"
-        return f"with placeholder '{self._placeholder}'"
+        if self._placeholder is not None:
+            return f"with placeholder '{self._placeholder}'"
+        return f"after header '{self._header}'"
 
 
 __all__ = ["AppianTextbox"]

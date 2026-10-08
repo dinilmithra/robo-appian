@@ -6,7 +6,7 @@ from typing import Optional
 from playwright.sync_api import Locator, expect
 from robo_automation import Scope
 
-from robo_appian.components.InputDate import InputDate
+from robo_appian.appian.appian_date import AppianDate
 from robo_appian.components.Dropdown import Dropdown
 from robo_appian.components.RadioSelect import RadioSelect
 from robo_appian.components.SearchInput import SearchInput
@@ -98,7 +98,11 @@ class Table:
                 if table.count() > 0:
                     return table
 
-            table = table_label.locator("xpath=following::table[1]").filter(visible=True).first
+            table = (
+                table_label.locator("xpath=following::table[1]")
+                .filter(visible=True)
+                .first
+            )
             expect(
                 table,
                 f"Table '{normalized_table_name}' was not visible.",
@@ -128,16 +132,21 @@ class Table:
 
         lookup_column = normalized_table_column or normalized_column
         if lookup_column:
-            tables = ComponentUtils.unwrap_scope(scope).locator("table").filter(visible=True)
+            tables = (
+                ComponentUtils.unwrap_scope(scope).locator("table").filter(visible=True)
+            )
             for index in range(tables.count()):
                 table = tables.nth(index)
                 if Table.__has_column(table, lookup_column):
                     return table
-            raise ValueError(
-                f"No visible table contains column '{lookup_column}'."
-            )
+            raise ValueError(f"No visible table contains column '{lookup_column}'.")
 
-        table = ComponentUtils.unwrap_scope(scope).locator("table").filter(visible=True).first
+        table = (
+            ComponentUtils.unwrap_scope(scope)
+            .locator("table")
+            .filter(visible=True)
+            .first
+        )
         expect(table, "No visible table was found.").to_be_visible()
         return table
 
@@ -347,7 +356,9 @@ class Table:
         else:
             normalized_row_name = str(row_name or "").strip()
             if not normalized_row_name:
-                raise ValueError("Specify row_number or row_name to locate a table cell.")
+                raise ValueError(
+                    "Specify row_number or row_name to locate a table cell."
+                )
             row = Table.__get_row_by_name(table, normalized_row_name, excat_match)
             row_description = f"'{normalized_row_name}'"
 
@@ -636,7 +647,9 @@ class Table:
             column_name=column_name,
         )
         textbox = cell.get_by_role("textbox").filter(visible=True).first
-        expect(textbox, "Text input was not found in the resolved table cell.").to_be_visible()
+        expect(
+            textbox, "Text input was not found in the resolved table cell."
+        ).to_be_visible()
         expect(textbox, "Text input was not enabled.").to_be_enabled()
         textbox.fill(str(value or ""))
 
@@ -672,9 +685,13 @@ class Table:
             column_number=column_number,
             column_name=column_name,
         )
-        date_input = cell.locator('input[placeholder="mm/dd/yyyy"]').filter(visible=True).first
-        expect(date_input, "Date input was not found in the resolved table cell.").to_be_visible()
-        InputDate.fill_by_locator(scope, date_input, value)
+        date_input = (
+            cell.locator('input[placeholder="mm/dd/yyyy"]').filter(visible=True).first
+        )
+        expect(
+            date_input, "Date input was not found in the resolved table cell."
+        ).to_be_visible()
+        AppianDate.fill_locator(date_input, value)
 
     @staticmethod
     def select_dropdown_in_cell(
@@ -712,7 +729,9 @@ class Table:
             column_name=column_name,
         )
         dropdown = cell.get_by_role("combobox").filter(visible=True).first
-        expect(dropdown, "Dropdown was not found in the resolved table cell.").to_be_visible()
+        expect(
+            dropdown, "Dropdown was not found in the resolved table cell."
+        ).to_be_visible()
         Dropdown.select_by_locator(scope, dropdown, option_name)
         logger.debug("Selected '%s' in resolved table cell.", option_name)
 
@@ -918,9 +937,13 @@ class Table:
             column_number=column_number,
             column_name=column_name,
         )
-        date_input = cell.locator('input[placeholder="mm/dd/yyyy"]').filter(visible=True).first
-        expect(date_input, "Date input was not found in the resolved table cell.").to_be_visible()
-        InputDate.fill_by_locator(scope, date_input, value)
+        date_input = (
+            cell.locator('input[placeholder="mm/dd/yyyy"]').filter(visible=True).first
+        )
+        expect(
+            date_input, "Date input was not found in the resolved table cell."
+        ).to_be_visible()
+        AppianDate.fill_locator(date_input, value)
 
     @staticmethod
     def select_radio_in_cell(

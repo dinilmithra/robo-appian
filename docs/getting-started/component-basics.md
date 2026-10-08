@@ -18,7 +18,7 @@ Start from the Appian control you want to interact with. Prefer the most specifi
 | Work with search suggestions | [`SearchInput`](../api/search-input.md) |
 | Select or inspect a tab | [`Tab`](../api/tab.md) |
 | Read or interact with table/grid content | [`Table`](../api/table.md) |
-| Read or wait for visible text | [`Text`](../api/text.md) |
+| Read or wait for visible text | `page.get_by_text(...)` |
 | Locate by arbitrary HTML attributes | [`AppianLocator`](../api/appian-page.md) |
 
 ## Framework lookup or component helper?

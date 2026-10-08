@@ -156,13 +156,13 @@ def test_appian_page_button_can_preserve_locator_scope() -> None:
     page.locator.assert_not_called()
 
 
-
 def test_appian_browser_context_is_not_public_api() -> None:
     import robo_appian
 
     package_root = Path(__file__).resolve().parents[1] / "robo_appian"
     assert not (package_root / "appian" / "appian_browser_context.py").exists()
     assert not hasattr(robo_appian, "AppianBrowserContext")
+
 
 def test_appian_scope_contains_only_appian_abstractions() -> None:
     from typing import get_args
@@ -172,7 +172,12 @@ def test_appian_scope_contains_only_appian_abstractions() -> None:
 
 def test_core_does_not_reference_generic_robo_resource_types() -> None:
     core_root = Path(__file__).resolve().parents[2] / "core-automation"
-    forbidden = ("RoboPage", "RoboBrowserContext", "RoboLocator", "from robo_automation import Scope")
+    forbidden = (
+        "RoboPage",
+        "RoboBrowserContext",
+        "RoboLocator",
+        "from robo_automation import Scope",
+    )
 
     for path in core_root.rglob("*"):
         if not path.is_file() or path.suffix not in {".py", ".md"}:
@@ -234,6 +239,20 @@ def test_appian_page_textbox_by_placeholder_returns_appian_textbox() -> None:
     assert textbox.label is None
 
 
+def test_appian_page_textbox_by_header_returns_appian_textbox() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    textbox = appian_page.textbox(header="Conference Description")
+
+    assert isinstance(textbox, AppianTextbox)
+    assert textbox.header == "Conference Description"
+    assert textbox.label is None
+    assert textbox.placeholder is None
+
+
 def test_appian_textbox_requires_exactly_one_identifier() -> None:
     import pytest
 
@@ -245,6 +264,14 @@ def test_appian_textbox_requires_exactly_one_identifier() -> None:
 
     with pytest.raises(ValueError):
         appian_page.textbox(label="Title", placeholder="Title")
+
+    with pytest.raises(ValueError):
+        appian_page.textbox(label="Title", header="Conference Description")
+
+    with pytest.raises(ValueError):
+        appian_page.textbox(
+            placeholder="Enter a value", header="Conference Description"
+        )
 
 
 def test_appian_textbox_label_uses_label_for_and_text_input_id() -> None:
@@ -292,7 +319,6 @@ def test_appian_textbox_placeholder_requires_text_input() -> None:
     assert "EXAMPLE@EXAMPLE.COM" in xpath
 
 
-
 def test_appian_textbox_label_supports_multiline_textarea() -> None:
     from robo_appian import AppianTextbox
 
@@ -326,6 +352,70 @@ def test_appian_textbox_placeholder_supports_multiline_textarea() -> None:
     assert "@role='textbox'" in xpath
     assert "@placeholder" in xpath
     assert "COMMENT" in xpath
+
+
+def test_appian_textbox_header_uses_semantic_header_and_following_textbox() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    header_locator = MagicMock(spec=Locator)
+    following_locator = MagicMock(spec=Locator)
+    matched_locator = MagicMock(spec=Locator)
+    header_locator.count.return_value = 1
+    header_locator.first.locator.return_value.first = matched_locator
+    page.locator.return_value = header_locator
+    appian_page = AppianPage.get(page)
+
+    result = AppianTextbox(
+        page=appian_page,
+        header="Conference Description",
+    )._locator()
+
+    assert result is matched_locator
+    header_xpath = page.locator.call_args.args[0]
+    assert "self::strong" in header_xpath
+    assert "@role='heading'" in header_xpath
+    assert "CONFERENCE DESCRIPTION" in header_xpath
+    following_xpath = header_locator.first.locator.call_args.args[0]
+    assert "following::*" in following_xpath
+    assert "self::textarea" in following_xpath
+    assert "@role='textbox'" in following_xpath
+    assert "@class" not in header_xpath
+    assert "@class" not in following_xpath
+
+
+def test_appian_textbox_header_missing_returns_nonmatching_locator() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    missing_header = MagicMock(spec=Locator)
+    no_match = MagicMock(spec=Locator)
+    missing_header.count.return_value = 0
+    page.locator.side_effect = [missing_header, no_match]
+    appian_page = AppianPage.get(page)
+
+    result = AppianTextbox(
+        page=appian_page,
+        header="Conference Description",
+    )._locator()
+
+    assert result is no_match
+    assert "false()" in page.locator.call_args_list[1].args[0]
+
+
+def test_core_conference_description_uses_header_textbox_lookup() -> None:
+    conference_flow = (
+        Path(__file__).resolve().parents[2]
+        / "core-automation"
+        / "src"
+        / "flows"
+        / "user_hub"
+        / "conference.py"
+    ).read_text(encoding="utf-8")
+
+    assert "textbox(header=app_text.CONFERENCE_DESCRIPTION_TEXT)" in conference_flow
+    assert "textbox(label=app_text.CONFERENCE_DESCRIPTION_TEXT" not in conference_flow
+
 
 def test_appian_textbox_label_supports_password_input() -> None:
     from robo_appian import AppianTextbox
@@ -361,6 +451,7 @@ def test_appian_textbox_placeholder_supports_password_input() -> None:
     assert "@placeholder" in xpath
     assert "PASSWORD" in xpath
 
+
 def test_appian_textbox_does_not_import_legacy_components() -> None:
     source = (
         Path(__file__).resolve().parents[1]
@@ -392,9 +483,7 @@ def test_appian_textbox_label_falls_back_to_accessible_textbox_name() -> None:
     )._locator()
 
     assert result is filtered_locator
-    page.get_by_role.assert_called_once_with(
-        "textbox", name="Description", exact=False
-    )
+    page.get_by_role.assert_called_once_with("textbox", name="Description", exact=False)
     filter_xpath = first_locator.locator.call_args.args[0]
     assert "not(@data-testid='DatePickerWidget-textInput')" in filter_xpath
 
@@ -507,3 +596,63 @@ def test_component_utils_unwraps_appian_locator_for_low_level_locator_calls() ->
         "The application continued processing longer than expected.",
     )
     expect_mock.return_value.to_have_count.assert_called_once_with(0)
+
+
+def test_appian_date_fill_blurs_after_entering_value() -> None:
+    from robo_appian import AppianDate
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    date = AppianDate(page=appian_page, label="Required Award Date")
+    date_input = MagicMock(spec=Locator)
+    date._wait_until_ready_locator = MagicMock(return_value=date_input)  # type: ignore[method-assign]
+
+    date.fill("10/07/2026")
+
+    date_input.fill.assert_called_once_with("10/07/2026")
+    date_input.blur.assert_called_once_with()
+    date_input.press.assert_not_called()
+
+
+def test_appian_textbox_fill_does_not_blur() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    textbox = AppianTextbox(page=appian_page, label="Title")
+    text_input = MagicMock(spec=Locator)
+    textbox._wait_until_ready_locator = MagicMock(return_value=text_input)  # type: ignore[method-assign]
+
+    textbox.fill("Contract Title")
+
+    text_input.fill.assert_called_once_with("Contract Title")
+    text_input.press.assert_not_called()
+
+
+def test_appian_page_does_not_expose_generic_label_or_placeholder_methods() -> None:
+    assert not hasattr(AppianPage, "get_by_label")
+    assert not hasattr(AppianPage, "get_by_placeholder")
+
+
+def test_legacy_input_date_module_is_removed() -> None:
+    from pathlib import Path
+
+    module_path = (
+        Path(__file__).parents[1] / "robo_appian" / "components" / "InputDate.py"
+    )
+    assert not module_path.exists()
+
+
+def test_legacy_text_component_is_removed() -> None:
+    """The legacy static Text component must not return to robo-appian."""
+    from pathlib import Path
+    import robo_appian
+
+    package_root = Path(robo_appian.__file__).resolve().parent
+    assert not (package_root / "components" / "Text.py").exists()
+    components_init = (package_root / "components" / "__init__.py").read_text(
+        encoding="utf-8"
+    )
+    assert "components.Text" not in components_init
+    assert '"Text"' not in components_init
+    assert not hasattr(robo_appian, "Text")

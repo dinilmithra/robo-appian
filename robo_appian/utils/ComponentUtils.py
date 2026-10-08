@@ -68,7 +68,9 @@ class ComponentUtils:
         expect(visible_locator).to_be_visible()
         expect(visible_locator).to_be_enabled()
 
-        logger.info("Before button/element click: Playwright target is visible and enabled.")
+        logger.info(
+            "Before button/element click: Playwright target is visible and enabled."
+        )
 
         try:
             visible_locator.click()
@@ -87,7 +89,9 @@ class ComponentUtils:
             logger.info("Forced Playwright click completed after pointer interception.")
             return
 
-        logger.info("After button/element click: Playwright click completed successfully.")
+        logger.info(
+            "After button/element click: Playwright click completed successfully."
+        )
 
     @staticmethod
     def click_by_text(scope: Scope, text: str, excat_match: bool = False) -> None:
@@ -133,7 +137,6 @@ class ComponentUtils:
         expect(active_locator).to_be_visible()
         active_locator.click()
 
-
     @staticmethod
     def is_visible_by_xpath(scope: Scope, xpath: str) -> bool:
         """Return whether at least one XPath match is currently visible.
@@ -151,7 +154,6 @@ class ComponentUtils:
 
         raw_scope = ComponentUtils.unwrap_scope(scope)
         return raw_scope.locator(f"xpath={expression}").filter(visible=True).count() > 0
-
 
     @staticmethod
     def is_visible_by_attribute(
@@ -204,9 +206,7 @@ class ComponentUtils:
 
         value_literal = ComponentUtils.xpath_literal(str(value or ""))
         raw_scope = ComponentUtils.unwrap_scope(scope)
-        components = raw_scope.locator(
-            f"xpath=//*[@{attribute_name}={value_literal}]"
-        )
+        components = raw_scope.locator(f"xpath=//*[@{attribute_name}={value_literal}]")
         if visible_only:
             components = components.filter(visible=True)
 
@@ -233,15 +233,11 @@ class ComponentUtils:
         if not attribute_name:
             raise ValueError("Attribute cannot be empty or whitespace.")
 
-        ancestor = component.locator(
-            f"xpath=ancestor::*[@{attribute_name}][1]"
-        )
+        ancestor = component.locator(f"xpath=ancestor::*[@{attribute_name}][1]")
         if ancestor.count() == 0:
             return ""
 
-        return str(
-            ancestor.first.get_attribute(attribute_name) or ""
-        ).strip()
+        return str(ancestor.first.get_attribute(attribute_name) or "").strip()
 
     @staticmethod
     def get_descendant_texts_by_component_id(
@@ -374,9 +370,7 @@ class ComponentUtils:
 
         values: list[str] = []
         for index in range(matches.count()):
-            value = str(
-                matches.nth(index).get_attribute(attribute_name) or ""
-            ).strip()
+            value = str(matches.nth(index).get_attribute(attribute_name) or "").strip()
             if value and value not in values:
                 values.append(value)
         return values
@@ -404,9 +398,7 @@ class ComponentUtils:
             "The application continued processing longer than expected.",
         ).to_have_count(0)
 
-        logger.info(
-            "Appian processing completed: global processing indicators absent."
-        )
+        logger.info("Appian processing completed: global processing indicators absent.")
         logger.info("After wait_for_appian_action_completed: processing completed.")
 
     @staticmethod
@@ -445,7 +437,11 @@ class ComponentUtils:
         """
         if occurrence is None:
             occurrence = 1
-        elif isinstance(occurrence, bool) or not isinstance(occurrence, int) or occurrence < 1:
+        elif (
+            isinstance(occurrence, bool)
+            or not isinstance(occurrence, int)
+            or occurrence < 1
+        ):
             raise ValueError("Tab occurrence must be a positive integer.")
 
         raw_scope = ComponentUtils.unwrap_scope(scope)
@@ -491,7 +487,9 @@ class ComponentUtils:
         if widget_input.count() > 0:
             widget_input.first.set_input_files(str(resolved_path))
         else:
-            raw_scope.locator("input[type='file']").first.set_input_files(str(resolved_path))
+            raw_scope.locator("input[type='file']").first.set_input_files(
+                str(resolved_path)
+            )
 
         return str(resolved_path)
 
@@ -508,7 +506,9 @@ class ComponentUtils:
         """
         logger.info("Waiting for text '%s' to be visible...", text)
         raw_scope = ComponentUtils.unwrap_scope(scope)
-        text_locator = raw_scope.get_by_text(text, exact=True).filter(visible=True).first
+        text_locator = (
+            raw_scope.get_by_text(text, exact=True).filter(visible=True).first
+        )
 
         try:
             text_locator.wait_for(state="visible")

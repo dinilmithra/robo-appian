@@ -58,7 +58,8 @@ class CheckBox:
 
         safe_checkbox_id = ComponentUtils.xpath_literal(checkbox_id)
         return (
-            ComponentUtils.unwrap_scope(scope).locator(f"xpath=//label[@for={safe_checkbox_id}]")
+            ComponentUtils.unwrap_scope(scope)
+            .locator(f"xpath=//label[@for={safe_checkbox_id}]")
             .filter(visible=True)
             .first
         )
