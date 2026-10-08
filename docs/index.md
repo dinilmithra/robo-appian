@@ -43,15 +43,13 @@ hide:
   <section class="ra-target-workbench">
     <div class="ra-target-code">
       <div class="ra-target-panel-title"><span>›_ &nbsp; Quick Start</span><span>🐍 Python</span></div>
-      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_automation <span class="kw">import</span> AppianPage
+      <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_appian <span class="kw">import</span> AppianPage
 <span class="ln">2</span>
-<span class="ln">3</span> <span class="kw">def</span> test_user_options(page: AppianPage):
-<span class="ln">4</span>     user_options = page.get_by_attributes(
-<span class="ln">5</span>         attributes={<span class="st">"role"</span>: <span class="st">"button"</span>, <span class="st">"aria-label"</span>: <span class="st">"User options"</span>},
-<span class="ln">6</span>         excat_match=<span class="kw">True</span>,
-<span class="ln">7</span>     )
-<span class="ln">8</span>     user_options.to_be_visible()
-<span class="ln">9</span>     user_options.click()</code></pre>
+<span class="ln">3</span> <span class="kw">def</span> test_create_request(page: AppianPage):
+<span class="ln">4</span>     page.textbox(label=<span class="st">"Request Name"</span>).fill(<span class="st">"Example Request"</span>)
+<span class="ln">5</span>     page.date(label=<span class="st">"Required Award Date"</span>).fill(<span class="st">"10/15/2026"</span>)
+<span class="ln">6</span>     page.checkbox(label=<span class="st">"Is this request for a conference?"</span>).select(<span class="st">"Yes"</span>)
+<span class="ln">7</span>     page.button(name=<span class="st">"Next"</span>).click()</code></pre>
     </div>
 
     <div class="ra-target-architecture">
@@ -70,9 +68,9 @@ hide:
     <div class="ra-target-docs-head"><h2>▣ &nbsp; Documentation</h2><a href="getting-started/installation/">Explore all docs&nbsp; →</a></div>
     <div class="ra-target-doc-grid">
       <a href="getting-started/installation/"><span>↓</span><div><strong>Installation</strong><small>Set up robo-appian in minutes.</small></div><b>→</b></a>
-      <a href="getting-started/concepts/"><span>⚙</span><div><strong>Core Concepts</strong><small>Understand scopes and reusable interactions.</small></div><b>→</b></a>
-      <a href="api/"><span>&lt;/&gt;</span><div><strong>Core APIs</strong><small>Browse Appian components and utilities.</small></div><b>→</b></a>
-      <a href="getting-started/quick-start/"><span>▧</span><div><strong>Examples</strong><small>Ready-to-use automation patterns.</small></div><b>→</b></a>
+      <a href="getting-started/concepts/"><span>⚙</span><div><strong>Core Concepts</strong><small>Learn the few concepts needed to write readable Appian tests.</small></div><b>→</b></a>
+      <a href="api/"><span>&lt;/&gt;</span><div><strong>Core APIs</strong><small>Browse detailed component APIs when you need more control.</small></div><b>→</b></a>
+      <a href="getting-started/quick-start/"><span>▧</span><div><strong>Examples</strong><small>Copy simple examples for common Appian controls.</small></div><b>→</b></a>
       <a href="guides/components/"><span>●</span><div><strong>Best Practices</strong><small>Choose the right component for the control.</small></div><b>→</b></a>
       <a href="getting-started/troubleshooting/"><span>◉</span><div><strong>Troubleshooting</strong><small>Common issues and practical solutions.</small></div><b>→</b></a>
     </div>

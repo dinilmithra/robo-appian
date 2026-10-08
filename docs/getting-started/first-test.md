@@ -1,39 +1,6 @@
 # Your First Test
 
-Installing `robo-appian` provides the Appian pytest integration automatically.
-
-## 1. Write a test with `AppianPage`
-
-```python
-from robo_appian import AppianPage
-
-
-def test_open_appian(page: AppianPage) -> None:
-    page.goto("https://your-appian-site.example/")
-    assert "your-appian-site" in page.url
-```
-
-Authentication and the target URL are application-specific and belong in the consuming project.
-
-## 2. Use Appian locators
-
-```python
-from robo_appian import AppianPage
-
-
-def test_user_menu(page: AppianPage) -> None:
-    user_options = page.get_by_attributes(
-        attributes={
-            "role": "button",
-            "aria-label": "User options",
-        },
-        excat_match=True,
-    )
-    user_options.to_be_visible()
-    user_options.click()
-```
-
-## 3. Use fluent Appian components
+A pytest test is just a Python function whose name starts with `test_`.
 
 ```python
 from robo_appian import AppianPage
@@ -44,4 +11,40 @@ def test_create_request(page: AppianPage) -> None:
     page.button(name="Submit").click()
 ```
 
-The consuming project owns URLs, authentication policy, workflow orchestration, assertions, test data, and application-specific waits. `robo-appian` owns reusable Appian interactions, while `robo-automation` owns generic resource lifecycle.
+## What is `page`?
+
+You do not create `page` yourself. pytest provides it to the test automatically.
+
+`page` represents the Appian page you are automating.
+
+## Add more fields
+
+```python
+
+def test_create_request(page: AppianPage) -> None:
+    page.textbox(label="Request Name").fill("Example Request")
+
+    page.date(
+        label="Required Award Date"
+    ).fill("10/15/2026")
+
+    page.checkbox(
+        label="Is this request for a conference?"
+    ).select("Yes")
+
+    page.button(name="Submit").click()
+```
+
+Prefer the label or button text a real user sees on the screen.
+
+## Application-specific behavior
+
+Your application project should normally own:
+
+- the application URL;
+- login and credentials;
+- business workflows;
+- test data;
+- assertions.
+
+`robo-appian` supplies reusable Appian interactions. `robo-automation` supplies generic browser and pytest infrastructure.

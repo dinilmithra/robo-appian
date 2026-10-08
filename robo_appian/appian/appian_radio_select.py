@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from robo_appian.errors import RoboAppianError
+
 from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator, expect
@@ -124,7 +126,7 @@ class AppianRadioSelect(AppianInputComponent):
         # Once the live label has appeared, reject ambiguous global matches.
         label_count = labels.count()
         if label_count != 1:
-            raise RuntimeError(
+            raise RoboAppianError(
                 f"Could not resolve Appian radio group '{self._label}' by semantic label, "
                 f"and visible option '{choice}' matched {label_count} labels in the current scope."
             )
@@ -150,7 +152,7 @@ class AppianRadioSelect(AppianInputComponent):
         """
         target_id = target.get_attribute("id")
         if not target_id:
-            raise RuntimeError(
+            raise RoboAppianError(
                 f"Appian radio option in '{self._label}' does not have an id attribute."
             )
         target_id_literal = self._xpath_literal(target_id)

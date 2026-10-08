@@ -1,114 +1,77 @@
 # Choosing a Component
 
-Start from the Appian control you want to interact with. Prefer the most specific public component available instead of starting with low-level selectors or `ComponentUtils`.
+Start with what the user sees on the page.
 
-| I need to… | Start with |
+| I need to... | Use |
 | --- | --- |
-| Click or wait for a button | [`AppianButton`](../api/appian-button.md) |
-| Fill a text field | [`AppianTextbox`](../api/appian-textbox.md) |
-| Select or inspect a checkbox | [`CheckBox`](../api/checkbox.md) |
-| Select a standard dropdown value | [`Dropdown`](../api/dropdown.md) |
-| Enter or inspect a date | [`AppianDate`](../api/appian-date.md) |
-| Find or activate a link | [`Link`](../api/link.md) |
-| Choose an item from a menu button | [`MenuButton`](../api/menu-button.md) |
-| Select a radio option | `page.checkbox(label=...).select(value)` |
-| Work with repeated record content | [`RecordList`](../api/record-list.md) |
-| Restrict interaction to a named region | [`Region`](../api/region.md) |
-| Search and select from a searchable dropdown | [`SearchDropdown`](../api/search-dropdown.md) |
-| Work with search suggestions | [`SearchInput`](../api/search-input.md) |
-| Select or inspect a tab | [`Tab`](../api/tab.md) |
-| Read or interact with table/grid content | [`Table`](../api/table.md) |
-| Read or wait for visible text | `page.get_by_text(...)` |
-| Locate by arbitrary HTML attributes | [`AppianLocator`](../api/appian-page.md) |
+| Enter text | `page.textbox(...)` |
+| Enter a date | `page.date(...)` |
+| Choose a radio/selection option | `page.checkbox(...).select(...)` |
+| Click a button | `page.button(...).click()` |
+| Choose a standard dropdown value | `Dropdown` |
+| Search in a searchable dropdown | `SearchDropdown` |
+| Select a tab | `Tab` |
+| Work with a table/grid | `Table` |
+| Click a link | `Link` |
 
-## Framework lookup or component helper?
+## Textbox
 
-Use `AppianPage` / `AppianLocator` when the control is best described by generic DOM/accessibility attributes:
-
-```python
-user_options = page.get_by_attributes(
-    attributes={
-        "role": "button",
-        "aria-label": "User options",
-    }
-)
-user_options.to_be_visible()
-user_options.click()
-```
-
-Use a component helper when robo-appian has reusable Appian-specific behavior for that control:
-
-```python
-from robo_appian import AppianPage
-
-page.textbox(label="Request Name").fill("Example Request")
-page.button(name="Submit").click()
-```
-
-## `Dropdown` or `SearchDropdown`?
-
-Use `Dropdown` for the standard Appian dropdown interaction. Use `SearchDropdown` when the control requires typing search text and selecting from dynamic results.
-
-## Fluent input textbox
-
-Use the page-level API for text fields:
+By label:
 
 ```python
 page.textbox(label="Request Name").fill("Example Request")
+```
+
+By placeholder:
+
+```python
 page.textbox(placeholder="example@example.com").fill("user@example.com")
-page.date(label="Required Award Date").fill("10/07/2026")
 ```
 
-## Understanding `Scope`
-
-Many existing component signatures still expose [`Scope`](../api/scope.md), which is the internal Playwright `Page | Locator` search boundary used by the component layer.
-
-New consuming projects should use the Robo* fixture/wrapper model for browser ownership. The `Scope` type remains documented because the current component APIs and internals still depend on it.
-
-## When to use `ComponentUtils`
-
-[`ComponentUtils`](../api/component-utils.md) contains shared lower-level operations. Application tests should normally prefer `AppianPage`, `AppianLocator`, or a component-specific API because those express intent more clearly.
-
-## Arbitrary attribute lookup
-
-`AppianLocator` accepts arbitrary HTML attributes, including standard, ARIA, `data-*`, and application-specific attributes:
+Some Appian forms introduce a textbox with nearby heading text instead of a normal field label:
 
 ```python
-user_options = page.get_by_attributes(
-    attributes={
-        "role": "button",
-        "aria-label": "User options",
-    },
-    excat_match=True,
-)
+page.textbox(header="Conference Description").fill("Annual conference")
 ```
 
-For a stable HTML id:
+## Date
 
 ```python
-agree_button = page.get_by_id("jsAcceptButton")
-agree_button.to_be_visible()
-agree_button.click()
+page.date(label="Required Award Date").fill("10/15/2026")
 ```
 
-## Duplicate visible matches
+Use `page.date(...)` for an Appian date field. Do not use a normal textbox just because the HTML input type is `text`.
 
-`to_be_visible()` filters the current locator set by visibility. If multiple visible matches remain and using the first is intentional:
+## Radio choice / selection
 
 ```python
-user_options.to_be_visible()
-user_options = user_options.first()
-user_options.click()
+page.checkbox(
+    label="Is this request for a conference?"
+).select("Yes")
 ```
 
-Keep explicit selection in test/application code instead of silently choosing the first element inside generic lookup.
+Use the **complete question text** when possible. This keeps choices such as `Yes` or `No` scoped to the correct question.
 
-## Focus-out after input changes
+You can inspect the current state without changing focus:
 
-Appian input components share a common post-change lifecycle. `AppianTextbox`
-(and therefore `AppianDate`) moves focus out with `blur()` after `fill(...)`.
-`AppianRadioSelect` does the same after a radio/checkbox state actually changes.
-Read-only operations such as `is_selected(...)` do not change focus.
+```python
+selected = page.checkbox(
+    label="Is this request for a conference?"
+).is_selected("Yes")
+```
 
-This behavior is provided by `AppianInputComponent`; component-specific locator
-semantics remain in their concrete component classes.
+## Button
+
+```python
+page.button(name="Next").click()
+```
+
+## Automatic focus-out
+
+After a textbox, date, or selection value actually changes, `robo-appian` moves focus out automatically so Appian can process the value.
+
+You normally should **not** add a Tab press or manual blur in application tests.
+
+## Advanced locators
+
+If none of the component APIs describe the control, use `AppianPage`/`AppianLocator` or a component-specific advanced API. See the API Reference after trying the simple component approach first.

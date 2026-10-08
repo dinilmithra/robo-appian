@@ -1,5 +1,6 @@
 """Generic helpers for semantic link interaction and link-state validation."""
 
+from robo_appian.errors import RoboAppianError
 import logging
 
 from playwright.sync_api import Page, expect
@@ -105,7 +106,7 @@ class Link:
         try:
             expect(target_link).to_be_visible()
         except Exception as exc:
-            raise RuntimeError(
+            raise RoboAppianError(
                 f"Link with text '{link_text}' is not visible and cannot be clicked."
             ) from exc
 

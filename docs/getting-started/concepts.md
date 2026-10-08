@@ -1,63 +1,49 @@
 # Core Concepts
 
-`robo-appian` is the Appian-specific interaction layer. Generic browser lifecycle and pytest resource management are provided by `robo-automation`.
+You only need a few ideas to start using `robo-appian`.
 
-## Appian resource model
+## Think like the user
 
-Consumer code should use the Appian layer:
-
-```python
-from robo_appian import AppianLocator, AppianPage, AppianScope
-```
-
-- `AppianPage` is the main entry point for Appian page interactions.
-- `AppianLocator` represents an Appian element or scoped subtree.
-- `AppianScope` is `AppianPage | AppianLocator` for APIs that intentionally support either scope.
-
-Prefer `AppianPage` for normal page-wide operations and `AppianLocator` only when an operation must be restricted to a dialog, region, or other subtree.
-
-## Fluent components
-
-Create reusable Appian controls directly from the page:
+Prefer visible application text over low-level HTML selectors.
 
 ```python
 page.textbox(label="Request Name").fill("Example Request")
-page.textbox(placeholder="example@example.com").fill("user@example.com")
-page.button(name="Submit").click()
+page.button(name="Next").click()
 ```
 
-## Attribute-based lookup
+## `page` is your main entry point
 
-Use `AppianPage.get_by_attributes(...)` when an element is best described by stable attributes:
+`page` is an `AppianPage`. It provides Appian-aware components such as:
 
 ```python
-user_options = page.get_by_attributes(
-    attributes={
-        "role": "button",
-        "aria-label": "User options",
-    },
-    excat_match=True,
-)
+page.textbox(...)
+page.date(...)
+page.checkbox(...)
+page.button(...)
 ```
 
-For a stable id:
+## Components do the Appian-specific work
+
+For example, a date input is still an Appian control even though it looks like a textbox in HTML. Use:
 
 ```python
-agree = page.get_by_id("jsAcceptButton")
-agree.to_be_visible()
-agree.click()
+page.date(label="Required Award Date").fill("10/15/2026")
 ```
 
-## Responsibility boundaries
+instead of treating it as a normal textbox.
 
-| Concern | robo-automation | robo-appian | Consumer project |
-| --- | :---: | :---: | :---: |
-| Generic browser and pytest lifecycle | ✓ | | |
-| Appian page/locator abstractions | | ✓ | |
-| Appian component behavior | | ✓ | |
-| Application URL and authentication policy | | | ✓ |
-| Worker-specific credentials/session policy | | | ✓ |
-| Business workflow orchestration | | | ✓ |
-| Assertions and test data | | | ✓ |
+Textboxes, dates, and selection controls automatically move focus out after a value changes so Appian can process the update.
 
-Next, use [Quick Start](quick-start.md) for the shortest working path or [Pytest Integration](../guides/pytest-integration.md) for application-specific fixture overrides.
+## Only use lower-level locators when necessary
+
+Most tests should start with the component APIs above. If the application has a control that cannot be described that way, `AppianPage` and `AppianLocator` also provide lower-level lookup methods. Those are covered in the API and advanced guides.
+
+## Where responsibilities live
+
+| Concern | Owner |
+| --- | --- |
+| Browser and pytest lifecycle | `robo-automation` |
+| Appian controls and Appian behavior | `robo-appian` |
+| Application URL, login, workflow and test data | Consumer project |
+
+For a first test, continue to [Quick Start](quick-start.md).
