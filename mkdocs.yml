@@ -88,8 +88,6 @@ nav:
       - Pytest Integration: guides/pytest-integration.md
       - Browser Management: guides/browser-management.md
       - Components: guides/components.md
-      - Development: guides/development.md
-      - Publishing Docs: guides/publishing-docs.md
   - API Reference:
       - Overview: api/index.md
       - Appian Page and Locator: api/appian-page.md

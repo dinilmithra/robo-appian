@@ -75,5 +75,5 @@ Full documentation:
 `robo-appian` is licensed under the [MIT License](LICENSE).
 ## Error handling
 
-Appian-specific library failures use `RoboAppianError`, which is also a `RoboAutomationError`. Normal tests should usually let these errors propagate. See `docs/getting-started/error-handling.md`.
+Appian-specific library failures use `RoboAppianError`, which is also a `RoboAutomationError`. Normal tests should usually let pytest report these errors. If you need recovery or diagnostic handling, see **[How to use RoboAppianError](docs/getting-started/error-handling.md)** for examples using `code`, `details`, `to_dict()`, and exception chaining.
 
