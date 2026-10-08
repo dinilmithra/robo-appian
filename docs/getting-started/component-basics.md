@@ -11,7 +11,7 @@ Start from the Appian control you want to interact with. Prefer the most specifi
 | Enter or inspect a date | [`AppianDate`](../api/appian-date.md) |
 | Find or activate a link | [`Link`](../api/link.md) |
 | Choose an item from a menu button | [`MenuButton`](../api/menu-button.md) |
-| Select a radio option | [`RadioSelect`](../api/radio-select.md) |
+| Select a radio option | `page.checkbox(label=...).select(value)` |
 | Work with repeated record content | [`RecordList`](../api/record-list.md) |
 | Restrict interaction to a named region | [`Region`](../api/region.md) |
 | Search and select from a searchable dropdown | [`SearchDropdown`](../api/search-dropdown.md) |
@@ -102,3 +102,13 @@ user_options.click()
 ```
 
 Keep explicit selection in test/application code instead of silently choosing the first element inside generic lookup.
+
+## Focus-out after input changes
+
+Appian input components share a common post-change lifecycle. `AppianTextbox`
+(and therefore `AppianDate`) moves focus out with `blur()` after `fill(...)`.
+`AppianRadioSelect` does the same after a radio/checkbox state actually changes.
+Read-only operations such as `is_selected(...)` do not change focus.
+
+This behavior is provided by `AppianInputComponent`; component-specific locator
+semantics remain in their concrete component classes.

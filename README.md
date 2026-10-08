@@ -60,7 +60,7 @@ robo-appian install-browser webkit
 
 The preferred Appian-facing API uses `AppianPage`, `AppianLocator`, and `AppianScope`. `AppianScope` is `AppianPage | AppianLocator`; use `AppianPage` for page-wide operations and `AppianLocator` only when a dialog or subtree must constrain the search.
 
-`AppianButton`, `AppianTextbox`, and `AppianDate` are implemented inside `robo_appian.appian` and are created through `page.button(name="...")`, `page.textbox(...)`, and `page.date(...)`. The legacy component APIs remain compatibility surfaces while fluent Appian components are the preferred consumer model.
+`AppianButton`, `AppianTextbox`, `AppianDate`, and `AppianRadioSelect` are implemented inside `robo_appian.appian`. Input components share `AppianInputComponent` for post-change focus-out (`blur()`) while retaining component-specific locator semantics. They are created through `page.button(name="...")`, `page.textbox(...)`, `page.date(...)`, and `page.checkbox(...)`. The legacy component APIs remain compatibility surfaces while fluent Appian components are the preferred consumer model.
 
 ## Documentation
 

@@ -1,5 +1,7 @@
 from pathlib import Path
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 from playwright.sync_api import Locator, Page
 
@@ -518,6 +520,19 @@ def test_appian_date_inherits_appian_textbox() -> None:
     assert issubclass(AppianDate, AppianTextbox)
 
 
+def test_appian_input_components_share_focus_out_base() -> None:
+    from robo_appian import (
+        AppianDate,
+        AppianInputComponent,
+        AppianRadioSelect,
+        AppianTextbox,
+    )
+
+    assert issubclass(AppianTextbox, AppianInputComponent)
+    assert issubclass(AppianDate, AppianInputComponent)
+    assert issubclass(AppianRadioSelect, AppianInputComponent)
+
+
 def test_appian_textbox_excludes_date_picker_test_id() -> None:
     from robo_appian import AppianTextbox
 
@@ -614,7 +629,7 @@ def test_appian_date_fill_blurs_after_entering_value() -> None:
     date_input.press.assert_not_called()
 
 
-def test_appian_textbox_fill_does_not_blur() -> None:
+def test_appian_textbox_fill_blurs_after_entering_value() -> None:
     from robo_appian import AppianTextbox
 
     page = _mock_page()
@@ -626,6 +641,7 @@ def test_appian_textbox_fill_does_not_blur() -> None:
     textbox.fill("Contract Title")
 
     text_input.fill.assert_called_once_with("Contract Title")
+    text_input.blur.assert_called_once_with()
     text_input.press.assert_not_called()
 
 
@@ -656,3 +672,248 @@ def test_legacy_text_component_is_removed() -> None:
     assert "components.Text" not in components_init
     assert '"Text"' not in components_init
     assert not hasattr(robo_appian, "Text")
+
+
+def test_appian_page_checkbox_returns_appian_radio_select() -> None:
+    from robo_appian import AppianRadioSelect
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    checkbox = appian_page.checkbox(label="Is this request for a conference?")
+
+    assert isinstance(checkbox, AppianRadioSelect)
+
+
+def _radio_group_mocks(page: Page, label_id: str):
+    label = MagicMock(spec=Locator)
+    label.count.return_value = 1
+    label.get_attribute.return_value = label_id
+    group = MagicMock(spec=Locator)
+    group.count.return_value = 1
+    target = MagicMock(spec=Locator)
+    group.locator.return_value.first = target
+    page.locator.side_effect = [label, group]
+    return label, group, target
+
+
+def test_appian_radio_select_radio_locator_scopes_value_to_aria_labelled_group() -> None:
+    page = _mock_page()
+    label, group, target = _radio_group_mocks(page, "conference-question-id")
+    target.is_checked.return_value = True
+    appian_page = AppianPage.get(page)
+
+    selected = appian_page.checkbox(
+        label="Is this request for a conference?"
+    ).is_selected("Yes")
+
+    assert selected is True
+    label_xpath = page.locator.call_args_list[0].args[0]
+    group_xpath = page.locator.call_args_list[1].args[0]
+    option_xpath = group.locator.call_args.args[0]
+    assert "IS THIS REQUEST FOR A CONFERENCE?" in label_xpath
+    assert "@class" not in label_xpath
+    assert "@role='radiogroup'" in group_xpath
+    assert "@aria-labelledby='conference-question-id'" in group_xpath
+    assert "IS THIS REQUEST FOR A CONFERENCE?" not in group_xpath
+    assert "@class" not in group_xpath
+    assert "input[@type='radio' and @value='Yes']" in option_xpath
+    label.get_attribute.assert_called_once_with("id")
+
+
+def test_appian_radio_select_radio_select_is_idempotent_when_already_checked() -> None:
+    page = _mock_page()
+    _, _, target = _radio_group_mocks(page, "traveler-count-id")
+    target.is_checked.return_value = True
+    appian_page = AppianPage.get(page)
+
+    appian_page.checkbox(
+        label="How many people are you submitting in this travel request?"
+    ).select("More than one")
+
+    target.check.assert_not_called()
+    target.blur.assert_not_called()
+
+
+def test_appian_radio_select_preserves_native_checkbox_semantics_without_css_classes() -> None:
+    page = _mock_page()
+    checkbox = page.locator.return_value
+    checkbox.is_checked.return_value = True
+    appian_page = AppianPage.get(page)
+
+    selected = appian_page.checkbox(label="Select All Rows").is_selected()
+
+    assert selected is True
+    xpath = page.locator.call_args.args[0]
+    assert "@type='checkbox'" in xpath
+    assert "@role='group'" in xpath
+    assert "@aria-labelledby" in xpath
+    assert "@class" not in xpath
+
+
+
+def test_appian_radio_select_radio_selection_clicks_associated_label() -> None:
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    component = appian_page.checkbox(label="Is this request for a conference?")
+    before = MagicMock(spec=Locator)
+    after = MagicMock(spec=Locator)
+    choice_label = MagicMock(spec=Locator)
+    before.is_checked.return_value = False
+    component._radio_locator = MagicMock(side_effect=[before, after])  # type: ignore[method-assign]
+    component._radio_label_locator = MagicMock(return_value=choice_label)  # type: ignore[method-assign]
+
+    with (
+        patch("robo_appian.appian.appian_radio_select.expect") as expect_mock,
+        patch("robo_appian.appian.appian_radio_select.ComponentUtils.wait_for_appian_action_completed"),
+    ):
+        component.select("Yes")
+
+    component._radio_label_locator.assert_called_once_with(before)
+    choice_label.click.assert_called_once_with()
+    before.check.assert_not_called()
+    before.uncheck.assert_not_called()
+    after.blur.assert_called_once_with()
+    expect_mock.return_value.to_be_checked.assert_called_once_with(checked=True)
+
+
+def test_appian_radio_select_radio_label_is_scoped_to_ancestor_group_and_input_id() -> None:
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    component = appian_page.checkbox(label="Is this request for a conference?")
+    target = MagicMock(spec=Locator)
+    target.get_attribute.return_value = "conference-question-id_1"
+    group = MagicMock(spec=Locator)
+    group.count.return_value = 1
+    choice_label = MagicMock(spec=Locator)
+    group.locator.return_value.first = choice_label
+    target.locator.return_value = group
+
+    resolved = component._radio_label_locator(target)
+
+    assert resolved is choice_label
+    target.get_attribute.assert_called_once_with("id")
+    target.locator.assert_called_once_with("xpath=ancestor::*[@role='radiogroup'][1]")
+    label_xpath = group.locator.call_args.args[0]
+    assert "label[@for='conference-question-id_1']" in label_xpath
+    assert "@class" not in label_xpath
+
+
+def test_appian_radio_select_falls_back_to_unique_visible_option_when_semantic_label_missing() -> None:
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    component = appian_page.checkbox(label="Are you submitting this travel request for yourself or on behalf of someone else?")
+    missing_label = MagicMock(spec=Locator)
+    missing_label.count.return_value = 0
+    labels = MagicMock(spec=Locator)
+    # Reproduce the UAT race: an immediate count would be zero while Appian is
+    # rerendering. The option becomes available during the visibility wait.
+    labels.count.return_value = 0
+    option_label = MagicMock(spec=Locator)
+    labels.first = option_label
+    radio = MagicMock(spec=Locator)
+    option_label.locator.return_value = radio
+    page.locator.side_effect = [missing_label, labels]
+
+    with patch("robo_appian.appian.appian_radio_select.expect") as expect_mock:
+        expect_mock.return_value.to_be_visible.side_effect = lambda: setattr(
+            labels.count, "return_value", 1
+        )
+        resolved = component._radio_locator("For myself")
+
+    assert resolved is radio
+    fallback_xpath = page.locator.call_args_list[1].args[0]
+    assert "label[@for and normalize-space(string(.))='For myself']" in fallback_xpath
+    option_label.locator.assert_called_once_with(
+        "xpath=preceding-sibling::input[@type='radio'][1]"
+    )
+    assert "@class" not in fallback_xpath
+    expect_mock.return_value.to_be_visible.assert_called_once_with()
+    expect_mock.return_value.to_be_attached.assert_called_once_with()
+
+
+def test_appian_radio_select_rejects_ambiguous_visible_option_fallback() -> None:
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    component = appian_page.checkbox(label="Are you submitting this travel request for yourself or on behalf of someone else?")
+    missing_label = MagicMock(spec=Locator)
+    missing_label.count.return_value = 0
+    labels = MagicMock(spec=Locator)
+    labels.count.return_value = 2
+    labels.first = MagicMock(spec=Locator)
+    page.locator.side_effect = [missing_label, labels]
+
+    with (
+        patch("robo_appian.appian.appian_radio_select.expect"),
+        pytest.raises(RuntimeError, match="matched 2 labels"),
+    ):
+        component._radio_locator("Yes")
+
+
+def test_appian_radio_select_native_checkbox_false_uses_uncheck() -> None:
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    component = appian_page.checkbox(label="Select All Rows")
+    before = MagicMock(spec=Locator)
+    after = MagicMock(spec=Locator)
+    before.is_checked.return_value = True
+    component._checkbox_locator = MagicMock(side_effect=[before, after])  # type: ignore[method-assign]
+
+    with (
+        patch("robo_appian.appian.appian_radio_select.expect") as expect_mock,
+        patch("robo_appian.appian.appian_radio_select.ComponentUtils.wait_for_appian_action_completed"),
+    ):
+        component.select(selected=False)
+
+    before.uncheck.assert_called_once_with()
+    before.check.assert_not_called()
+    after.blur.assert_called_once_with()
+    expect_mock.return_value.to_be_checked.assert_called_once_with(checked=False)
+
+def test_legacy_radio_select_component_is_removed() -> None:
+    """The static RadioSelect helper must not remain part of robo-appian."""
+    import robo_appian
+
+    package_root = Path(robo_appian.__file__).resolve().parent
+    assert not (package_root / "components" / "RadioSelect.py").exists()
+    assert not hasattr(robo_appian, "RadioSelect")
+
+    components_init = (package_root / "components" / "__init__.py").read_text(
+        encoding="utf-8"
+    )
+    assert "RadioSelect" not in components_init
+
+
+def test_appian_radio_select_pcard_radio_is_scoped_to_question_group() -> None:
+    page = _mock_page()
+    _, group, target = _radio_group_mocks(page, "pcard-receiver-id")
+    target.is_checked.return_value = True
+    appian_page = AppianPage.get(page)
+
+    appian_page.checkbox(
+        label="Will you be the one to receive the purchased product or service?"
+    ).select("Yes, I will be receiving the purchased product or service")
+
+    label_xpath = page.locator.call_args_list[0].args[0]
+    group_xpath = page.locator.call_args_list[1].args[0]
+    option_xpath = group.locator.call_args.args[0]
+    assert "WILL YOU BE THE ONE TO RECEIVE THE PURCHASED PRODUCT OR SERVICE?" in label_xpath
+    assert "@role='radiogroup'" in group_xpath
+    assert "@aria-labelledby='pcard-receiver-id'" in group_xpath
+    assert "@class" not in group_xpath
+    assert (
+        "input[@type='radio' and @value='Yes, I will be receiving the purchased product or service']"
+        in option_xpath
+    )
+    target.check.assert_not_called()
+
+
+def test_core_no_longer_references_radio_select() -> None:
+    core_root = Path(__file__).resolve().parents[2] / "core-automation"
+    matches = []
+    for path in core_root.rglob("*.py"):
+        if any(part in {".venv", ".venv-core", "dist", "__pycache__"} for part in path.parts):
+            continue
+        if "RadioSelect" in path.read_text(encoding="utf-8"):
+            matches.append(path)
+    assert not matches, f"RadioSelect remains in CORE: {matches}"

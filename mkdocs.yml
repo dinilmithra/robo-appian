@@ -100,7 +100,6 @@ nav:
           - Dropdown: api/dropdown.md
           - Link: api/link.md
           - MenuButton: api/menu-button.md
-          - RadioSelect: api/radio-select.md
           - RecordList: api/record-list.md
           - Region: api/region.md
           - SearchDropdown: api/search-dropdown.md

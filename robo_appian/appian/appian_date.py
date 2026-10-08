@@ -55,16 +55,12 @@ class AppianDate(AppianTextbox):
         expect(target, "Date input was not visible.").to_be_visible()
         expect(target, "Date input was not enabled.").to_be_enabled()
         target.fill(cls.normalize(value))
-        target.blur()
+        cls._focus_out(target)
 
     def _control_predicate(self) -> str:
         return (
             "(self::input and @type='text' and " f"@data-testid='{self.DATE_TEST_ID}')"
         )
-
-    def _after_fill(self, textbox: Locator) -> None:
-        """Move focus away after entry so Appian commits date validation."""
-        textbox.blur()
 
 
 __all__ = ["AppianDate"]

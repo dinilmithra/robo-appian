@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator, expect
 
+from .appian_input_component import AppianInputComponent
+
 if TYPE_CHECKING:
     from .appian_locator import AppianLocator
     from .appian_page import AppianPage
@@ -14,7 +16,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class AppianTextbox:
+class AppianTextbox(AppianInputComponent):
     """Represent an Appian text field bound to a page."""
 
     DATE_TEST_ID = "DatePickerWidget-textInput"
@@ -40,7 +42,7 @@ class AppianTextbox:
                 "for a textbox."
             )
 
-        self._page = page
+        super().__init__(page=page)
         self._label = normalized_label
         self._placeholder = normalized_placeholder
         self._header = normalized_header
@@ -204,7 +206,8 @@ class AppianTextbox:
         logger.info("Filled Appian textbox: %s.", self._description())
 
     def _after_fill(self, textbox: Locator) -> None:
-        """Run component-specific behavior after a value is filled."""
+        """Commit the changed textbox value by moving focus away."""
+        self._after_change(textbox)
 
     def clear(self) -> None:
         """Wait until the textbox is ready, then clear its value."""

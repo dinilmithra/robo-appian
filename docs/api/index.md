@@ -40,7 +40,7 @@ Component pages are generated from current source signatures/docstrings.
 | [`AppianDate`](appian-date.md) | Appian date fields |
 | [`Link`](link.md) | Links |
 | [`MenuButton`](menu-button.md) | Menu-button actions |
-| [`RadioSelect`](radio-select.md) | Radio options |
+| `AppianPage.checkbox(...)` | Checkboxes and labeled radio groups |
 | [`RecordList`](record-list.md) | Repeated record content |
 | [`Region`](region.md) | Named regions/scoping |
 | [`SearchDropdown`](search-dropdown.md) | Searchable dropdowns |

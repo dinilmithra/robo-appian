@@ -7,6 +7,8 @@ consumer project's component layer.
 
 from robo_appian.appian import (
     AppianButton,
+    AppianInputComponent,
+    AppianRadioSelect,
     AppianDate,
     AppianTextbox,
     AppianLocator,
@@ -21,7 +23,6 @@ from robo_appian.components import (
     SearchDropdown,
     Table,
     Tab,
-    RadioSelect,
     Region,
     RecordList,
     CheckBox,
@@ -31,6 +32,8 @@ from robo_appian.utils import ComponentUtils
 __all__ = [
     "AppianPage",
     "AppianButton",
+    "AppianInputComponent",
+    "AppianRadioSelect",
     "AppianDate",
     "AppianTextbox",
     "AppianLocator",
@@ -43,7 +46,6 @@ __all__ = [
     "Table",
     "Tab",
     "ComponentUtils",
-    "RadioSelect",
     "Region",
     "RecordList",
     "CheckBox",

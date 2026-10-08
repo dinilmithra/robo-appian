@@ -8,7 +8,6 @@ from robo_automation import Scope
 
 from robo_appian.appian.appian_date import AppianDate
 from robo_appian.components.Dropdown import Dropdown
-from robo_appian.components.RadioSelect import RadioSelect
 from robo_appian.components.SearchInput import SearchInput
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
@@ -27,6 +26,31 @@ class Table:
             return f'"{value}"'
         parts = value.split("'")
         return "concat(" + ', "\'", '.join(f"'{part}'" for part in parts) + ")"
+
+    @staticmethod
+    def __select_radio_option(scope: Scope, option_text: str) -> None:
+        """Select one native radio option inside an already-resolved table scope."""
+        text = str(option_text or "").strip()
+        if not text:
+            raise ValueError("Radio option text cannot be empty.")
+
+        literal = Table.__xpath_literal(text)
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        label = raw_scope.locator(
+            "xpath=(.//label[@for and normalize-space(string(.))=" + literal + "])[1]"
+        )
+        expect(label, f"Visible radio option '{text}' was not found.").to_be_visible()
+        radio = label.locator("xpath=preceding-sibling::input[@type='radio'][1]")
+        expect(radio, f"Radio input linked to '{text}' was not found.").to_be_attached()
+        if radio.is_checked():
+            return
+
+        label.click()
+        label = raw_scope.locator(
+            "xpath=(.//label[@for and normalize-space(string(.))=" + literal + "])[1]"
+        )
+        radio = label.locator("xpath=preceding-sibling::input[@type='radio'][1]")
+        expect(radio, f"Radio option '{text}' was not selected.").to_be_checked()
 
     """Reusable operations for Appian tables and editable grids."""
 
@@ -980,7 +1004,7 @@ class Table:
             column_number=column_number,
             column_name=column_name,
         )
-        RadioSelect.click_locator(cell, value)
+        Table.__select_radio_option(cell, value)
 
     @staticmethod
     def click_action_in_cell(
@@ -1165,7 +1189,7 @@ class Table:
             excat_match=False,
         )
 
-        RadioSelect.click_locator(
+        Table.__select_radio_option(
             cell,
             option_name,
         )

@@ -33,7 +33,6 @@ API_MAP = {
     "dropdown": ("Dropdown", PKG / "components" / "Dropdown.py"),
     "link": ("Link", PKG / "components" / "Link.py"),
     "menu-button": ("MenuButton", PKG / "components" / "MenuButton.py"),
-    "radio-select": ("RadioSelect", PKG / "components" / "RadioSelect.py"),
     "record-list": ("RecordList", PKG / "components" / "RecordList.py"),
     "region": ("Region", PKG / "components" / "Region.py"),
     "search-dropdown": ("SearchDropdown", PKG / "components" / "SearchDropdown.py"),
