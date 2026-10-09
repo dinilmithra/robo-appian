@@ -29,3 +29,9 @@ class RoboAppianError(RoboAutomationError):
         details: Mapping[str, Any] | None = None,
     ) -> None:
         super().__init__(message, code=code or self.default_code, details=details)
+
+
+class RoboAppianNavigationError(RoboAppianError):
+    """Appian navigation failure translated from robo-automation."""
+
+    default_code = "ROBO_APPIAN_NAVIGATION_ERROR"

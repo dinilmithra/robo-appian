@@ -13,7 +13,7 @@ maintainers = [
 ]
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "playwright==1.63.0", 
+    "playwright==1.63.0",
     "pytest==9.1.1",
     "robo-automation==0.1.8",
 ]
@@ -32,7 +32,7 @@ Issues = "https://github.com/dinilmithra/robo-appian/issues"
 Developer = "https://www.linkedin.com/in/dinilmithra/"
 
 [tool.poetry]
-version = "0.1.21"
+version = "0.1.22"
 packages = [{ include = "robo_appian" }]
 exclude = ["scripts/**", "tools/**"]
 

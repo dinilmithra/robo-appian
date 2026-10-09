@@ -77,3 +77,17 @@ Full documentation:
 
 Appian-specific library failures use `RoboAppianError`, which is also a `RoboAutomationError`. Normal tests should usually let pytest report these errors. If you need recovery or diagnostic handling, see **[How to use RoboAppianError](docs/getting-started/error-handling.md)** for examples using `code`, `details`, `to_dict()`, and exception chaining.
 
+
+## Runtime boundary for application projects
+
+Application projects should normally import automation APIs only from
+`robo_appian`.
+
+```python
+from robo_appian import AppianPage, AppianRuntime, RoboAppianError
+```
+
+`AppianRuntime` provides the Appian-facing browser/session lifecycle used by
+advanced consumer fixtures. It intentionally hides lower browser and
+performance implementation classes. Normal test authors usually only need the
+`page` fixture and component APIs shown above.

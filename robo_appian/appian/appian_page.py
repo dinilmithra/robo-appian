@@ -1,6 +1,8 @@
 """Appian-specific page wrapper."""
 
-from robo_automation import RoboPage
+from robo_automation import RoboAutomationError, RoboPage
+
+from robo_appian.errors import RoboAppianNavigationError
 
 from .appian_button import AppianButton
 from .appian_date import AppianDate
@@ -13,6 +15,34 @@ class AppianPage(RoboPage):
     """RoboPage specialization that exposes Appian-aware components and locators."""
 
     locator_class = AppianLocator
+
+
+    def goto(self, url: str, **kwargs):
+        """Navigate to an Appian URL using the public Appian error boundary."""
+        try:
+            return super().goto(url, **kwargs)
+        except RoboAutomationError as exc:
+            code = (
+                "ROBO_APPIAN_NAVIGATION_ABORTED"
+                if getattr(exc, "code", "") == "ROBO_NAVIGATION_ABORTED"
+                else "ROBO_APPIAN_NAVIGATION_ERROR"
+            )
+            raise RoboAppianNavigationError(
+                str(exc),
+                code=code,
+                details=getattr(exc, "details", None),
+            ) from exc
+
+    def reload(self, **kwargs):
+        """Reload an Appian page using the public Appian error boundary."""
+        try:
+            return super().reload(**kwargs)
+        except RoboAutomationError as exc:
+            raise RoboAppianNavigationError(
+                str(exc),
+                code="ROBO_APPIAN_RELOAD_ERROR",
+                details=getattr(exc, "details", None),
+            ) from exc
 
     def button(
         self,

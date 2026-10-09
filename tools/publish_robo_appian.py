@@ -104,14 +104,22 @@ def run_poetry(
     """Run Poetry in the package directory and raise on a nonzero exit status."""
     command = [_poetry_executable(), *args]
     print("> " + subprocess.list2cmdline(command))
-    return subprocess.run(
-        command,
-        cwd=PROJECT_ROOT,
-        env=env,
-        check=True,
-        text=True,
-        capture_output=capture_output,
-    )
+    try:
+        return subprocess.run(
+            command,
+            cwd=PROJECT_ROOT,
+            env=env,
+            check=True,
+            text=True,
+            capture_output=capture_output,
+        )
+    except subprocess.CalledProcessError as exc:
+        if capture_output:
+            if exc.stdout:
+                print(exc.stdout.rstrip(), file=sys.stderr)
+            if exc.stderr:
+                print(exc.stderr.rstrip(), file=sys.stderr)
+        raise
 
 
 def increment_version() -> tuple[str, str]:
