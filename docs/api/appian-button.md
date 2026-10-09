@@ -1,9 +1,9 @@
 # AppianButton
 
-`AppianButton` is the fluent button component returned by `AppianPage.button(...)`.
+`AppianButton` is the fluent button component returned by `AppianPage.appian_button(...)`.
 
 ```python
-button = page.button(name="Save")
+button = page.appian_button(name="Save")
 button.click()
 ```
 

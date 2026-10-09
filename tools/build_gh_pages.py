@@ -212,8 +212,8 @@ def home_body() -> str:
       <pre><code>from robo_appian import AppianPage
 
 def test_request(page: AppianPage):
-    page.textbox(label="Request Name").fill("Example")
-    page.button(name="Submit").click()</code></pre>
+    page.appian_textbox(label="Request Name").fill("Example")
+    page.appian_button(name="Submit").click()</code></pre>
     </div>
     <div class="ra-target-architecture">
       <div class="ra-target-panel-title light"><span>Architecture Overview</span><a href="getting-started/concepts/index.html">How it works &rarr;</a></div>

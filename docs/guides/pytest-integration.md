@@ -12,7 +12,7 @@ from robo_appian import AppianPage
 
 def test_example(page: AppianPage) -> None:
     page.goto("https://your-appian-site.example/")
-    page.button(name="Submit").is_visible()
+    page.appian_button(name="Submit").is_visible()
 ```
 
 Generic resource creation and teardown remain owned by `robo-automation`. `robo-appian` specializes the page for Appian interactions without duplicating that lifecycle.

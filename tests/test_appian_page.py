@@ -57,7 +57,7 @@ def test_appian_page_button_returns_appian_button() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    button = appian_page.button(name="Save")
+    button = appian_page.appian_button(name="Save")
 
     assert isinstance(button, AppianButton)
     assert button.name == "Save"
@@ -83,7 +83,7 @@ def test_appian_page_button_requires_name_keyword() -> None:
     appian_page = AppianPage.get(page)
 
     with pytest.raises(TypeError):
-        appian_page.button("Save")  # type: ignore[misc]
+        appian_page.appian_button("Save")  # type: ignore[misc]
 
 
 def test_button_locator_requires_type_button() -> None:
@@ -151,7 +151,7 @@ def test_appian_page_button_can_preserve_locator_scope() -> None:
     scoped_locator = AppianLocator.get(raw_scope)
     appian_page = AppianPage.get(page)
 
-    button = appian_page.button(name="Confirm", scope=scoped_locator)
+    button = appian_page.appian_button(name="Confirm", scope=scoped_locator)
     button._locator()
 
     raw_scope.locator.assert_called_once()
@@ -221,7 +221,7 @@ def test_appian_page_textbox_by_label_returns_appian_textbox() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    textbox = appian_page.textbox(label="Title")
+    textbox = appian_page.appian_textbox(label="Title")
 
     assert isinstance(textbox, AppianTextbox)
     assert textbox.label == "Title"
@@ -234,7 +234,7 @@ def test_appian_page_textbox_by_placeholder_returns_appian_textbox() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    textbox = appian_page.textbox(placeholder="example@example.com")
+    textbox = appian_page.appian_textbox(placeholder="example@example.com")
 
     assert isinstance(textbox, AppianTextbox)
     assert textbox.placeholder == "example@example.com"
@@ -247,7 +247,7 @@ def test_appian_page_textbox_by_header_returns_appian_textbox() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    textbox = appian_page.textbox(header="Conference Description")
+    textbox = appian_page.appian_textbox(header="Conference Description")
 
     assert isinstance(textbox, AppianTextbox)
     assert textbox.header == "Conference Description"
@@ -262,16 +262,16 @@ def test_appian_textbox_requires_exactly_one_identifier() -> None:
     appian_page = AppianPage.get(page)
 
     with pytest.raises(ValueError):
-        appian_page.textbox()
+        appian_page.appian_textbox()
 
     with pytest.raises(ValueError):
-        appian_page.textbox(label="Title", placeholder="Title")
+        appian_page.appian_textbox(label="Title", placeholder="Title")
 
     with pytest.raises(ValueError):
-        appian_page.textbox(label="Title", header="Conference Description")
+        appian_page.appian_textbox(label="Title", header="Conference Description")
 
     with pytest.raises(ValueError):
-        appian_page.textbox(
+        appian_page.appian_textbox(
             placeholder="Enter a value", header="Conference Description"
         )
 
@@ -508,7 +508,7 @@ def test_appian_page_date_returns_appian_date() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    date = appian_page.date(label="Required Award Date")
+    date = appian_page.appian_date(label="Required Award Date")
 
     assert isinstance(date, AppianDate)
     assert date.label == "Required Award Date"
@@ -680,7 +680,7 @@ def test_appian_page_checkbox_returns_appian_checkbox() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    checkbox = appian_page.checkbox(label="Vendor is missing in approved list")
+    checkbox = appian_page.appian_checkbox(label="Vendor is missing in approved list")
 
     assert isinstance(checkbox, AppianCheckbox)
 
@@ -691,7 +691,7 @@ def test_appian_page_radio_returns_appian_radio_select() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    radio = appian_page.radio(label="Is this request for a conference?")
+    radio = appian_page.appian_radio(label="Is this request for a conference?")
 
     assert isinstance(radio, AppianRadioSelect)
 
@@ -714,7 +714,7 @@ def test_appian_radio_select_radio_locator_scopes_value_to_aria_labelled_group()
     target.is_checked.return_value = True
     appian_page = AppianPage.get(page)
 
-    selected = appian_page.radio(
+    selected = appian_page.appian_radio(
         label="Is this request for a conference?"
     ).is_selected("Yes")
 
@@ -736,7 +736,7 @@ def test_appian_radio_select_is_idempotent_when_already_checked() -> None:
     target.is_checked.return_value = True
     appian_page = AppianPage.get(page)
 
-    appian_page.radio(
+    appian_page.appian_radio(
         label="How many people are you submitting in this travel request?"
     ).select("More than one")
 
@@ -747,7 +747,7 @@ def test_appian_radio_select_is_idempotent_when_already_checked() -> None:
 def test_appian_radio_select_clicks_associated_label() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.radio(label="Is this request for a conference?")
+    component = appian_page.appian_radio(label="Is this request for a conference?")
     before = MagicMock(spec=Locator)
     after = MagicMock(spec=Locator)
     choice_label = MagicMock(spec=Locator)
@@ -772,7 +772,7 @@ def test_appian_radio_select_clicks_associated_label() -> None:
 def test_appian_radio_select_falls_back_to_unique_visible_option_when_semantic_label_missing() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.radio(label="Are you submitting this travel request for yourself or on behalf of someone else?")
+    component = appian_page.appian_radio(label="Are you submitting this travel request for yourself or on behalf of someone else?")
     missing_label = MagicMock(spec=Locator)
     missing_label.count.return_value = 0
     labels = MagicMock(spec=Locator)
@@ -812,7 +812,7 @@ def test_appian_checkbox_uses_live_accessible_name_locator_for_choice_label() ->
     appian_page = AppianPage.get(page)
 
     with patch("robo_appian.appian.appian_checkbox.expect"):
-        checked = appian_page.checkbox(
+        checked = appian_page.appian_checkbox(
             label="Vendor is missing in approved list"
         ).is_checked()
 
@@ -841,7 +841,7 @@ def test_appian_checkbox_keeps_field_group_fallback_live_for_rerender() -> None:
     appian_page = AppianPage.get(page)
 
     with patch("robo_appian.appian.appian_checkbox.expect"):
-        checked = appian_page.checkbox(label="IT").is_checked(timeout=10)
+        checked = appian_page.appian_checkbox(label="IT").is_checked(timeout=10)
 
     assert checked is False
     group_xpath = page.locator.call_args.args[0]
@@ -860,7 +860,7 @@ def test_appian_checkbox_keeps_field_group_fallback_live_for_rerender() -> None:
 def test_appian_checkbox_timeout_waits_for_presence_not_checked_state() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.checkbox(label="IT")
+    component = appian_page.appian_checkbox(label="IT")
     target = MagicMock(spec=Locator)
     target.is_checked.return_value = False
     component._checkbox_locator = MagicMock(return_value=target)  # type: ignore[method-assign]
@@ -875,7 +875,7 @@ def test_appian_checkbox_timeout_waits_for_presence_not_checked_state() -> None:
 def test_appian_checkbox_clicks_native_label_for_pointer_intercepting_input() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.checkbox(
+    component = appian_page.appian_checkbox(
         label="I have read and understand the qualifications for the reimbursement."
     )
     target = MagicMock(spec=Locator)
@@ -899,7 +899,7 @@ def test_appian_checkbox_clicks_native_label_for_pointer_intercepting_input() ->
 def test_appian_checkbox_check_only_when_unchecked() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.checkbox(label="Vendor is missing in approved list")
+    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
     before = MagicMock(spec=Locator)
     after = MagicMock(spec=Locator)
     choice_label = MagicMock(spec=Locator)
@@ -925,7 +925,7 @@ def test_appian_checkbox_check_only_when_unchecked() -> None:
 def test_appian_checkbox_check_is_noop_when_already_checked() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.checkbox(label="Vendor is missing in approved list")
+    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
     target = MagicMock(spec=Locator)
     target.is_checked.return_value = True
     component._checkbox_locator = MagicMock(return_value=target)  # type: ignore[method-assign]
@@ -941,7 +941,7 @@ def test_appian_checkbox_check_is_noop_when_already_checked() -> None:
 def test_appian_checkbox_uncheck_only_when_checked() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.checkbox(label="Vendor is missing in approved list")
+    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
     before = MagicMock(spec=Locator)
     after = MagicMock(spec=Locator)
     choice_label = MagicMock(spec=Locator)
@@ -967,7 +967,7 @@ def test_appian_checkbox_uncheck_only_when_checked() -> None:
 def test_appian_checkbox_uncheck_is_noop_when_already_unchecked() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.checkbox(label="Vendor is missing in approved list")
+    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
     target = MagicMock(spec=Locator)
     target.is_checked.return_value = False
     component._checkbox_locator = MagicMock(return_value=target)  # type: ignore[method-assign]
@@ -983,7 +983,7 @@ def test_appian_checkbox_uncheck_is_noop_when_already_unchecked() -> None:
 def test_appian_checkbox_set_checked_routes_to_expected_state() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.checkbox(label="Vendor is missing in approved list")
+    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
     component.check = MagicMock(return_value=component)  # type: ignore[method-assign]
     component.uncheck = MagicMock(return_value=component)  # type: ignore[method-assign]
 
@@ -1022,7 +1022,7 @@ def test_appian_radio_select_pcard_radio_is_scoped_to_question_group() -> None:
     target.is_checked.return_value = True
     appian_page = AppianPage.get(page)
 
-    appian_page.radio(
+    appian_page.appian_radio(
         label="Will you be the one to receive the purchased product or service?"
     ).select("Yes, I will be receiving the purchased product or service")
 
@@ -1055,8 +1055,8 @@ def test_appian_page_exposes_checkbox_and_radio_factories() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    checkbox = appian_page.checkbox(label="Vendor is missing in approved list")
-    radio = appian_page.radio(label="Will you be the one to receive the purchased product or service?")
+    checkbox = appian_page.appian_checkbox(label="Vendor is missing in approved list")
+    radio = appian_page.appian_radio(label="Will you be the one to receive the purchased product or service?")
 
     assert isinstance(checkbox, AppianCheckbox)
     assert isinstance(radio, AppianRadioSelect)

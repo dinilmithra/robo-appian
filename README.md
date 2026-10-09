@@ -11,10 +11,10 @@ from robo_appian import AppianPage
 
 
 def test_create_request(page: AppianPage) -> None:
-    page.textbox(label="Request Name").fill("Example Request")
-    page.date(label="Required Award Date").fill("10/15/2026")
-    page.radio(label="Is this request for a conference?").select("Yes")
-    page.button(name="Submit").click()
+    page.appian_textbox(label="Request Name").fill("Example Request")
+    page.appian_date(label="Required Award Date").fill("10/15/2026")
+    page.appian_radio(label="Is this request for a conference?").select("Yes")
+    page.appian_button(name="Submit").click()
 ```
 
 The goal is to describe the page using the same text a user sees.
@@ -31,11 +31,11 @@ Python 3.12 is required. `robo-appian` uses `robo-automation` for generic browse
 ## Common controls
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
-page.textbox(placeholder="example@example.com").fill("user@example.com")
-page.date(label="Required Award Date").fill("10/15/2026")
-page.radio(label="Is this request for a conference?").select("Yes")
-page.button(name="Next").click()
+page.appian_textbox(label="Request Name").fill("Example Request")
+page.appian_textbox(placeholder="example@example.com").fill("user@example.com")
+page.appian_date(label="Required Award Date").fill("10/15/2026")
+page.appian_radio(label="Is this request for a conference?").select("Yes")
+page.appian_button(name="Next").click()
 ```
 
 Textboxes, dates, and selection components automatically move focus out after a value changes so Appian can process it.

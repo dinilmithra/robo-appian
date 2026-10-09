@@ -26,7 +26,7 @@ class Popup:
         """Complete an action in a required dialog and wait for it to close."""
         dialog = Popup._dialog(scope, expected_text)
         dialog.wait_for(state="visible")
-        Popup._page(scope).button(name=action_label, exact=False, scope=dialog).click()
+        Popup._page(scope).appian_button(name=action_label, exact=False, scope=dialog).click()
         dialog.wait_for(state="hidden")
         return True
 
@@ -49,6 +49,6 @@ class Popup:
         except PlaywrightTimeoutError:
             return False
 
-        Popup._page(scope).button(name=action_label, exact=False, scope=dialog).click()
+        Popup._page(scope).appian_button(name=action_label, exact=False, scope=dialog).click()
         dialog.wait_for(state="hidden")
         return True

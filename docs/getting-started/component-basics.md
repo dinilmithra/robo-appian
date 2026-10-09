@@ -4,11 +4,11 @@ Start with what the user sees on the page.
 
 | I need to... | Use |
 | --- | --- |
-| Enter text | `page.textbox(...)` |
-| Enter a date | `page.date(...)` |
-| Check or uncheck a checkbox | `page.checkbox(...).check()` / `.uncheck()` |
-| Choose a radio option | `page.radio(...).select(...)` |
-| Click a button | `page.button(...).click()` |
+| Enter text | `page.appian_textbox(...)` |
+| Enter a date | `page.appian_date(...)` |
+| Check or uncheck a checkbox | `page.appian_checkbox(...).check()` / `.uncheck()` |
+| Choose a radio option | `page.appian_radio(...).select(...)` |
+| Click a button | `page.appian_button(...).click()` |
 | Choose a standard dropdown value | `Dropdown` |
 | Search in a searchable dropdown | `SearchDropdown` |
 | Select a tab | `Tab` |
@@ -20,36 +20,36 @@ Start with what the user sees on the page.
 By label:
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
+page.appian_textbox(label="Request Name").fill("Example Request")
 ```
 
 By placeholder:
 
 ```python
-page.textbox(placeholder="example@example.com").fill("user@example.com")
+page.appian_textbox(placeholder="example@example.com").fill("user@example.com")
 ```
 
 Some Appian forms introduce a textbox with nearby heading text instead of a normal field label:
 
 ```python
-page.textbox(header="Conference Description").fill("Annual conference")
+page.appian_textbox(header="Conference Description").fill("Annual conference")
 ```
 
 ## Date
 
 ```python
-page.date(label="Required Award Date").fill("10/15/2026")
+page.appian_date(label="Required Award Date").fill("10/15/2026")
 ```
 
-Use `page.date(...)` for an Appian date field. Do not use a normal textbox just because the HTML input type is `text`.
+Use `page.appian_date(...)` for an Appian date field. Do not use a normal textbox just because the HTML input type is `text`.
 
 
 ## Checkbox
 
-`page.checkbox(...)` returns an [`AppianCheckbox`](../api/appian-checkbox.md).
+`page.appian_checkbox(...)` returns an [`AppianCheckbox`](../api/appian-checkbox.md).
 
 ```python
-missing_vendor = page.checkbox(
+missing_vendor = page.appian_checkbox(
     label="Vendor is missing in approved list"
 )
 missing_vendor.check()
@@ -59,11 +59,11 @@ Use `uncheck()` to clear it and `is_checked()` to read the state. Both `check()`
 
 ## Radio choice / selection
 
-`page.radio(...)` returns an [`AppianRadioSelect`](../api/appian-radio-select.md).
+`page.appian_radio(...)` returns an [`AppianRadioSelect`](../api/appian-radio-select.md).
 
 
 ```python
-page.radio(
+page.appian_radio(
     label="Is this request for a conference?"
 ).select("Yes")
 ```
@@ -73,7 +73,7 @@ Use the **complete question text** when possible. This keeps choices such as `Ye
 You can inspect the current state without changing focus:
 
 ```python
-selected = page.radio(
+selected = page.appian_radio(
     label="Is this request for a conference?"
 ).is_selected("Yes")
 ```
@@ -81,7 +81,7 @@ selected = page.radio(
 ## Button
 
 ```python
-page.button(name="Next").click()
+page.appian_button(name="Next").click()
 ```
 
 ## Automatic focus-out

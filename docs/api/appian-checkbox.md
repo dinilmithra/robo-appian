@@ -1,9 +1,9 @@
 # AppianCheckbox
 
-`AppianCheckbox` represents a true Appian checkbox. Create it with `page.checkbox(...)`.
+`AppianCheckbox` represents a true Appian checkbox. Create it with `page.appian_checkbox(...)`.
 
 ```python
-missing_vendor = page.checkbox(
+missing_vendor = page.appian_checkbox(
     label="Vendor is missing in approved list"
 )
 ```

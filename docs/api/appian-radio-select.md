@@ -1,9 +1,9 @@
 # AppianRadioSelect
 
-`AppianRadioSelect` represents an Appian radio group. Create it with `page.radio(...)`.
+`AppianRadioSelect` represents an Appian radio group. Create it with `page.appian_radio(...)`.
 
 ```python
-conference = page.radio(
+conference = page.appian_radio(
     label="Is this request for a conference?"
 )
 

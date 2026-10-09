@@ -44,10 +44,10 @@ CAPTURE_ACTION_SNAPSHOTS=N
 Appian component methods are captured when they invoke supported Playwright actions. Examples include:
 
 ```python
-page.textbox(label="Conference Name").fill("Testing")
-page.checkbox(label="Added to Concur Government Edition (CGE)").check()
-page.radio(label="Conference Type").select("Scientific")
-page.button(name="SAVE").click()
+page.appian_textbox(label="Conference Name").fill("Testing")
+page.appian_checkbox(label="Added to Concur Government Edition (CGE)").check()
+page.appian_radio(label="Conference Type").select("Scientific")
+page.appian_button(name="SAVE").click()
 ```
 
 The underlying operations such as `fill`, `check`, `click`, `focus`, or `blur` receive paired action evidence.
@@ -87,7 +87,7 @@ The snapshot monitor does **not** change Appian rerender handling. Component log
 For a checkbox:
 
 ```python
-checkbox = page.checkbox(label="Added to Concur Government Edition (CGE)")
+checkbox = page.appian_checkbox(label="Added to Concur Government Edition (CGE)")
 checkbox.check()
 assert checkbox.is_checked()
 ```
@@ -97,7 +97,7 @@ The `check()` interaction is captured. `is_checked()` is a state query rather th
 For a radio group:
 
 ```python
-conference_type = page.radio(label="Conference Type")
+conference_type = page.appian_radio(label="Conference Type")
 conference_type.select("Scientific")
 assert conference_type.is_selected("Scientific")
 ```

@@ -1,8 +1,8 @@
-# AppianPage
+# Appian Page
 
 `AppianPage` is the main page object you use when automating an Appian application.
 
-Most application tests should start here. It gives you simple, readable component APIs such as `textbox()`, `date()`, `checkbox()`, and `button()`.
+Most application tests should start here. It gives you simple, readable component APIs such as `appian_textbox()`, `appian_date()`, `appian_checkbox()`, and `appian_button()`.
 
 ```python
 from robo_appian import AppianPage
@@ -11,13 +11,13 @@ from robo_appian import AppianPage
 ## Common usage
 
 ```python
-page.textbox(label="Request Title").fill("Office Supplies")
-page.date(label="Required Award Date").fill("10/15/2026")
-page.checkbox(label="Vendor is missing in approved list").check()
-page.radio(
+page.appian_textbox(label="Request Title").fill("Office Supplies")
+page.appian_date(label="Required Award Date").fill("10/15/2026")
+page.appian_checkbox(label="Vendor is missing in approved list").check()
+page.appian_radio(
     label="Is this request for a conference?"
 ).select("Yes")
-page.button(name="Next").click()
+page.appian_button(name="Next").click()
 ```
 
 Think about the page the same way an end user does: identify the visible field or button text, then choose the matching `AppianPage` component helper.

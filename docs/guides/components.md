@@ -11,17 +11,17 @@ Component helpers encapsulate reusable Appian-specific interaction mechanics. Br
 ## Buttons
 
 ```python
-page.button(name="Submit").click()
+page.appian_button(name="Submit").click()
 ```
 
 ## Radio and checkbox selections
 
-Use `page.checkbox(...)` for true Appian checkbox fields. It returns an [`AppianCheckbox`](../api/appian-checkbox.md).
+Use `page.appian_checkbox(...)` for true Appian checkbox fields. It returns an [`AppianCheckbox`](../api/appian-checkbox.md).
 
-Use `page.radio(...)` for Appian radio groups. It returns an [`AppianRadioSelect`](../api/appian-radio-select.md).
+Use `page.appian_radio(...)` for Appian radio groups. It returns an [`AppianRadioSelect`](../api/appian-radio-select.md).
 
 ```python
-page.radio(
+page.appian_radio(
     label="Is this request for a conference?"
 ).select("Yes")
 ```
@@ -32,7 +32,7 @@ Use the complete question text when possible so common option values such as `Ye
 ## Text inputs
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
+page.appian_textbox(label="Request Name").fill("Example Request")
 ```
 
 ## Dropdowns
@@ -58,16 +58,16 @@ Some older non-button component helpers still expose the generic lower-layer `Sc
 `AppianButton` is the reference fluent component API:
 
 ```python
-button = page.button(name="Save")
+button = page.appian_button(name="Save")
 button.click()
 ```
 
 ## Input textbox
 
-Use `AppianPage.textbox(...)` for text fields:
+Use `AppianPage.appian_textbox(...)` for text fields:
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
-page.textbox(placeholder="example@example.com").fill("user@example.com")
-page.textbox(header="Conference Description").fill("General conference details")
+page.appian_textbox(label="Request Name").fill("Example Request")
+page.appian_textbox(placeholder="example@example.com").fill("user@example.com")
+page.appian_textbox(header="Conference Description").fill("General conference details")
 ```

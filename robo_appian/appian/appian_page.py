@@ -45,7 +45,7 @@ class AppianPage(RoboPage):
                 details=getattr(exc, "details", None),
             ) from exc
 
-    def button(
+    def appian_button(
         self,
         *,
         name: str,
@@ -64,7 +64,7 @@ class AppianPage(RoboPage):
         """
         return AppianButton(page=self, name=name, exact=exact, scope=scope)
 
-    def textbox(
+    def appian_textbox(
         self,
         *,
         label: str | None = None,
@@ -87,7 +87,7 @@ class AppianPage(RoboPage):
             scope=scope,
         )
 
-    def checkbox(
+    def appian_checkbox(
         self,
         *,
         label: str,
@@ -102,7 +102,7 @@ class AppianPage(RoboPage):
             scope=scope,
         )
 
-    def radio(
+    def appian_radio(
         self,
         *,
         label: str,
@@ -117,7 +117,7 @@ class AppianPage(RoboPage):
             scope=scope,
         )
 
-    def date(
+    def appian_date(
         self,
         *,
         label: str | None = None,

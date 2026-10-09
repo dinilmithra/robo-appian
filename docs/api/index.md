@@ -16,20 +16,20 @@ Prefer `AppianPage` for normal application tests.
 
 | API | Use it for |
 | --- | --- |
-| [`AppianButton`](appian-button.md) | Buttons through `page.button(...)` |
-| [`AppianTextbox`](appian-textbox.md) | Text inputs through `page.textbox(...)` |
-| [`AppianDate`](appian-date.md) | Date inputs through `page.date(...)` |
-| [`AppianCheckbox`](appian-checkbox.md) | Native Appian checkboxes through `page.checkbox(...)` |
-| [`AppianRadioSelect`](appian-radio-select.md) | Labeled radio groups through `page.radio(...)` |
+| [`AppianButton`](appian-button.md) | Buttons through `page.appian_button(...)` |
+| [`AppianTextbox`](appian-textbox.md) | Text inputs through `page.appian_textbox(...)` |
+| [`AppianDate`](appian-date.md) | Date inputs through `page.appian_date(...)` |
+| [`AppianCheckbox`](appian-checkbox.md) | Native Appian checkboxes through `page.appian_checkbox(...)` |
+| [`AppianRadioSelect`](appian-radio-select.md) | Labeled radio groups through `page.appian_radio(...)` |
 | [`AppianInputComponent`](appian-input-component.md) | Shared input lifecycle; mainly for framework/component authors |
 
 Example:
 
 ```python
-page.textbox(label="Request Title").fill("Example")
-page.date(label="Required Award Date").fill("10/15/2026")
-page.radio(label="Is this request for a conference?").select("Yes")
-page.button(name="Next").click()
+page.appian_textbox(label="Request Title").fill("Example")
+page.appian_date(label="Required Award Date").fill("10/15/2026")
+page.appian_radio(label="Is this request for a conference?").select("Yes")
+page.appian_button(name="Next").click()
 ```
 
 ## Reusable components

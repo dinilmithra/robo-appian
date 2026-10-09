@@ -7,8 +7,8 @@ You only need a few ideas to start using `robo-appian`.
 Prefer visible application text over low-level HTML selectors.
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
-page.button(name="Next").click()
+page.appian_textbox(label="Request Name").fill("Example Request")
+page.appian_button(name="Next").click()
 ```
 
 ## `page` is your main entry point
@@ -16,11 +16,11 @@ page.button(name="Next").click()
 `page` is an `AppianPage`. It provides Appian-aware components such as:
 
 ```python
-page.textbox(...)
-page.date(...)
-page.checkbox(...)
-page.radio(...)
-page.button(...)
+page.appian_textbox(...)
+page.appian_date(...)
+page.appian_checkbox(...)
+page.appian_radio(...)
+page.appian_button(...)
 ```
 
 ## Components do the Appian-specific work
@@ -28,7 +28,7 @@ page.button(...)
 For example, a date input is still an Appian control even though it looks like a textbox in HTML. Use:
 
 ```python
-page.date(label="Required Award Date").fill("10/15/2026")
+page.appian_date(label="Required Award Date").fill("10/15/2026")
 ```
 
 instead of treating it as a normal textbox.
