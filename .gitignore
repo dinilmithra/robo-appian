@@ -219,3 +219,6 @@ __marimo__/
 /.test-install
 
 /site/
+
+# MkDocs generated site
+site/

@@ -288,6 +288,10 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Removing existing virtual environment: {VENV_DIR}")
             shutil.rmtree(VENV_DIR)
 
+        # Clear cached PyPI metadata before lock/sync so newly published package
+        # versions are visible to Poetry.
+        _run([*poetry_command, "cache", "clear", "PyPI", "--all", "-n"], env=env)
+
         _ensure_lock_current(poetry_command, env)
         _run([*poetry_command, "env", "use", str(bootstrap_python)], env=env)
 
