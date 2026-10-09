@@ -29,3 +29,7 @@ generic browser and page lifecycle
 ## Ownership
 
 `robo-automation` owns generic browser/context/page lifecycle. `robo-appian` owns Appian-specific page, locator, and component behavior. Consumer projects own application-specific authentication, navigation, test data, and business workflows.
+
+## Cross-cutting action evidence
+
+Action-level browser evidence is owned by `robo-automation`, not duplicated in `robo-appian`. When `CAPTURE_ACTION_SNAPSHOTS=Y`, Appian component interactions are captured automatically when they execute supported Playwright actions. See [Action Snapshots](action-snapshots.md).

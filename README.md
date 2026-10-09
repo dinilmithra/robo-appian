@@ -13,7 +13,7 @@ from robo_appian import AppianPage
 def test_create_request(page: AppianPage) -> None:
     page.textbox(label="Request Name").fill("Example Request")
     page.date(label="Required Award Date").fill("10/15/2026")
-    page.checkbox(label="Is this request for a conference?").select("Yes")
+    page.radio(label="Is this request for a conference?").select("Yes")
     page.button(name="Submit").click()
 ```
 
@@ -34,7 +34,7 @@ Python 3.12 is required. `robo-appian` uses `robo-automation` for generic browse
 page.textbox(label="Request Name").fill("Example Request")
 page.textbox(placeholder="example@example.com").fill("user@example.com")
 page.date(label="Required Award Date").fill("10/15/2026")
-page.checkbox(label="Is this request for a conference?").select("Yes")
+page.radio(label="Is this request for a conference?").select("Yes")
 page.button(name="Next").click()
 ```
 

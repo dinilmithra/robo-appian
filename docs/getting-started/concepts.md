@@ -19,6 +19,7 @@ page.button(name="Next").click()
 page.textbox(...)
 page.date(...)
 page.checkbox(...)
+page.radio(...)
 page.button(...)
 ```
 

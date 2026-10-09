@@ -20,6 +20,7 @@ from robo_appian.runtime import (
 )
 from robo_appian.appian import (
     AppianButton,
+    AppianCheckbox,
     AppianInputComponent,
     AppianRadioSelect,
     AppianDate,
@@ -38,7 +39,6 @@ from robo_appian.components import (
     Tab,
     Region,
     RecordList,
-    CheckBox,
 )
 from robo_appian.utils import ComponentUtils
 
@@ -60,6 +60,7 @@ __all__ = [
     "resolve_appian_page",
     "AppianPage",
     "AppianButton",
+    "AppianCheckbox",
     "AppianInputComponent",
     "AppianRadioSelect",
     "AppianDate",
@@ -76,5 +77,4 @@ __all__ = [
     "ComponentUtils",
     "Region",
     "RecordList",
-    "CheckBox",
 ]

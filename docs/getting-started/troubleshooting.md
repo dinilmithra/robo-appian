@@ -15,7 +15,7 @@ If the application label changed, update the automation to use the current label
 For radio questions, use the complete question text whenever possible:
 
 ```python
-page.checkbox(
+page.radio(
     label="Are you submitting this travel request for yourself or on behalf of someone else?"
 ).select("For myself")
 ```

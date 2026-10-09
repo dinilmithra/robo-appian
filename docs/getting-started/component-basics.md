@@ -6,7 +6,8 @@ Start with what the user sees on the page.
 | --- | --- |
 | Enter text | `page.textbox(...)` |
 | Enter a date | `page.date(...)` |
-| Choose a radio/selection option | `page.checkbox(...).select(...)` |
+| Check or uncheck a checkbox | `page.checkbox(...).check()` / `.uncheck()` |
+| Choose a radio option | `page.radio(...).select(...)` |
 | Click a button | `page.button(...).click()` |
 | Choose a standard dropdown value | `Dropdown` |
 | Search in a searchable dropdown | `SearchDropdown` |
@@ -42,10 +43,27 @@ page.date(label="Required Award Date").fill("10/15/2026")
 
 Use `page.date(...)` for an Appian date field. Do not use a normal textbox just because the HTML input type is `text`.
 
-## Radio choice / selection
+
+## Checkbox
+
+`page.checkbox(...)` returns an [`AppianCheckbox`](../api/appian-checkbox.md).
 
 ```python
-page.checkbox(
+missing_vendor = page.checkbox(
+    label="Vendor is missing in approved list"
+)
+missing_vendor.check()
+```
+
+Use `uncheck()` to clear it and `is_checked()` to read the state. Both `check()` and `uncheck()` are idempotent.
+
+## Radio choice / selection
+
+`page.radio(...)` returns an [`AppianRadioSelect`](../api/appian-radio-select.md).
+
+
+```python
+page.radio(
     label="Is this request for a conference?"
 ).select("Yes")
 ```
@@ -55,7 +73,7 @@ Use the **complete question text** when possible. This keeps choices such as `Ye
 You can inspect the current state without changing focus:
 
 ```python
-selected = page.checkbox(
+selected = page.radio(
     label="Is this request for a conference?"
 ).is_selected("Yes")
 ```

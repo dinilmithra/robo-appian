@@ -28,7 +28,7 @@ def test_create_request(page: AppianPage) -> None:
         label="Required Award Date"
     ).fill("10/15/2026")
 
-    page.checkbox(
+    page.radio(
         label="Is this request for a conference?"
     ).select("Yes")
 

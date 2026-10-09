@@ -29,7 +29,8 @@ NAV = [
 
 API_MAP = {
     "button": ("Button", PKG / "components" / "Button.py"),
-    "checkbox": ("CheckBox", PKG / "components" / "CheckBox.py"),
+    "checkbox": ("AppianCheckbox", PKG / "appian" / "appian_checkbox.py"),
+    "appian-checkbox": ("AppianCheckbox", PKG / "appian" / "appian_checkbox.py"),
     "dropdown": ("Dropdown", PKG / "components" / "Dropdown.py"),
     "link": ("Link", PKG / "components" / "Link.py"),
     "menu-button": ("MenuButton", PKG / "components" / "MenuButton.py"),

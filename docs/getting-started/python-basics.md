@@ -30,7 +30,7 @@ def test_create_request(page):
 
 ```python
 if request_type == "Conference":
-    page.checkbox(label="Is this request for a conference?").select("Yes")
+    page.radio(label="Is this request for a conference?").select("Yes")
 ```
 
 ## Dictionaries

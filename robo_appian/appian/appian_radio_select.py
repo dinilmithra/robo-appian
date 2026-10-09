@@ -1,4 +1,4 @@
-"""Appian checkbox and radio-group component abstraction."""
+"""Appian radio-group component abstraction."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class AppianRadioSelect(AppianInputComponent):
-    """Represent an Appian checkbox field or labeled radio group.
+    """Represent an Appian labeled radio group.
 
     Appian radio groups are resolved semantically: the visible field label's
     ``id`` is referenced by ``role="radiogroup"`` through ``aria-labelledby``.
@@ -36,7 +36,7 @@ class AppianRadioSelect(AppianInputComponent):
         scope: "AppianLocator | None" = None,
     ) -> None:
         if not isinstance(label, str) or not label.strip():
-            raise ValueError("Checkbox label cannot be empty or whitespace.")
+            raise ValueError("Radio-group label cannot be empty or whitespace.")
         super().__init__(page=page)
         self._label = " ".join(label.split())
         self._exact = exact
@@ -165,57 +165,30 @@ class AppianRadioSelect(AppianInputComponent):
             f"xpath=.//label[@for={target_id_literal}]"
         ).first
 
-    def _checkbox_locator(self) -> Locator:
-        """Resolve a labeled native checkbox or Appian boolean checkbox group."""
-        comparison = self._label_comparison()
-        return self._root_locator(
-            "xpath=("
-            ".//input[@type='checkbox' and "
-            f"@id = .//label[@for and ({comparison})]/@for]"
-            " | "
-            ".//*[@role='group' and @aria-labelledby = "
-            f".//*[@id and ({comparison})]/@id]//input[@type='checkbox']"
-            ")[1]"
-        )
+    def is_selected(self, value: str) -> bool:
+        """Return whether the requested radio option is selected."""
+        return self._radio_locator(value).is_checked()
 
-    def is_selected(self, value: str | None = None) -> bool:
-        """Return selected state for a radio option or the labeled checkbox."""
-        target = self._radio_locator(value) if value is not None else self._checkbox_locator()
-        return target.is_checked()
+    def select(self, value: str) -> "AppianRadioSelect":
+        """Idempotently select a radio option inside this labeled group."""
+        target = self._radio_locator(value)
+        description = f"'{self._label}' value '{value}'"
+        if target.is_checked():
+            return self
 
-    def select(self, value: str | None = None, selected: bool = True) -> None:
-        """Idempotently select a radio value or set the labeled checkbox state.
-
-        The checked state is always inspected before an interaction. For radio
-        groups, ``selected=False`` is not supported because a radio option is
-        changed by selecting another value rather than unchecking the current one.
-        """
-        if value is not None and not selected:
-            raise ValueError("Radio options cannot be deselected directly; select another value.")
-
-        target = self._radio_locator(value) if value is not None else self._checkbox_locator()
-        description = f"'{self._label}'" + (f" value '{value}'" if value is not None else "")
-        desired = True if value is not None else selected
-        if target.is_checked() == desired:
-            return
-
-        expect(target, f"Appian selection field {description} was not found.").to_be_attached()
+        expect(target, f"Appian radio field {description} was not found.").to_be_attached()
         target.scroll_into_view_if_needed()
-        if value is not None:
-            # Appian's visible radio label can cover the native input and
-            # intercept pointer events. Click the associated label instead of
-            # calling input.check(), then verify the native checked state.
-            self._radio_label_locator(target).click()
-        elif desired:
-            target.check()
-        else:
-            target.uncheck()
+        self._radio_label_locator(target).click()
 
         # Appian can re-render the control after the action, so resolve it again.
-        target = self._radio_locator(value) if value is not None else self._checkbox_locator()
-        expect(target, f"Appian selection field {description} did not reach selected={desired}.").to_be_checked(checked=desired)
+        target = self._radio_locator(value)
+        expect(
+            target,
+            f"Appian radio field {description} did not become selected.",
+        ).to_be_checked(checked=True)
         self._after_change(target)
         ComponentUtils.wait_for_appian_action_completed(self._page)
+        return self
 
 
 __all__ = ["AppianRadioSelect"]

@@ -1,6 +1,7 @@
 """Appian-specific page, locator, and component abstractions."""
 
 from .appian_button import AppianButton
+from .appian_checkbox import AppianCheckbox
 from .appian_input_component import AppianInputComponent
 from .appian_radio_select import AppianRadioSelect
 from .appian_date import AppianDate
@@ -13,6 +14,7 @@ __all__ = [
     "AppianPage",
     "AppianLocator",
     "AppianButton",
+    "AppianCheckbox",
     "AppianInputComponent",
     "AppianRadioSelect",
     "AppianDate",

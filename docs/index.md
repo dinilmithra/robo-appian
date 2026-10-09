@@ -48,7 +48,7 @@ hide:
 <span class="ln">3</span> <span class="kw">def</span> test_create_request(page: AppianPage):
 <span class="ln">4</span>     page.textbox(label=<span class="st">"Request Name"</span>).fill(<span class="st">"Example Request"</span>)
 <span class="ln">5</span>     page.date(label=<span class="st">"Required Award Date"</span>).fill(<span class="st">"10/15/2026"</span>)
-<span class="ln">6</span>     page.checkbox(label=<span class="st">"Is this request for a conference?"</span>).select(<span class="st">"Yes"</span>)
+<span class="ln">6</span>     page.radio(label=<span class="st">"Is this request for a conference?"</span>).select(<span class="st">"Yes"</span>)
 <span class="ln">7</span>     page.button(name=<span class="st">"Next"</span>).click()</code></pre>
     </div>
 
@@ -77,3 +77,9 @@ hide:
   </section>
 
 </div>
+
+
+## Common framework capabilities
+
+`robo-appian` includes the common browser lifecycle, pytest integration, correlation, logging, performance instrumentation, and action-snapshot capabilities supplied by `robo-automation`, exposed through the Appian-facing framework boundary. See [Common Framework Features](guides/common-framework-features.md) for the complete capability map and usage guidance.
+

@@ -14,6 +14,21 @@ Component helpers encapsulate reusable Appian-specific interaction mechanics. Br
 page.button(name="Submit").click()
 ```
 
+## Radio and checkbox selections
+
+Use `page.checkbox(...)` for true Appian checkbox fields. It returns an [`AppianCheckbox`](../api/appian-checkbox.md).
+
+Use `page.radio(...)` for Appian radio groups. It returns an [`AppianRadioSelect`](../api/appian-radio-select.md).
+
+```python
+page.radio(
+    label="Is this request for a conference?"
+).select("Yes")
+```
+
+Use the complete question text when possible so common option values such as `Yes` and `No` stay scoped to the correct group.
+
+
 ## Text inputs
 
 ```python

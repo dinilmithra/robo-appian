@@ -41,7 +41,7 @@ For example, you may want to add business context, perform a controlled recovery
 from robo_appian import RoboAppianError
 
 try:
-    page.checkbox(
+    page.radio(
         label="Is this request for a conference?"
     ).select("Yes")
 except RoboAppianError as error:
@@ -170,7 +170,7 @@ from robo_appian import RoboAppianError
 
 def complete_travel_details(page):
     try:
-        page.checkbox(
+        page.radio(
             label="Are you submitting this travel request for yourself or on behalf of someone else?"
         ).select("For myself")
     except RoboAppianError as error:
@@ -193,7 +193,7 @@ from robo_appian import RoboAppianError
 
 def select_business_option(page, label: str, value: str) -> None:
     try:
-        page.checkbox(label=label).select(value)
+        page.radio(label=label).select(value)
     except RoboAppianError:
         raise
     except Exception as error:

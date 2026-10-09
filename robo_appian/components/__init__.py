@@ -13,7 +13,6 @@ from robo_appian.components.Table import Table
 from robo_appian.components.Tab import Tab
 from robo_appian.components.Region import Region
 from robo_appian.components.RecordList import RecordList
-from robo_appian.components.CheckBox import CheckBox
 
 __all__ = [
     "Dropdown",
@@ -25,5 +24,4 @@ __all__ = [
     "Tab",
     "Region",
     "RecordList",
-    "CheckBox",
 ]

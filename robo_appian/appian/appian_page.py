@@ -5,6 +5,7 @@ from robo_automation import RoboAutomationError, RoboPage
 from robo_appian.errors import RoboAppianNavigationError
 
 from .appian_button import AppianButton
+from .appian_checkbox import AppianCheckbox
 from .appian_date import AppianDate
 from .appian_radio_select import AppianRadioSelect
 from .appian_textbox import AppianTextbox
@@ -92,8 +93,23 @@ class AppianPage(RoboPage):
         label: str,
         exact: bool = True,
         scope: AppianLocator | None = None,
+    ) -> AppianCheckbox:
+        """Return an Appian checkbox identified by visible label text."""
+        return AppianCheckbox(
+            page=self,
+            label=label,
+            exact=exact,
+            scope=scope,
+        )
+
+    def radio(
+        self,
+        *,
+        label: str,
+        exact: bool = True,
+        scope: AppianLocator | None = None,
     ) -> AppianRadioSelect:
-        """Return an Appian selection component identified by field label."""
+        """Return an Appian radio group identified by its field label."""
         return AppianRadioSelect(
             page=self,
             label=label,

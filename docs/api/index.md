@@ -1,46 +1,44 @@
 # API Reference
 
-`robo-appian`'s public API is the Appian component/utility layer. Generic browser/resource wrappers are provided by the dependency `robo-automation` and are shown here only as integration context.
+The public API is grouped by what an automation developer needs to do. Start with the fluent Appian component APIs. Runtime and lower-level scoping APIs are available when you need framework integration or advanced control.
 
-## Appian resource API
+## Page and scoping
 
-Prefer package-root Appian imports in consumers:
-
-```python
-from robo_appian import AppianLocator, AppianPage, AppianScope
-```
-
-| Type | Responsibility |
+| API | Use it for |
 | --- | --- |
-| [`AppianPage`](appian-page.md) | Appian page abstraction and fluent component entry point |
-| `AppianLocator` | Appian locator specialization used for scoped/subtree operations |
-| [`AppianScope`](appian-scope.md) | `AppianPage | AppianLocator` for APIs that intentionally accept both |
+| [`AppianPage`](appian-page.md) | Main Appian page and fluent component entry point |
+| [`AppianLocator`](appian-locator.md) | Scope work to a dialog, region, row, or subtree |
+| [`AppianScope`](appian-scope.md) | Type alias for APIs that intentionally accept either page or locator |
 
-The generic Robo* inheritance layer belongs to `robo-automation` and is not the preferred consumer API for Appian projects.
+Prefer `AppianPage` for normal application tests.
 
-## Pytest Integration
+## Fluent Appian input components
 
-- [Pytest Integration](../guides/pytest-integration.md) — `robo-automation` fixture ownership and extension points
+| API | Use it for |
+| --- | --- |
+| [`AppianButton`](appian-button.md) | Buttons through `page.button(...)` |
+| [`AppianTextbox`](appian-textbox.md) | Text inputs through `page.textbox(...)` |
+| [`AppianDate`](appian-date.md) | Date inputs through `page.date(...)` |
+| [`AppianCheckbox`](appian-checkbox.md) | Native Appian checkboxes through `page.checkbox(...)` |
+| [`AppianRadioSelect`](appian-radio-select.md) | Labeled radio groups through `page.radio(...)` |
+| [`AppianInputComponent`](appian-input-component.md) | Shared input lifecycle; mainly for framework/component authors |
 
-## Component API
-
-The package also exposes reusable Appian component helpers:
+Example:
 
 ```python
-from robo_appian import AppianPage, Dropdown, Table
+page.textbox(label="Request Title").fill("Example")
+page.date(label="Required Award Date").fill("10/15/2026")
+page.radio(label="Is this request for a conference?").select("Yes")
+page.button(name="Next").click()
 ```
 
-Component pages are generated from current source signatures/docstrings.
+## Reusable components
 
 | Component | Use it for |
 | --- | --- |
-| [`AppianButton`](appian-button.md) | Appian button interactions through `AppianPage.button(...)` |
-| [`CheckBox`](checkbox.md) | Checkbox state/actions |
 | [`Dropdown`](dropdown.md) | Standard dropdowns |
-| [`AppianDate`](appian-date.md) | Appian date fields |
 | [`Link`](link.md) | Links |
 | [`MenuButton`](menu-button.md) | Menu-button actions |
-| `AppianPage.checkbox(...)` | Checkboxes and labeled radio groups |
 | [`RecordList`](record-list.md) | Repeated record content |
 | [`Region`](region.md) | Named regions/scoping |
 | [`SearchDropdown`](search-dropdown.md) | Searchable dropdowns |
@@ -49,19 +47,13 @@ Component pages are generated from current source signatures/docstrings.
 | [`Table`](table.md) | Tables/grids |
 | [`ComponentUtils`](component-utils.md) | Shared lower-level component utilities |
 
-## Compatibility note
+## Runtime and framework integration
 
-Some older non-button component helpers still expose the lower-layer generic `Scope` type in generated signatures. New Appian APIs should use `AppianPage`, `AppianLocator`, or `AppianScope`.
+- [Appian Runtime](runtime.md) — `AppianRuntime`, `AppianContext`, `AutomationContext`, and correlation/runtime helpers
+- [Assertion Helpers](assertions.md) — Appian-facing visibility/text assertions
+- [Errors](errors.md) — `RoboAppianError` and `RoboAppianNavigationError`
+- [Pytest Integration](../guides/pytest-integration.md) — fixtures and plugin integration
 
-## Appian input textbox
+## Compatibility
 
-Create a text field from `AppianPage` by label, placeholder, or nearby header text:
-
-```python
-page.textbox(label="Title").fill("Example request")
-page.textbox(placeholder="example@example.com").fill("user@example.com")
-page.textbox(header="Conference Description").fill("General conference details")
-page.date(label="Required Award Date").fill("10/07/2026")
-```
-
-See [Appian Textbox](appian-textbox.md).
+Some older component helpers still expose compatibility signatures inherited from earlier layers. New Appian code should prefer `AppianPage`, `AppianLocator`, `AppianScope`, and the fluent component APIs above.
