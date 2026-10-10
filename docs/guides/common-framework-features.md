@@ -113,13 +113,13 @@ See [Action Snapshots](action-snapshots.md) for artifact layout, metadata, suppo
 
 ## Failure snapshots are separate
 
-Action snapshots and test-level failure evidence solve different problems. `CAPTURE_ACTION_SNAPSHOTS` belongs to the common action instrumentation. A consuming application may separately provide a failure-evidence flag, such as CORE's:
+Action and failure snapshots are two independent policies of the common `robo-automation` `SnapshotService`:
 
 ```text
 CAPTURE_FAILURE_SNAPSHOTS=Y
 ```
 
-That application flag is not a `robo-appian` configuration option. It controls the application's pytest failure evidence even when per-action snapshots are disabled.
+`CAPTURE_FAILURE_SNAPSHOTS` remains effective when action snapshots are disabled. When both flags are enabled, matching failed-action/test-failure evidence is deduplicated.
 
 ## Error handling
 

@@ -368,29 +368,56 @@ class AppianDropdown:
             search.fill(requested, **self._timeout_kwargs())
 
         if selected_index is not None:
-            # Appian commonly renders the placeholder ``Select a Value`` as a
-            # real role=option at position zero.  Public index selection is
-            # intentionally based on selectable business values, so index=1
-            # means the first real value rather than re-selecting the
-            # placeholder.  Evaluate the live option list after expansion (and
-            # after optional search filtering) because Appian can rebuild and
-            # renumber the options during a rerender.
+            # Appian can expose the listbox and set aria-expanded=true before
+            # asynchronously loaded options are available.  Keep this as a live
+            # role locator and wait for the option required by the public
+            # 1-based index instead of taking an immediate count snapshot.
+            #
+            # Appian also commonly renders ``Select a Value`` as the first real
+            # role=option.  It is a placeholder, not a business value, so it
+            # does not participate in public indexing.
             options = listbox.get_by_role("option").filter(visible=True)
-            selectable_options: list[tuple[Locator, str]] = []
-            for option_index in range(options.count()):
-                candidate = options.nth(option_index)
-                candidate_text = " ".join(candidate.inner_text().split())
-                if not candidate_text or candidate_text.casefold() == "select a value":
-                    continue
-                selectable_options.append((candidate, candidate_text))
+            first_option = options.first
+            try:
+                expect(
+                    first_option,
+                    f"Dropdown '{self._label}' did not load any visible options.",
+                ).to_be_visible(**self._timeout_kwargs())
 
-            option_count = len(selectable_options)
-            if selected_index > option_count:
+                first_text = " ".join(first_option.inner_text().split())
+                placeholder_offset = (
+                    1
+                    if not first_text
+                    or first_text.casefold() == "select a value"
+                    else 0
+                )
+                option = options.nth(selected_index - 1 + placeholder_offset)
+                expect(
+                    option,
+                    f"Dropdown option index {selected_index} was not available "
+                    f"for '{self._label}'.",
+                ).to_be_visible(**self._timeout_kwargs())
+                selected_text = " ".join(option.inner_text().split())
+            except AssertionError as exc:
+                # Report the final live state only after the applicable
+                # component/Playwright timeout has expired.  The Appian
+                # ``Searching...`` live-region text is intentionally not used
+                # as the readiness condition; option availability is.
+                option_count = 0
+                for option_index in range(options.count()):
+                    candidate_text = " ".join(
+                        options.nth(option_index).inner_text().split()
+                    )
+                    if (
+                        candidate_text
+                        and candidate_text.casefold() != "select a value"
+                    ):
+                        option_count += 1
                 raise IndexError(
                     f"Dropdown option index {selected_index} is out of range for "
-                    f"'{self._label}' ({option_count} selectable options)."
-                )
-            option, selected_text = selectable_options[selected_index - 1]
+                    f"'{self._label}' after waiting for options "
+                    f"({option_count} selectable options)."
+                ) from exc
         else:
             option = (
                 listbox.get_by_role("option", name=requested, exact=exact)

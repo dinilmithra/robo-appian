@@ -1660,6 +1660,7 @@ def test_appian_dropdown_select_supports_one_based_index() -> None:
     visible_options = MagicMock(spec=Locator)
     option = MagicMock(spec=Locator)
     role_options.filter.return_value = visible_options
+    visible_options.first = option
     visible_options.count.return_value = 3
     visible_options.nth.return_value = option
     option.inner_text.return_value = "Brandi Saddler - 455448"
@@ -1676,7 +1677,7 @@ def test_appian_dropdown_select_supports_one_based_index() -> None:
 
     assert result is dropdown
     role_options.filter.assert_called_once_with(visible=True)
-    assert visible_options.nth.call_args_list == [call(0), call(1), call(2)]
+    visible_options.nth.assert_called_once_with(1)
     option.click.assert_called_once_with()
 
 
@@ -1694,6 +1695,7 @@ def test_appian_dropdown_select_positional_integer_is_one_based_index() -> None:
     visible_options = MagicMock(spec=Locator)
     option = MagicMock(spec=Locator)
     role_options.filter.return_value = visible_options
+    visible_options.first = option
     visible_options.count.return_value = 2
     visible_options.nth.return_value = option
     option.inner_text.return_value = "Aaron Chen - 516466"
@@ -1708,7 +1710,7 @@ def test_appian_dropdown_select_positional_integer_is_one_based_index() -> None:
     ):
         dropdown.select(1)
 
-    assert visible_options.nth.call_args_list == [call(0), call(1)]
+    visible_options.nth.assert_called_once_with(0)
 
 
 def test_appian_dropdown_search_text_requires_searchable_dropdown() -> None:
@@ -1747,6 +1749,7 @@ def test_appian_dropdown_select_supports_search_text_and_string_index() -> None:
     visible_options = MagicMock(spec=Locator)
     option = MagicMock(spec=Locator)
     role_options.filter.return_value = visible_options
+    visible_options.first = option
     visible_options.count.return_value = 2
     visible_options.nth.return_value = option
     option.inner_text.return_value = "12345"
@@ -1762,7 +1765,7 @@ def test_appian_dropdown_select_supports_search_text_and_string_index() -> None:
         dropdown.select(search_text="123", index="1")
 
     search.fill.assert_called_once_with("123")
-    assert visible_options.nth.call_args_list == [call(0), call(1)]
+    visible_options.nth.assert_called_once_with(0)
     option.click.assert_called_once_with()
 
 
@@ -2025,8 +2028,9 @@ def test_appian_dropdown_index_skips_select_a_value_placeholder() -> None:
     first_value = MagicMock(spec=Locator)
     second_value = MagicMock(spec=Locator)
     role_options.filter.return_value = visible_options
+    visible_options.first = placeholder
     visible_options.count.return_value = 3
-    visible_options.nth.side_effect = [placeholder, first_value, second_value]
+    visible_options.nth.side_effect = [first_value, second_value]
     placeholder.inner_text.return_value = "Select a Value"
     first_value.inner_text.return_value = "Aaron Chen - 516466"
     second_value.inner_text.return_value = "Brandi Saddler - 455448"

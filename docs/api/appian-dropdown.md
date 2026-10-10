@@ -123,9 +123,14 @@ page.dropdown(label="P-Card Holder").select(index=2)
 page.dropdown(label="P-Card Holder").select(2)
 ```
 
-The index is evaluated against the visible option order after the dropdown is
-expanded (and after filtering when a search is used). Appian placeholder options such as `Select a Value` are excluded from this
-public index. Therefore `index=1` selects the first real business value.
+The index is evaluated against the live visible option order after the dropdown is
+expanded (and after filtering when a search is used). Appian can expose the
+listbox while its values are still loading, so index selection waits until the
+requested option exists rather than treating a transient zero-option state as
+out-of-range. Appian placeholder options such as `Select a Value` are excluded
+from this public index. Therefore `index=1` selects the first real business value.
+The `Searching...` live-region message may be useful diagnostics, but option
+availability is the authoritative readiness signal.
 
 Cell-scoped dropdowns use the same component and selection API:
 
