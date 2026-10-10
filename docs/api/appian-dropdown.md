@@ -124,9 +124,8 @@ page.dropdown(label="P-Card Holder").select(2)
 ```
 
 The index is evaluated against the visible option order after the dropdown is
-expanded (and after filtering when a search is used). If Appian renders a
-placeholder such as `Select a Value` as an option, it participates in that
-1-based order.
+expanded (and after filtering when a search is used). Appian placeholder options such as `Select a Value` are excluded from this
+public index. Therefore `index=1` selects the first real business value.
 
 Cell-scoped dropdowns use the same component and selection API:
 

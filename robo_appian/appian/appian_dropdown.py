@@ -368,15 +368,29 @@ class AppianDropdown:
             search.fill(requested, **self._timeout_kwargs())
 
         if selected_index is not None:
+            # Appian commonly renders the placeholder ``Select a Value`` as a
+            # real role=option at position zero.  Public index selection is
+            # intentionally based on selectable business values, so index=1
+            # means the first real value rather than re-selecting the
+            # placeholder.  Evaluate the live option list after expansion (and
+            # after optional search filtering) because Appian can rebuild and
+            # renumber the options during a rerender.
             options = listbox.get_by_role("option").filter(visible=True)
-            option_count = options.count()
+            selectable_options: list[tuple[Locator, str]] = []
+            for option_index in range(options.count()):
+                candidate = options.nth(option_index)
+                candidate_text = " ".join(candidate.inner_text().split())
+                if not candidate_text or candidate_text.casefold() == "select a value":
+                    continue
+                selectable_options.append((candidate, candidate_text))
+
+            option_count = len(selectable_options)
             if selected_index > option_count:
                 raise IndexError(
                     f"Dropdown option index {selected_index} is out of range for "
-                    f"'{self._label}' ({option_count} visible options)."
+                    f"'{self._label}' ({option_count} selectable options)."
                 )
-            option = options.nth(selected_index - 1)
-            selected_text = " ".join(option.inner_text().split())
+            option, selected_text = selectable_options[selected_index - 1]
         else:
             option = (
                 listbox.get_by_role("option", name=requested, exact=exact)

@@ -46,7 +46,7 @@ page.dropdown(label="CAN")[0].select(value="12345")
 page.button(name="Edit", exact=True)[1].click()
 ```
 
-This component index is separate from APIs with their own domain indexing. For example, dropdown option `index=1` means the first option, while `page.dropdown[0]` means the first dropdown component.
+This component index is separate from APIs with their own domain indexing. For example, dropdown option `index=1` means the first real option (excluding `Select a Value`), while `page.dropdown[0]` means the first dropdown component.
 
 ## Visible text
 
