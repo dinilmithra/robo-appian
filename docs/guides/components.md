@@ -86,7 +86,7 @@ Matching is consistent across Appian component factories: `exact=True` and `visi
 All semantic Appian component factories also accept `timeout` in **seconds**. The default is `None`, which preserves the Playwright/context timeout configured from `WAIT_TIME`. A positive finite value overrides `WAIT_TIME` for waits and actions owned by that component:
 
 ```python
-page.dropdown(label="Request Category", timeout=10).select(value="Purchase Request")
+page.dropdown(label="Category", timeout=10).select(value="General")
 page.button(name="Submit", timeout=15).click()
 ```
 
@@ -101,9 +101,9 @@ The page and cell component accessors share the same matching model:
 ```python
 page.button(name="Save")                         # exact=True, visible=True
 page.button(name="Sav", exact=False)             # partial semantic match
-page.dropdown(label="CAN", visible=None)         # no visibility filter
+page.dropdown(label="Category", visible=None)         # no visibility filter
 page.dropdown[0].select(value="Dinil")           # first dropdown on page
-page.dropdown(label="CAN")[0].select(value="12345")
+page.dropdown(label="Category")[0].select(value="General")
 ```
 
 Component collection indexing is zero-based. Semantic filtering happens before an index such as `[0]` is applied. The same model is available from `AppianCell`.
@@ -137,12 +137,12 @@ Enabled-state queries are immediate unless a timeout is explicitly supplied. Thi
 
 ```python
 # Snapshot of the current state; no wait.
-page.dropdown(label="Request Category").is_enabled()
+page.dropdown(label="Category").is_enabled()
 
 # Wait up to WAIT_TIME_SHORT seconds for an Appian dependency to enable it.
-dropdown = page.dropdown(label="Request Category")
+dropdown = page.dropdown(label="Category")
 if dropdown.is_enabled(timeout=short_wait_seconds):
     dropdown.select(value="Grant")
 ```
 
-An explicit `timeout` is expressed in seconds. `is_enabled(timeout=...)` returns `True` as soon as the live component becomes enabled and returns `False` if the timeout expires; the state-query timeout is not raised as an automation failure. This is useful for dependent Appian controls such as Request Category, Request Sub-Category, and Fiscal Year.
+An explicit `timeout` is expressed in seconds. `is_enabled(timeout=...)` returns `True` as soon as the live component becomes enabled and returns `False` if the timeout expires; the state-query timeout is not raised as an automation failure. This is useful for dependent Appian controls such as Category and Subcategory.

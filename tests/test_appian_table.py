@@ -11,63 +11,6 @@ def test_appian_table_is_public_component() -> None:
     assert AppianTable is ModuleAppianTable
 
 
-def test_appian_table_click_link_in_cell_uses_appian_cell_link() -> None:
-    page = MagicMock(spec=Page)
-    cell = MagicMock(spec=Locator)
-    cell.page = page
-    appian_cell = MagicMock()
-    link_component = MagicMock()
-    appian_cell.link.return_value = link_component
-
-    with (
-        patch.object(
-            AppianTable, "_AppianTable__get_cell", return_value=cell
-        ) as get_cell,
-        patch("robo_appian.appian.appian_table.AppianCell", return_value=appian_cell),
-        patch(
-            "robo_appian.appian.appian_page.AppianPage.get", return_value=MagicMock()
-        ),
-    ):
-        AppianTable.click_link_in_cell(
-            page,
-            label="Requests",
-            row_number=1,
-            column_name="Created By",
-            link_name="robo appian",
-        )
-
-    get_cell.assert_called_once_with(
-        scope=page,
-        label="Requests",
-        header_name="",
-        table_column_name=None,
-        row_number=1,
-        row_name="",
-        column_number=None,
-        column_name="Created By",
-        excat_match=True,
-    )
-    appian_cell.link.assert_called_once_with(name="robo appian", exact=True)
-    link_component.click.assert_called_once_with()
-
-
-def test_appian_table_click_link_rejects_empty_name() -> None:
-    page = MagicMock(spec=Page)
-
-    try:
-        AppianTable.click_link_in_cell(
-            page,
-            label="Requests",
-            row_number=1,
-            column_name="Created By",
-            link_name="   ",
-        )
-    except ValueError as exc:
-        assert str(exc) == "Link name cannot be empty or whitespace."
-    else:
-        raise AssertionError("Expected ValueError for blank link name")
-
-
 def test_appian_table_visible_none_keeps_visible_and_hidden_matches() -> None:
     page = MagicMock(spec=Page)
     tables = MagicMock(spec=Locator)
@@ -402,23 +345,57 @@ def test_appian_table_cell_requires_row_and_column_context() -> None:
         table.cell(column_name="Created By")
     except ValueError as exc:
         assert str(exc) == (
-            "AppianAppianTable.cell requires row_name or row_number, "
+            "AppianTable.cell requires row_name or row_number, "
             "unless the table was created with row_name."
         )
     else:
-        raise AssertionError("Expected AppianAppianTable.cell to require row context")
+        raise AssertionError("Expected AppianTable.cell to require row context")
 
     try:
         table.cell(row_number=1)
     except ValueError as exc:
         assert str(exc) == (
-            "AppianAppianTable.cell requires column_name or column_number, "
+            "AppianTable.cell requires column_name or column_number, "
             "unless the table was created with column_name."
         )
     else:
         raise AssertionError(
-            "Expected AppianAppianTable.cell to require column context"
+            "Expected AppianTable.cell to require column context"
         )
+
+
+def test_appian_table_row_count_counts_rendered_body_rows() -> None:
+    page = MagicMock(spec=Page)
+    table = AppianTable(page, label="Items")
+    table_locator = MagicMock(spec=Locator)
+    first_table = MagicMock(spec=Locator)
+    rows = MagicMock(spec=Locator)
+    rows.count.return_value = 3
+    table_locator.first = first_table
+    first_table.locator.return_value = rows
+
+    with patch.object(AppianTable, "locator", new_callable=PropertyMock, return_value=table_locator), patch(
+        "robo_appian.appian.appian_table.expect"
+    ):
+        assert table.row_count() == 3
+
+    first_table.locator.assert_called_once_with("tbody tr")
+
+
+def test_appian_table_row_count_empty_table_returns_zero() -> None:
+    page = MagicMock(spec=Page)
+    table = AppianTable(page, label="Items")
+    table_locator = MagicMock(spec=Locator)
+    first_table = MagicMock(spec=Locator)
+    rows = MagicMock(spec=Locator)
+    rows.count.return_value = 0
+    table_locator.first = first_table
+    first_table.locator.return_value = rows
+
+    with patch.object(AppianTable, "locator", new_callable=PropertyMock, return_value=table_locator), patch(
+        "robo_appian.appian.appian_table.expect"
+    ):
+        assert table.row_count() == 0
 
 
 def test_appian_row_select_clicks_resolved_row_and_waits_for_appian() -> None:

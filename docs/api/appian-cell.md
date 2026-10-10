@@ -41,8 +41,8 @@ cell.tab[0].select()
 The same short accessors remain callable when semantic identification is available:
 
 ```python
-cell.dropdown(label="CAN").select(value="699H177")
-cell.dropdown(label="CAN")[0].select(value="699H177")
+cell.dropdown(label="Category").select(value="General")
+cell.dropdown(label="Category")[0].select(value="General")
 cell.button(name="Approve").click()
 cell.checkbox(label="Include").check()
 ```

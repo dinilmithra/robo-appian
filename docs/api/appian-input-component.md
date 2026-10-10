@@ -1,16 +1,67 @@
-# AppianInputComponent
+# Appian Input Components
 
-`AppianInputComponent` is the shared base class for Appian controls that change input state.
+Input components represent fields where a user can enter, select, or change information in an Appian application.
 
-Most application developers will not use this class directly. It exists so input components share the same post-change behavior without duplicating it.
+Common input components include:
 
-Current examples include:
+| Component | Use it for |
+| --- | --- |
+| Textbox | Entering text or numbers |
+| Date | Entering a date |
+| Dropdown | Choosing one value from a list |
+| Checkbox | Turning an option on or off |
+| Radio | Choosing one value from a small set of choices |
 
-- `AppianTextbox`
-- `AppianDate`
-- `AppianRadioSelect`
+Most tests use the specific component directly:
 
-After a value actually changes, the shared lifecycle moves focus out of the control so Appian can process the new value. Application tests normally should not add their own Tab press or manual blur.
+```python
+page.textbox(label="Description").fill("Example description")
+page.dropdown(label="Category").select(value="General")
+page.checkbox(label="Include Details").check()
+```
+
+## Finding a field
+
+By default, component matching is exact and targets visible fields:
+
+```python
+page.textbox(label="Description")
+```
+
+Use `exact=False` when a partial label is intentional:
+
+```python
+page.textbox(label="Description", exact=False)
+```
+
+Use `visible=None` when both visible and hidden matches should be considered:
+
+```python
+page.textbox(label="Description", visible=None)
+```
+
+## Checking whether a field is ready
+
+`is_enabled()` checks the current state immediately:
+
+```python
+field = page.dropdown(label="Subcategory")
+
+if field.is_enabled():
+    field.select(value="Standard")
+```
+
+Some Appian fields become available only after another field changes. Supply a timeout when the test should wait for that field to become enabled:
+
+```python
+page.dropdown(label="Category").select(value="General")
+
+subcategory = page.dropdown(label="Subcategory")
+if subcategory.is_enabled(timeout=8):
+    subcategory.select(value="Standard")
+```
+
+`timeout` is measured in seconds. `is_enabled()` without a timeout does not wait.
 
 ## API
 

@@ -42,7 +42,7 @@ Each short component accessor can be called with semantic identifiers or indexed
 
 ```python
 page.dropdown[0].select(value="Dinil")
-page.dropdown(label="CAN")[0].select(value="12345")
+page.dropdown(label="Category")[0].select(value="General")
 page.button(name="Edit", exact=True)[1].click()
 ```
 
@@ -70,7 +70,7 @@ For operations inside a dialog, region, or smaller part of the page, use [`Appia
 Every semantic component factory accepts `timeout` in seconds. The default `None` leaves the framework `WAIT_TIME` timeout unchanged; a positive finite value overrides it for that component.
 
 ```python
-page.dropdown(label="Request Category", timeout=10).select(value="Travel")
+page.dropdown(label="Category", timeout=10).select(value="General")
 page.textbox(label="Description", timeout=5).fill("Test")
 page.button(name="Submit", timeout=10).click()
 ```

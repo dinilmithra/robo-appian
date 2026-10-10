@@ -10,23 +10,23 @@ It supports both Appian link shapes observed in SAIL pages:
 The component identifies links by accessible/visible name through the native link role. It does not use generated Appian CSS classes.
 
 ```python
-page.link(name="Open Request").click()
-page.link(name="Request 1001").click()
-page.link(name="Request Details").click()
+page.link(name="View Details").click()
+page.link(name="Item 1001").click()
+page.link(name="Item Details").click()
 page.link(name="Return").click()
 ```
 
 Links that belong to table rows are handled by `AppianTable`, which owns table/row/cell resolution. Do not build table-row scopes just to use `AppianLink`:
 
 ```python
-table = page.table(label="Requests")
-table.row(name="Request 1001").cell(column_name="Owner").link(name="View").click()
+table = page.table(label="Items")
+table.row(name="Item 1001").cell(column_name="Owner").link(name="View").click()
 ```
 
 Useful operations are:
 
 ```python
-link = page.link(name="Request 1001")
+link = page.link(name="Item 1001")
 
 link.is_visible()
 link.wait_until_visible()

@@ -50,8 +50,8 @@ def test_appian_link_is_exposed_as_appian_api_entry() -> None:
     assert "- Appian Link: api/appian-link.md" in mkdocs
     assert link_doc.startswith("# AppianLink\n")
     assert "page.link" in link_doc
-    assert "Create a New Request" in link_doc
-    assert "RETURN TO DASHBOARD" in link_doc
+    assert "View Details" in link_doc
+    assert "Item 1001" in link_doc
 
 
 def test_appian_table_is_exposed_as_appian_api_entry() -> None:
