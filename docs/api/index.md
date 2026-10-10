@@ -27,9 +27,9 @@ Prefer `AppianPage` for normal application tests.
 Example:
 
 ```python
-page.textbox(label="Request Title").fill("Example")
-page.date(label="Required Award Date").fill("10/15/2026")
-page.radio(label="Is this request for a conference?").select("Yes")
+page.textbox(label="Description").fill("Example")
+page.date(label="Start Date").fill("10/15/2026")
+page.radio(label="Priority").select("High")
 page.button(name="Next").click()
 ```
 

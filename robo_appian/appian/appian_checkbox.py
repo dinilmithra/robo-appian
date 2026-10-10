@@ -81,7 +81,7 @@ class AppianCheckbox(AppianInputComponent):
     def _checkbox_locator(self) -> Locator:
         """Return a live locator for either supported Appian checkbox structure.
 
-        The locator must stay *live* while Playwright waits.  Appian often
+        The locator must stay *live* while the runtime waits.  Appian often
         rerenders immediately after navigation/clicks, so probing ``count()``
         here and choosing a fallback eagerly can freeze the component to an
         empty locator before the checkbox is attached.
@@ -119,7 +119,7 @@ class AppianCheckbox(AppianInputComponent):
             "//*[@id and (" + comparison + ")]/@id]//input[@type='checkbox']"
         )
 
-        # ``or_`` keeps both branches live.  Playwright reevaluates them while
+        # ``or_`` keeps both branches live.  The runtime reevaluates them while
         # assertions/actions wait, so a checkbox added by a SAIL rerender can
         # be discovered without reconstructing the component.
         combined = named_checkbox.or_(group_checkbox)
@@ -131,7 +131,7 @@ class AppianCheckbox(AppianInputComponent):
         """Resolve the native label associated with a checkbox input.
 
         Appian can visually place the associated ``label[for]`` over the native
-        checkbox input. In that DOM shape Playwright ``check()``/``uncheck()``
+        checkbox input. In that DOM shape the runtime ``check()``/``uncheck()``
         waits for the input to receive pointer events and eventually times out
         because the label correctly receives the click instead. Activating the
         associated native label mirrors a user click and avoids depending on

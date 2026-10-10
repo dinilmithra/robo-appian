@@ -51,6 +51,10 @@ class AppianCell(AppianLocator):
         """Return the zero-based visible component match inside this cell."""
         return locator.filter(visible=True).nth(index)
 
+    def text(self) -> str:
+        """Return normalized user-visible text from this resolved table cell."""
+        return " ".join((self.locator.inner_text() or "").split())
+
     # ------------------------------------------------------------------
     # Semantic factories used by the public short accessors
     # ------------------------------------------------------------------

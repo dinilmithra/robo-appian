@@ -37,7 +37,7 @@ hide:
     <article><span class="ico">▤</span><div><strong>Pytest Ready</strong><p>Works cleanly with pytest fixtures, assertions, and test projects.</p></div></article>
     <article><span class="ico">ϟ</span><div><strong>Parallel Friendly</strong><p>Designed to work with isolated workers and parallel execution.</p></div></article>
     <article><span class="ico">∞</span><div><strong>CI/CD Friendly</strong><p>Fits Jenkins and modern CI/CD automation pipelines.</p></div></article>
-    <article><span class="ico">▥</span><div><strong>Clear Diagnostics</strong><p>Playwright-native behavior works with logs, screenshots, and reports.</p></div></article>
+    <article><span class="ico">▥</span><div><strong>Clear Diagnostics</strong><p>Framework behavior works with logs, screenshots, and reports.</p></div></article>
   </section>
 
   <section class="ra-target-workbench">
@@ -45,10 +45,10 @@ hide:
       <div class="ra-target-panel-title"><span>›_ &nbsp; Quick Start</span><span>🐍 Python</span></div>
       <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_appian <span class="kw">import</span> AppianPage
 <span class="ln">2</span>
-<span class="ln">3</span> <span class="kw">def</span> test_create_request(page: AppianPage):
-<span class="ln">4</span>     page.textbox(label=<span class="st">"Request Name"</span>).fill(<span class="st">"Example Request"</span>)
-<span class="ln">5</span>     page.date(label=<span class="st">"Required Award Date"</span>).fill(<span class="st">"10/15/2026"</span>)
-<span class="ln">6</span>     page.radio(label=<span class="st">"Is this request for a conference?"</span>).select(<span class="st">"Yes"</span>)
+<span class="ln">3</span> <span class="kw">def</span> test_update_item(page: AppianPage):
+<span class="ln">4</span>     page.textbox(label=<span class="st">"Description"</span>).fill(<span class="st">"Example item"</span>)
+<span class="ln">5</span>     page.date(label=<span class="st">"Start Date"</span>).fill(<span class="st">"10/15/2026"</span>)
+<span class="ln">6</span>     page.radio(label=<span class="st">"Priority"</span>).select(<span class="st">"High"</span>)
 <span class="ln">7</span>     page.button(name=<span class="st">"Next"</span>).click()</code></pre>
     </div>
 
@@ -59,7 +59,7 @@ hide:
         <b>→</b>
         <div class="node library"><div class="library-brand"><img src="assets/images/robo-appian-icon.png" alt=""><span><strong>robo-appian</strong><small>Appian Component Layer</small></span></div><ul><li>Appian components</li><li>Label-oriented interactions</li><li>Reusable Appian utilities</li><li>Browser install CLI</li><li>Built on robo-automation</li></ul></div>
         <b>→</b>
-        <div class="node"><span class="node-icon">▣</span><strong>robo-automation + Playwright</strong><small>• Generic fixtures<br>• Robo* wrappers<br>• Browser engine</small></div>
+        <div class="node"><span class="node-icon">▣</span><strong>robo-automation + the browser automation runtime</strong><small>• Generic fixtures<br>• Robo* wrappers<br>• Browser engine</small></div>
       </div>
     </div>
   </section>

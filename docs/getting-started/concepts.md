@@ -7,7 +7,7 @@ You only need a few ideas to start using `robo-appian`.
 Prefer visible application text over low-level HTML selectors.
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
+page.textbox(label="Description").fill("Example item")
 page.button(name="Next").click()
 ```
 
@@ -28,7 +28,7 @@ page.button(...)
 For example, a date input is still an Appian control even though it looks like a textbox in HTML. Use:
 
 ```python
-page.date(label="Required Award Date").fill("10/15/2026")
+page.date(label="Start Date").fill("10/15/2026")
 ```
 
 instead of treating it as a normal textbox.

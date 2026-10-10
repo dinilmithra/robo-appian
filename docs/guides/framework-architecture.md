@@ -32,4 +32,4 @@ generic browser and page lifecycle
 
 ## Cross-cutting action evidence
 
-Action-level browser evidence is owned by `robo-automation`, not duplicated in `robo-appian`. When `CAPTURE_ACTION_SNAPSHOTS=Y`, Appian component interactions are captured automatically when they execute supported Playwright actions. See [Action Snapshots](action-snapshots.md).
+Action-level browser evidence is owned by `robo-automation`, not duplicated in `robo-appian`. When `CAPTURE_ACTION_SNAPSHOTS=Y`, Appian component interactions are captured automatically when they execute supported browser actions. See [Action Snapshots](action-snapshots.md).

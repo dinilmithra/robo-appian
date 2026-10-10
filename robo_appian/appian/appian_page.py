@@ -27,8 +27,8 @@ class AppianPage:
     """Transparent Appian wrapper around ``RoboPage``.
 
     Appian-specific helpers are additive. Unknown attributes and methods are
-    delegated to ``RoboPage``, which in turn delegates to Playwright ``Page``.
-    This preserves the complete Playwright page API on an AppianPage object.
+    delegated to ``RoboPage``, which in turn delegates to underlying page.
+    This preserves the complete underlying page API on an AppianPage object.
     """
 
     locator_class = AppianLocator
@@ -40,7 +40,7 @@ class AppianPage:
 
     @classmethod
     def get(cls, page: Page | RoboPage | "AppianPage") -> "AppianPage":
-        """Return an Appian wrapper around a RoboPage or Playwright Page."""
+        """Return an Appian wrapper around a RoboPage or underlying page."""
         if isinstance(page, cls):
             return page
         return cls(RoboPage.get(page))
@@ -51,15 +51,15 @@ class AppianPage:
         return self._robo_page
 
     def __getattr__(self, name: str) -> Any:
-        """Delegate unknown attributes through RoboPage to Playwright Page."""
+        """Delegate unknown attributes through RoboPage to underlying page."""
         return getattr(self._robo_page, name)
 
     def __dir__(self) -> list[str]:
-        """Include RoboPage and Playwright Page members in introspection."""
+        """Include RoboPage and underlying page members in introspection."""
         return sorted(set(super().__dir__()) | set(dir(self._robo_page)))
 
     def same_page(self, other: object) -> bool:
-        """Return whether another wrapper owns the same Playwright page."""
+        """Return whether another wrapper owns the same underlying page."""
         if isinstance(other, AppianPage):
             other = other.robo_page
         return isinstance(other, RoboPage) and self._robo_page.same_page(other)

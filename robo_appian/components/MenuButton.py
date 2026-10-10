@@ -89,7 +89,7 @@ class MenuButton:
         """Return the page-like owner for a page or locator scope.
 
         Page wrappers such as RoboPage and AppianPage are already page owners.
-        Locator wrappers are unwrapped first and use their Playwright owner page.
+        Locator wrappers are unwrapped first and use their underlying owner page.
         """
         raw_scope = ComponentUtils.unwrap_scope(scope)
         return raw_scope.page if isinstance(raw_scope, Locator) else scope

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 from playwright.sync_api import Locator, Page
 
-from robo_appian import AppianTable
+from robo_appian import AppianCell, AppianTable
 
 
 def test_appian_table_is_public_component() -> None:
@@ -614,3 +614,43 @@ def test_appian_cell_component_accessor_rejects_negative_and_non_integer_indexes
         _ = cell.dropdown[-1]
     with pytest.raises(TypeError):
         _ = cell.dropdown["0"]  # type: ignore[index]
+
+
+def test_appian_cell_text_returns_plain_text() -> None:
+    locator = MagicMock(spec=Locator)
+    locator.inner_text.return_value = "Active"
+    cell = AppianCell(locator, page=MagicMock())
+
+    assert cell.text() == "Active"
+
+
+def test_appian_cell_text_normalizes_nested_text_whitespace() -> None:
+    locator = MagicMock(spec=Locator)
+    locator.inner_text.return_value = "  Item\n   1001  "
+    cell = AppianCell(locator, page=MagicMock())
+
+    assert cell.text() == "Item 1001"
+
+
+def test_appian_cell_text_returns_link_text() -> None:
+    locator = MagicMock(spec=Locator)
+    locator.inner_text.return_value = "View Details"
+    cell = AppianCell(locator, page=MagicMock())
+
+    assert cell.text() == "View Details"
+
+
+def test_appian_cell_text_returns_empty_string_for_empty_cell() -> None:
+    locator = MagicMock(spec=Locator)
+    locator.inner_text.return_value = ""
+    cell = AppianCell(locator, page=MagicMock())
+
+    assert cell.text() == ""
+
+
+def test_appian_cell_text_normalizes_nonbreaking_and_mixed_whitespace() -> None:
+    locator = MagicMock(spec=Locator)
+    locator.inner_text.return_value = "  Owner\u00a0 \n  Name\t "
+    cell = AppianCell(locator, page=MagicMock())
+
+    assert cell.text() == "Owner Name"

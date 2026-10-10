@@ -55,7 +55,7 @@ class AppianTab:
         return self._name
 
     def _root(self):
-        """Return the Playwright-compatible scope used for tab lookup."""
+        """Return the framework-compatible scope used for tab lookup."""
         if self._scope is not None:
             return self._scope.locator
         return self._page

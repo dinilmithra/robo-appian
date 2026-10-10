@@ -69,3 +69,7 @@ if subcategory.is_enabled(timeout=8):
     options:
       show_root_heading: true
       members_order: source
+
+## Focus-out after changes
+
+Input components that change a value perform the framework's focus-out behavior after the change so Appian can process dependent updates. Tests should not add a Tab keystroke just to validate a changed value.

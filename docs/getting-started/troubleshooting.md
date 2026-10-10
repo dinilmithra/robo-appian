@@ -7,7 +7,7 @@ Start from what you see in the failure.
 Check the text visible on the page.
 
 ```python
-page.textbox(label="Request Title")
+page.textbox(label="Description")
 ```
 
 If the application label changed, update the automation to use the current label.
@@ -16,7 +16,7 @@ For radio questions, use the complete question text whenever possible:
 
 ```python
 page.radio(
-    label="Are you submitting this travel request for yourself or on behalf of someone else?"
+    label="Who owns this item?"
 ).select("For myself")
 ```
 
@@ -25,7 +25,7 @@ page.radio(
 Use `page.date(...)` rather than a normal textbox:
 
 ```python
-page.date(label="Required Award Date").fill("10/15/2026")
+page.date(label="Start Date").fill("10/15/2026")
 ```
 
 Focus-out is automatic. Do not add Tab just to trigger Appian validation.
@@ -49,9 +49,9 @@ A timeout does not always mean the timeout value is too small. First check:
 
 Increase a timeout only when the evidence shows that the application is genuinely slow.
 
-## Playwright says another element intercepts pointer events
+## Another element intercepts pointer events
 
-This means Playwright found the target but another visible element is receiving the click. For supported Appian radio controls, `robo-appian` handles the associated label interaction internally. If you see this elsewhere, inspect the current UI rather than forcing the click immediately.
+This means The browser found the target but another visible element is receiving the click. For supported Appian radio controls, `robo-appian` handles the associated label interaction internally. If you see this elsewhere, inspect the current UI rather than forcing the click immediately.
 
 ## Need more detail?
 

@@ -34,7 +34,7 @@ class AppianInputComponent:
         return self._timeout
 
     def _timeout_kwargs(self, timeout: float | int | None = None) -> dict[str, float]:
-        """Return Playwright timeout kwargs using an optional method override."""
+        """Return runtime timeout kwargs using an optional method override."""
         effective = self._timeout if timeout is None else timeout
         return ComponentUtils.timeout_kwargs(effective)
 

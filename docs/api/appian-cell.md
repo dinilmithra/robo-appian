@@ -3,8 +3,8 @@
 `AppianCell` represents a resolved table cell. It is also an `AppianLocator`, so normal locator operations remain available, while Appian component factories are automatically scoped to that cell.
 
 ```python
-cell = page.table(label="Requests").cell(
-    row_name="Request 1001",
+cell = page.table(label="Items").cell(
+    row_name="Item 1001",
     column_number=16,
 )
 
@@ -17,10 +17,19 @@ The same scoped pattern is available for the other Appian semantic components:
 cell.link(name="View").click()
 cell.dropdown(label="Status").select("Approved")
 cell.checkbox(label="Include").check()
-cell.radio(label="Decision").select("Yes")
+cell.radio(label="Decision").select("High")
 cell.textbox(label="Comment").fill("Approved")
 cell.date(label="Date Needed By").fill("10/09/2026")
 cell.tab(name="Details").select()
+```
+
+Read the user-visible value of a cell with `text()`. Whitespace is normalized, and the same method works for plain text, nested markup, and link text. An empty cell returns `""`.
+
+```python
+status = page.table(label="Items").cell(
+    row_name="Item 1001",
+    column_name="Status",
+).text()
 ```
 
 ## Index-based components inside unlabeled cells
@@ -28,10 +37,10 @@ cell.tab(name="Details").select()
 Appian cells do not always render a field label or accessible component name. For those cells, the short component accessors are both callable and zero-based indexable. Indexing is scoped strictly to the resolved cell.
 
 ```python
-cell.dropdown[0].select(value="Dinil")
+cell.dropdown[0].select(value="General")
 cell.button[0].click()
 cell.checkbox[0].check()
-cell.radio[0].select("Yes")
+cell.radio[0].select("High")
 cell.link[0].click()
 cell.textbox[0].fill("Approved")
 cell.date[0].fill("10/09/2026")
@@ -60,7 +69,7 @@ cell.dropdown[0].select(search_text="123", index="1")
 A nested table can also be resolved semantically or by cell-local index:
 
 ```python
-nested = cell.table(label="Nested Requests")
+nested = cell.table(label="Nested Items")
 nested = cell.table[0]
 ```
 
@@ -76,4 +85,4 @@ All semantic cell-scoped factories default to `exact=True` and `visible=True`. P
 
 ## Timeout
 
-Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework Playwright timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.
+Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.

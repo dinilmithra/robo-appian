@@ -88,7 +88,7 @@ class AppianRadioSelect(AppianInputComponent):
         Some Appian radio groups expose a semantic field label whose ``id`` is
         referenced by ``aria-labelledby``. Others render nearby presentation
         text without using that text as the group's accessible label. Avoid a
-        long Playwright auto-wait for the latter by checking locator count
+        long runtime auto-wait for the latter by checking locator count
         before reading the label id.
         """
         indexed = getattr(self, "_indexed_locator", None)
@@ -162,7 +162,7 @@ class AppianRadioSelect(AppianInputComponent):
         """Resolve the native label associated with a radio input.
 
         Appian visually places the radio label over the native input, so a
-        Playwright ``check()`` on the input can time out because the label
+        the runtime ``check()`` on the input can time out because the label
         intercepts pointer events. Activating the associated ``label[for]``
         mirrors the user interaction while retaining semantic scoping.
         """

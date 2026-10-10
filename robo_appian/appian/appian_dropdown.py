@@ -130,7 +130,7 @@ class AppianDropdown:
         """Return whether the dropdown is enabled, optionally waiting.
 
         With no ``timeout`` argument this is an immediate state query and does
-        not inherit the component timeout or Playwright ``WAIT_TIME``. When a
+        not inherit the component timeout or framework ``WAIT_TIME``. When a
         positive timeout in seconds is supplied, wait up to that duration for
         Appian to make the live combobox enabled. A timeout returns ``False``
         rather than raising.

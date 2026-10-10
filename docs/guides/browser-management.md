@@ -1,6 +1,6 @@
 # Browser Management
 
-`robo-appian` depends on the Playwright Python package and provides a platform-independent command for provisioning Playwright-managed browser binaries.
+`robo-appian` depends on the browser automation runtime and provides a platform-independent command for provisioning framework-managed browser binaries.
 
 ## Install all browsers
 
@@ -40,7 +40,7 @@ The generic lifecycle selects a browser from the automation configuration. The c
 BROWSER=firefox
 ```
 
-Supported Playwright engine names are:
+Supported browser engine names are:
 
 - `chromium`
 - `firefox`

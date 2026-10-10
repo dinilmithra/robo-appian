@@ -21,7 +21,7 @@ Start with what the user sees on the page.
 By label:
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
+page.textbox(label="Description").fill("Example item")
 ```
 
 By placeholder:
@@ -33,13 +33,13 @@ page.textbox(placeholder="example@example.com").fill("user@example.com")
 Some Appian forms introduce a textbox with nearby heading text instead of a normal field label:
 
 ```python
-page.textbox(header="Conference Description").fill("Annual conference")
+page.textbox(header="Item Description").fill("General details")
 ```
 
 ## Date
 
 ```python
-page.date(label="Required Award Date").fill("10/15/2026")
+page.date(label="Start Date").fill("10/15/2026")
 ```
 
 Use `page.date(...)` for an Appian date field. Do not use a normal textbox just because the HTML input type is `text`.
@@ -50,10 +50,10 @@ Use `page.date(...)` for an Appian date field. Do not use a normal textbox just 
 `page.checkbox(...)` returns an [`AppianCheckbox`](../api/appian-checkbox.md).
 
 ```python
-missing_vendor = page.checkbox(
-    label="Vendor is missing in approved list"
+include_details = page.checkbox(
+    label="Include Details"
 )
-missing_vendor.check()
+include_details.check()
 ```
 
 Use `uncheck()` to clear it and `is_checked()` to read the state. Both `check()` and `uncheck()` are idempotent.
@@ -65,8 +65,8 @@ Use `uncheck()` to clear it and `is_checked()` to read the state. Both `check()`
 
 ```python
 page.radio(
-    label="Is this request for a conference?"
-).select("Yes")
+    label="Priority"
+).select("High")
 ```
 
 Use the **complete question text** when possible. This keeps choices such as `Yes` or `No` scoped to the correct question.
@@ -75,7 +75,7 @@ You can inspect the current state without changing focus:
 
 ```python
 selected = page.radio(
-    label="Is this request for a conference?"
+    label="Priority"
 ).is_selected("Yes")
 ```
 
@@ -84,7 +84,7 @@ selected = page.radio(
 `page.link(name=...)` returns an [`AppianLink`](../api/appian-link.md) for native anchors and Appian linked-card controls.
 
 ```python
-page.link(name="Open Request").click()
+page.link(name="View Details").click()
 page.link(name="Return").click()
 ```
 

@@ -18,7 +18,7 @@ class AppianLink:
 
     Appian renders links in more than one semantic HTML shape. Native rich-text
     links are ``<a>`` elements, while linked cards expose ``role="link"`` on a
-    non-anchor container. Playwright's role locator covers both forms without
+    non-anchor container. The runtime's role locator covers both forms without
     relying on generated Appian CSS classes.
     """
 
@@ -61,7 +61,7 @@ class AppianLink:
         return ComponentUtils.timeout_kwargs(effective)
 
     def _root(self):
-        """Return the Playwright-compatible scope used for link lookup."""
+        """Return the framework-compatible scope used for link lookup."""
         if self._scope is not None:
             return self._scope.locator
         return self._page

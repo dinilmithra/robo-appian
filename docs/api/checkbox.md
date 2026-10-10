@@ -4,7 +4,7 @@ The legacy static `CheckBox` helper has been removed. Use [`AppianCheckbox`](app
 
 ```python
 page.checkbox(
-    label="Vendor is missing in approved list"
+    label="Include Details"
 ).check()
 ```
 

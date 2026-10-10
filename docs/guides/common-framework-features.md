@@ -10,7 +10,7 @@ This guide summarizes the common functionality available to a `robo-appian` cons
 | --- | --- | --- |
 | Browser and context lifecycle | Yes | `robo-automation` |
 | Appian-specialized `page` fixture | Yes | `robo-appian` |
-| Playwright/expect timeout configuration | Yes | `robo-automation` |
+| framework timeout configuration | Yes | `robo-automation` |
 | Pytest plugin and fixtures | Yes | Both packages |
 | Worker/test correlation context | Yes | `robo-automation`, exposed by `robo-appian.runtime` |
 | Framework logging | Yes | `robo-automation` |
@@ -33,23 +33,41 @@ def test_example(page: AppianPage) -> None:
     page.button(name="Submit").is_visible()
 ```
 
-The generic lifecycle is implemented by `robo-automation`; `robo-appian` wraps the `RoboPage` so Appian components and semantic locators are available without hiding Playwright `Page` methods. Application projects should not close framework-owned pages, contexts, or browsers from normal tests.
+The generic lifecycle is implemented by `robo-automation`; `robo-appian` wraps the `RoboPage` so Appian components and semantic locators are available without hiding browser page operations. Application projects should not close framework-owned pages, contexts, or browsers from normal tests.
 
 See [Browser Management](browser-management.md) and [Pytest Integration](pytest-integration.md).
 
-## Configuration and timeouts
+## Configuration flags and timeouts
 
-Common runtime behavior is configured through the automation environment. Typical settings include:
+`robo-appian` uses the common runtime configuration supplied by `robo-automation`. The most commonly used flags are:
 
-```text
+| Flag | Default | Usage |
+| --- | --- | --- |
+| `BROWSER` | `chromium` | Select `chromium`, `firefox`, or `webkit`. |
+| `HEAD_LESS` | `Y` | Set `N` to show the browser during local debugging. |
+| `WAIT_TIME` | `90` | Default framework timeout in seconds. |
+| `CAPTURE_ACTION_SNAPSHOTS` | `N` | Capture before/after evidence for instrumented actions. |
+| `CAPTURE_FAILURE_SNAPSHOTS` | `N` | Capture failure evidence independently of action capture. |
+| `ACTION_SNAPSHOT_FULL_PAGE` | `N` | Capture full-page rather than viewport screenshots. |
+| `SNAPSHOT_PATH` | `artifacts/evidence/actions` | Snapshot evidence root; `${VAR}` path references are supported. |
+| `PYTEST_LOG_LEVEL` | `INFO` | Set the framework/file logging level. |
+| `TESTCASE_LOG_ENABLED` | `Y` | Enable per-testcase logs. |
+| `PERF_MONITOR_ENABLED` | `Y` | Enable common performance monitoring. |
+
+Example:
+
+```ini
 BROWSER=chromium
-HEAD_LESS=N
-WAIT_TIME=60
+HEAD_LESS=Y
+WAIT_TIME=90
+CAPTURE_ACTION_SNAPSHOTS=N
+CAPTURE_FAILURE_SNAPSHOTS=Y
+SNAPSHOT_PATH=${EVIDENCE_PATH}/actions
 ```
 
-`WAIT_TIME` is expressed in seconds at the application/configuration boundary. The framework applies it to Playwright and expect operations as required.
+`WAIT_TIME` is expressed in seconds. A semantic component can override the normal action timeout with `timeout=<seconds>`. Enabled-state checks are intentionally different: `component.is_enabled()` is immediate, while `component.is_enabled(timeout=8)` waits up to eight seconds and returns `False` on timeout.
 
-Applications may override configuration policy in their own fixtures or environment files. Keep application URLs, credentials, authentication policy, and test-data paths in the consuming application rather than in `robo-appian`.
+Application URLs, credentials, authentication policy, and test-data paths belong in the consuming application rather than in `robo-appian`.
 
 ## Pytest fixtures
 
@@ -87,7 +105,7 @@ Do not log passwords, tokens, authenticated storage-state contents, or other sec
 
 ## Performance telemetry
 
-The common automation layer can measure framework lifecycle and Playwright action durations. `robo-appian` component operations benefit from that instrumentation because their browser interactions ultimately execute through the shared automation layer.
+The common automation layer can measure framework lifecycle and browser action durations. `robo-appian` component operations benefit from that instrumentation because their browser interactions ultimately execute through the shared automation layer.
 
 An Appian semantic operation can involve more than one low-level action. For example, filling an Appian date can include the input update and the required focus-out/blur operation. Performance records therefore describe the underlying browser actions as well as the higher-level test flow.
 
@@ -147,9 +165,9 @@ A consuming application can assign different credentials or storage state to eac
 Common framework services should not replace Appian semantics. Continue to use the Appian component API for application interactions:
 
 ```python
-page.textbox(label="Request Title").fill("Example Request")
+page.textbox(label="Description").fill("Example item")
 page.checkbox(label="IT").check()
-page.radio(label="Conference Type").select("Scientific")
+page.radio(label="Priority").select("High")
 page.date(label="From").fill("12/12/2026")
 ```
 

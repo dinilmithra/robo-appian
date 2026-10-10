@@ -5,8 +5,8 @@ You do not need advanced Python to start writing UI automation.
 ## Variables
 
 ```python
-request_title = "Office Supplies"
-page.textbox(label="Request Title").fill(request_title)
+item_description = "Office Supplies"
+page.textbox(label="Description").fill(item_description)
 ```
 
 ## Calling a method
@@ -22,15 +22,15 @@ page.button(name="Next").click()
 A pytest test is a Python function whose name normally starts with `test_`:
 
 ```python
-def test_create_request(page):
+def test_update_item(page):
     page.button(name="Next").click()
 ```
 
 ## `if` conditions
 
 ```python
-if request_type == "Conference":
-    page.radio(label="Is this request for a conference?").select("Yes")
+if item_type == "Special":
+    page.radio(label="Priority").select("High")
 ```
 
 ## Dictionaries
@@ -38,12 +38,12 @@ if request_type == "Conference":
 A dictionary stores related values by name:
 
 ```python
-request = {
+item = {
     "title": "Office Supplies",
     "date": "10/15/2026",
 }
 
-page.textbox(label="Request Title").fill(request["title"])
+page.textbox(label="Description").fill(item["title"])
 ```
 
 That is enough Python for many straightforward automation tasks. Learn more Python as your test logic becomes more complex.

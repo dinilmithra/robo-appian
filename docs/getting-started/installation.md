@@ -1,12 +1,12 @@
 # Installation
 
-Install `robo-appian` into the Python environment that runs your tests. The package provides Appian-specific components and a platform-independent CLI for provisioning Playwright-managed browser binaries. Generic Playwright wrappers and pytest lifecycle are supplied by its `robo-automation` dependency.
+Install `robo-appian` into the Python environment that runs your tests. The package provides Appian-specific components and a platform-independent CLI for provisioning framework-managed browser binaries. Generic the browser automation runtime wrappers and pytest lifecycle are supplied by its `robo-automation` dependency.
 
 ## Requirements
 
 - Python **3.12** (`>=3.12,<3.13`)
 - pytest
-- one or more Playwright-supported browser engines installed for the environment that executes the tests
+- one or more the browser automation runtime-supported browser engines installed for the environment that executes the tests
 
 `playwright`, `pytest`, and `robo-automation` are direct dependencies in the current package metadata. The generic fixture stack itself is owned by `robo-automation`; a consuming project does not need `pytest-playwright` for that stack.
 
@@ -22,13 +22,13 @@ pip install robo-appian
 poetry add robo-appian
 ```
 
-Installing the Python package installs Playwright's Python library. Browser binaries are provisioned explicitly so projects can choose only what they need.
+Installing the Python package installs the browser automation runtime. Browser binaries are provisioned explicitly so projects can choose only what they need.
 
 ## Install browser binaries
 
-The CLI invokes Playwright with the **current Python interpreter** (`sys.executable -m playwright install ...`), so it works consistently in Windows, Linux, macOS, virtual environments, Poetry environments, and CI agents.
+The CLI invokes the browser automation runtime with the **current Python interpreter** (`sys.executable -m playwright install ...`), so it works consistently in Windows, Linux, macOS, virtual environments, Poetry environments, and CI agents.
 
-Install the full Playwright-managed browser set:
+Install the full framework-managed browser set:
 
 ```bash
 robo-appian install-browser
@@ -84,7 +84,7 @@ robo-appian install-browser firefox
 
 Installing `robo-automation` registers `robo_automation.pytest_plugin` through pytest's `pytest11` entry-point group. Under normal plugin autoloading, no `conftest.py` import, `pytest_plugins` declaration, or `-p` option is required.
 
-The lower `robo-automation` plugin owns browser/runtime lifecycle, and the `robo-appian` plugin transparently wraps the `RoboPage` fixture for Appian consumers without hiding Playwright `Page` methods:
+The lower `robo-automation` plugin owns browser/runtime lifecycle, and the `robo-appian` plugin transparently wraps the `RoboPage` fixture for Appian consumers without hiding browser page operations:
 
 ```text
 robo-automation: robo_page -> AppianPage

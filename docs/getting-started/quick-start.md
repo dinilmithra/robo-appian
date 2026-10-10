@@ -15,18 +15,18 @@ robo-appian install-browser firefox
 from robo_appian import AppianPage
 
 
-def test_create_request(page: AppianPage) -> None:
-    page.textbox(label="Request Name").fill("Example Request")
-    page.date(label="Required Award Date").fill("10/15/2026")
-    page.radio(label="Is this request for a conference?").select("Yes")
+def test_update_item(page: AppianPage) -> None:
+    page.textbox(label="Description").fill("Example item")
+    page.date(label="Start Date").fill("10/15/2026")
+    page.radio(label="Priority").select("High")
     page.button(name="Submit").click()
 ```
 
 Read the code the same way a user would describe the page:
 
-1. Enter the request name.
+1. Enter the item description.
 2. Enter the required date.
-3. Choose Yes for the conference question.
+3. Choose the item priority.
 4. Click Submit.
 
 ## 3. Run it with pytest

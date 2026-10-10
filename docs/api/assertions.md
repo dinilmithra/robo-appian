@@ -1,6 +1,6 @@
 # Assertion Helpers
 
-`robo-appian` provides Appian-facing assertion helpers so application projects can use a stable Appian error boundary instead of depending directly on Playwright assertion types.
+`robo-appian` provides Appian-facing assertion helpers so application projects can use a stable Appian error boundary instead of depending directly on browser-runtime assertion types.
 
 ```python
 from robo_appian import assert_text, assert_visible, wait_visible
@@ -9,13 +9,13 @@ from robo_appian import assert_text, assert_visible, wait_visible
 ## Wait for visibility
 
 ```python
-wait_visible(page.get_by_text("Request submitted"))
+wait_visible(page.get_by_text("Item saved"))
 ```
 
 ## Assert visibility
 
 ```python
-assert_visible(page.get_by_text("Request submitted"))
+assert_visible(page.get_by_text("Item saved"))
 ```
 
 ## Assert text

@@ -1,4 +1,4 @@
-"""Appian-facing assertion helpers that hide Playwright assertion types."""
+"""Appian-facing assertion helpers that expose stable framework assertion behavior."""
 
 from __future__ import annotations
 

@@ -36,7 +36,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     install_parser = subparsers.add_parser(
         "install-browser",
-        help="Install a Playwright-managed browser binary.",
+        help="Install a framework-managed browser binary.",
     )
     install_parser.add_argument(
         "browser",

@@ -24,8 +24,8 @@ For normal pytest tests, **do not catch `RoboAppianError` unless you have a real
 Let pytest fail the test so the traceback, logs, screenshot, HTML evidence, and other diagnostics remain available.
 
 ```python
-def test_create_request(page):
-    page.textbox(label="Request Title").fill("Office Supplies")
+def test_update_item(page):
+    page.textbox(label="Description").fill("Example item")
     page.button(name="Next").click()
 ```
 
@@ -42,8 +42,8 @@ from robo_appian import RoboAppianError
 
 try:
     page.radio(
-        label="Is this request for a conference?"
-    ).select("Yes")
+        label="Priority"
+    ).select("High")
 except RoboAppianError as error:
     print(f"Appian interaction failed: {error}")
     print(f"Code: {error.code}")
@@ -87,8 +87,8 @@ A dictionary returned by `to_dict()` can look like this:
     "code": "RADIO_OPTION_NOT_FOUND",
     "message": "Could not find the requested Appian radio option.",
     "details": {
-        "label": "Is this request for a conference?",
-        "value": "Yes",
+        "label": "Priority",
+        "value": "High",
     },
 }
 ```
@@ -129,7 +129,7 @@ For example:
 
 ```python
 {
-    "label": "Are you submitting this travel request for yourself or on behalf of someone else?",
+    "label": "Who owns this item?",
     "value": "For myself",
 }
 ```
@@ -171,11 +171,11 @@ from robo_appian import RoboAppianError
 def complete_travel_details(page):
     try:
         page.radio(
-            label="Are you submitting this travel request for yourself or on behalf of someone else?"
+            label="Who owns this item?"
         ).select("For myself")
     except RoboAppianError as error:
         raise RuntimeError(
-            "Could not complete the Travel personal-details section"
+            "Could not complete the item-details section"
         ) from error
 ```
 
@@ -268,7 +268,7 @@ Prefer:
 
 ```python
 except RoboAppianError as error:
-    raise RuntimeError("Could not complete the request step") from error
+    raise RuntimeError("Could not complete the item step") from error
 ```
 
 ## What should I check when I see one?

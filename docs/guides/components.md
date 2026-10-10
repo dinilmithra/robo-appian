@@ -22,8 +22,8 @@ Use `page.radio(...)` for Appian radio groups. It returns an [`AppianRadioSelect
 
 ```python
 page.radio(
-    label="Is this request for a conference?"
-).select("Yes")
+    label="Priority"
+).select("High")
 ```
 
 Use the complete question text when possible so common option values such as `Yes` and `No` stay scoped to the correct group.
@@ -32,7 +32,7 @@ Use the complete question text when possible so common option values such as `Ye
 ## Text inputs
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
+page.textbox(label="Description").fill("Example item")
 ```
 
 ## Dropdowns
@@ -50,9 +50,9 @@ assert page.dropdown(label="Status").is_selected("Active")
 Use `page.link(name=...)` for both native Appian `<a>` links and linked-card controls exposed with `role="link"`. It returns an [`AppianLink`](../api/appian-link.md).
 
 ```python
-page.link(name="Open Request").click()
-page.link(name="Request 1001").click()
-page.link(name="Request Details").click()
+page.link(name="View Details").click()
+page.link(name="Item 1001").click()
+page.link(name="Item Details").click()
 page.link(name="Return").click()
 ```
 
@@ -74,16 +74,16 @@ Selection is idempotent and state is derived from Appian accessibility text (`Se
 Create a semantic table component from `AppianPage`. At least one of `label`, `header_name`, `row_name`, or `column_name` is required.
 
 ```python
-requests = page.table(
-    label="Requests",
-    row_name="Request 1001",
-    column_name="Created By",
+items = page.table(
+    label="Items",
+    row_name="Item 1001",
+    column_name="Status",
 )
 ```
 
 Matching is consistent across Appian component factories: `exact=True` and `visible=True` are the defaults. Use `exact=False` for intentional partial semantic-name/label matching. `visible=False` targets hidden matches; `visible=None`, `visible=""`, or whitespace removes visibility filtering. For tables, no visibility filter leaves both visible and hidden matches in the live locator.
 
-All semantic Appian component factories also accept `timeout` in **seconds**. The default is `None`, which preserves the Playwright/context timeout configured from `WAIT_TIME`. A positive finite value overrides `WAIT_TIME` for waits and actions owned by that component:
+All semantic Appian component factories also accept `timeout` in **seconds**. The default is `None`, which preserves the framework timeout configured from `WAIT_TIME`. A positive finite value overrides `WAIT_TIME` for waits and actions owned by that component:
 
 ```python
 page.dropdown(label="Category", timeout=10).select(value="General")
@@ -102,7 +102,7 @@ The page and cell component accessors share the same matching model:
 page.button(name="Save")                         # exact=True, visible=True
 page.button(name="Sav", exact=False)             # partial semantic match
 page.dropdown(label="Category", visible=None)         # no visibility filter
-page.dropdown[0].select(value="Dinil")           # first dropdown on page
+page.dropdown[0].select(value="General")           # first dropdown on page
 page.dropdown(label="Category")[0].select(value="General")
 ```
 
@@ -126,9 +126,9 @@ button.click()
 Use `AppianPage.textbox(...)` for text fields:
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
+page.textbox(label="Description").fill("Example item")
 page.textbox(placeholder="example@example.com").fill("user@example.com")
-page.textbox(header="Conference Description").fill("General conference details")
+page.textbox(header="Item Description").fill("General details")
 ```
 
 ### Waiting for an Appian component to become enabled
@@ -139,10 +139,10 @@ Enabled-state queries are immediate unless a timeout is explicitly supplied. Thi
 # Snapshot of the current state; no wait.
 page.dropdown(label="Category").is_enabled()
 
-# Wait up to WAIT_TIME_SHORT seconds for an Appian dependency to enable it.
+# Wait up to a configured short timeout for an Appian dependency to enable it.
 dropdown = page.dropdown(label="Category")
 if dropdown.is_enabled(timeout=short_wait_seconds):
-    dropdown.select(value="Grant")
+    dropdown.select(value="General")
 ```
 
 An explicit `timeout` is expressed in seconds. `is_enabled(timeout=...)` returns `True` as soon as the live component becomes enabled and returns `False` if the timeout expires; the state-query timeout is not raised as an automation failure. This is useful for dependent Appian controls such as Category and Subcategory.

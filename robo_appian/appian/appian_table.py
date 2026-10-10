@@ -1,14 +1,11 @@
 """Generic utilities for interacting with Appian table and grid components."""
 
 import logging
-from typing import Optional
 
 from playwright.sync_api import Locator, expect
 from robo_automation import Scope
 
-from robo_appian.appian.appian_date import AppianDate
 from robo_appian.appian.appian_cell import AppianCell
-from robo_appian.components.SearchInput import SearchInput
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 logger = logging.getLogger(__name__)
@@ -325,128 +322,6 @@ class AppianTable:
         """Click a one-based rendered data row."""
         self.row(row_number=row_number).select()
 
-    def click_action_in_cell(
-        self,
-        *,
-        row_number: int,
-        column_name: str,
-        action_label: str,
-        exact: bool = False,
-    ) -> None:
-        """Click a link or button action in a resolved table cell."""
-        normalized = " ".join(str(action_label or "").split())
-        if not normalized:
-            raise ValueError("Action label cannot be empty or whitespace.")
-        cell = self.cell(row_number=row_number, column_name=column_name)
-        actions = cell.locator.locator("a, button").filter(visible=True)
-        for index in range(actions.count()):
-            candidate = actions.nth(index)
-            text = " ".join((candidate.text_content() or "").split())
-            matched = text == normalized if exact else normalized in text
-            if not matched:
-                labels = candidate.locator("[aria-label]")
-                for label_index in range(labels.count()):
-                    aria = " ".join((labels.nth(label_index).get_attribute("aria-label") or "").split())
-                    if (aria == normalized if exact else normalized in aria):
-                        matched = True
-                        break
-            if matched:
-                expect(candidate, f"Action '{normalized}' was not visible.").to_be_visible()
-                ComponentUtils.click(candidate)
-                return
-        raise AssertionError(f"Action '{normalized}' was not found in the resolved table cell.")
-
-    def select_dropdown_in_cell(
-        self,
-        *,
-        option_name: str,
-        row_number: int | None = None,
-        row_name: str | None = None,
-        column_name: str | None = None,
-        column_number: int | None = None,
-    ) -> None:
-        """Select the first dropdown in a resolved table cell."""
-        self.cell(
-            row_number=row_number,
-            row_name=row_name,
-            column_name=column_name,
-            column_number=column_number,
-        ).dropdown[0].select(value=option_name)
-
-    def select_dropdown_in_named_row(
-        self, *, row_name: str, column_name: str, option_name: str
-    ) -> None:
-        """Select the first dropdown at a named row/column intersection."""
-        self.select_dropdown_in_cell(
-            row_name=row_name, column_name=column_name, option_name=option_name
-        )
-
-    def fill_input_in_named_row(
-        self, *, row_name: str, column_name: str, value: str
-    ) -> None:
-        """Fill the first textbox at a named row/column intersection."""
-        self.cell(row_name=row_name, column_name=column_name).textbox[0].fill(value)
-
-    def fill_textbox_in_cell(
-        self,
-        *,
-        value: str,
-        row_number: int | None = None,
-        row_name: str | None = None,
-        column_name: str | None = None,
-        column_number: int | None = None,
-    ) -> None:
-        """Fill the first textbox in a resolved table cell."""
-        self.cell(
-            row_number=row_number,
-            row_name=row_name,
-            column_name=column_name,
-            column_number=column_number,
-        ).textbox[0].fill(value)
-
-    def fill_date_in_cell(
-        self,
-        *,
-        value: str,
-        row_number: int | None = None,
-        row_name: str | None = None,
-        column_name: str | None = None,
-        column_number: int | None = None,
-    ) -> None:
-        """Fill the first date component in a resolved table cell."""
-        self.cell(
-            row_number=row_number,
-            row_name=row_name,
-            column_name=column_name,
-            column_number=column_number,
-        ).date[0].fill(value)
-
-    def fill_date_in_named_row(
-        self, *, row_name: str, column_name: str, value: str
-    ) -> None:
-        """Fill the first date component at a named row/column intersection."""
-        self.fill_date_in_cell(row_name=row_name, column_name=column_name, value=value)
-
-    def get_label_value_in_cell(
-        self, *, row_number: int, column_name: str
-    ) -> str:
-        """Return normalized visible text from a resolved table cell."""
-        text = self.cell(row_number=row_number, column_name=column_name).locator.inner_text()
-        return " ".join(text.split())
-
-    def select_search_input_in_named_row(
-        self, *, row_name: str, column_name: str, option_name: str
-    ) -> None:
-        """Select a value from a searchable picker in a named table cell."""
-        cell = self.cell(row_name=row_name, column_name=column_name)
-        search_input = cell.locator.get_by_role("combobox").filter(visible=True).first
-        expect(search_input, "Search input was not found in the resolved table cell.").to_be_visible()
-        SearchInput.select_by_locator(
-            scope=self._component_scope,
-            lookup=search_input,
-            search_text=option_name,
-            field_name=row_name,
-        )
 
 
 __all__ = ["AppianTable"]

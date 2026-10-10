@@ -59,7 +59,7 @@ python .\robo-appian\tools\setup_venv.py --browser firefox
 
 Supported values are `firefox`, `chromium`, `webkit`, and `all`.
 
-To install the full Playwright-managed browser set:
+To install the full framework-managed browser set:
 
 ```powershell
 python .\robo-appian\tools\setup_venv.py --browser all

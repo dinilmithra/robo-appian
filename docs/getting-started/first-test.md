@@ -6,8 +6,8 @@ A pytest test is just a Python function whose name starts with `test_`.
 from robo_appian import AppianPage
 
 
-def test_create_request(page: AppianPage) -> None:
-    page.textbox(label="Request Name").fill("Example Request")
+def test_update_item(page: AppianPage) -> None:
+    page.textbox(label="Description").fill("Example item")
     page.button(name="Submit").click()
 ```
 
@@ -21,16 +21,16 @@ You do not create `page` yourself. pytest provides it to the test automatically.
 
 ```python
 
-def test_create_request(page: AppianPage) -> None:
-    page.textbox(label="Request Name").fill("Example Request")
+def test_update_item(page: AppianPage) -> None:
+    page.textbox(label="Description").fill("Example item")
 
     page.date(
-        label="Required Award Date"
+        label="Start Date"
     ).fill("10/15/2026")
 
     page.radio(
-        label="Is this request for a conference?"
-    ).select("Yes")
+        label="Priority"
+    ).select("High")
 
     page.button(name="Submit").click()
 ```

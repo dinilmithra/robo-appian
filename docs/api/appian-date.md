@@ -3,7 +3,7 @@
 Use `AppianPage.date(...)` for Appian date fields. A date can be identified by its label, placeholder, or nearby header text.
 
 ```python
-page.date(label="Required Award Date").fill("10/07/2026")
+page.date(label="Start Date").fill("10/07/2026")
 ```
 
 ```python
@@ -11,10 +11,10 @@ page.date(placeholder="mm/dd/yyyy").fill("10/07/2026")
 ```
 
 ```python
-page.date(header="Required Award Date").fill("10/07/2026")
+page.date(header="Start Date").fill("10/07/2026")
 ```
 
-`AppianDate` inherits the common textbox operations while preserving date-specific behavior.
+`AppianDate` inherits the common textbox operations while preserving date-specific behavior. After `fill()` changes the value, the component immediately performs focus-out so Appian can validate and process the date; tests should not press Tab for this purpose.
 
 ::: robo_appian.appian.appian_date.AppianDate
 
@@ -25,4 +25,4 @@ Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exac
 
 ## Timeout
 
-Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework Playwright timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.
+Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.

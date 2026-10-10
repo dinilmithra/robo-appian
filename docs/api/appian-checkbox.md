@@ -3,15 +3,15 @@
 `AppianCheckbox` represents a true Appian checkbox. Create it with `page.checkbox(...)`.
 
 ```python
-missing_vendor = page.checkbox(
-    label="Vendor is missing in approved list"
+include_details = page.checkbox(
+    label="Include Details"
 )
 ```
 
 ## Check a checkbox
 
 ```python
-missing_vendor.check()
+include_details.check()
 ```
 
 `check()` first reads the native checked state. If the checkbox is already checked, nothing happens.
@@ -19,7 +19,7 @@ missing_vendor.check()
 ## Uncheck a checkbox
 
 ```python
-missing_vendor.uncheck()
+include_details.uncheck()
 ```
 
 `uncheck()` first reads the native checked state. If the checkbox is already unchecked, nothing happens.
@@ -27,15 +27,15 @@ missing_vendor.uncheck()
 ## Read the state
 
 ```python
-if missing_vendor.is_checked():
-    print("Vendor is missing")
+if include_details.is_checked():
+    print("Details are included")
 ```
 
 You can also set the desired state directly:
 
 ```python
-missing_vendor.set_checked(True)
-missing_vendor.set_checked(False)
+include_details.set_checked(True)
+include_details.set_checked(False)
 ```
 
 `AppianCheckbox` inherits the shared post-change focus-out behavior from `AppianInputComponent`. It uses semantic HTML relationships such as `label[for]`, `role="group"`, and `aria-labelledby`; it does not rely on generated Appian CSS class names.
@@ -49,4 +49,4 @@ Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exac
 
 ## Timeout
 
-Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework Playwright timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.
+Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.

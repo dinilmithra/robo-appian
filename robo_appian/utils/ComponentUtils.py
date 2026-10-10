@@ -23,7 +23,7 @@ class ComponentUtils:
     def normalize_timeout_seconds(value: float | int | None) -> float | None:
         """Normalize an optional Appian component timeout expressed in seconds.
 
-        ``None`` preserves the Playwright/context default timeout (normally
+        ``None`` preserves the framework/context default timeout (normally
         configured from ``WAIT_TIME``). A positive finite number overrides that
         default for waits/actions performed by the component.
         """
@@ -38,7 +38,7 @@ class ComponentUtils:
 
     @staticmethod
     def timeout_kwargs(value: float | int | None) -> dict[str, float]:
-        """Return Playwright timeout kwargs for an optional seconds value."""
+        """Return runtime timeout kwargs for an optional seconds value."""
         timeout = ComponentUtils.normalize_timeout_seconds(value)
         return {} if timeout is None else {"timeout": timeout * 1000}
 

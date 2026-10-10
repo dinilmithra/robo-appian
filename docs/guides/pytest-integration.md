@@ -15,7 +15,7 @@ def test_example(page: AppianPage) -> None:
     page.button(name="Submit").is_visible()
 ```
 
-Generic resource creation and teardown remain owned by `robo-automation`. `robo-appian` wraps the `RoboPage` for Appian interactions without duplicating that lifecycle or hiding Playwright `Page` methods.
+Generic resource creation and teardown remain owned by `robo-automation`. `robo-appian` wraps the `RoboPage` for Appian interactions without duplicating that lifecycle or hiding browser page operations.
 
 ## Application-specific overrides
 
