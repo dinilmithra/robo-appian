@@ -1222,14 +1222,14 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<8)"]
 
 [[package]]
 name = "robo-automation"
-version = "0.1.8"
+version = "0.1.9"
 description = "Reusable Playwright and pytest automation framework utilities"
 optional = false
 python-versions = "<3.13,>=3.12"
 groups = ["main"]
 files = [
-    {file = "robo_automation-0.1.8-py3-none-any.whl", hash = "sha256:7d6fcdfe0cd1648a9f5574e4fdf28afe6694c9bfa4b672d8e3973ebb04e7a573"},
-    {file = "robo_automation-0.1.8.tar.gz", hash = "sha256:0cf457209087558350116fa2aa7aa647db0c78c296df7928db5b0b7def0556f5"},
+    {file = "robo_automation-0.1.9-py3-none-any.whl", hash = "sha256:569e81724be4f77f4aa33f8042827eca1e3e438a7a637ba1df4045e8adc51bd7"},
+    {file = "robo_automation-0.1.9.tar.gz", hash = "sha256:1f282b62f75e9d6bf7fa0ae4b6553fda91f10de273f778a35be800b625d54bda"},
 ]
 
 [package.dependencies]
@@ -1325,4 +1325,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "3aace9717eaf6684a8be0ee8e57287b5117bbb55fca95f2da9de2a9b2f3115cd"
+content-hash = "9b6a4b8bee38538a7f70738655e6dabca36acf3e8830d38de779c33057ae13e1"
