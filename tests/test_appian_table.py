@@ -11,10 +11,39 @@ def test_appian_table_is_public_component() -> None:
     assert AppianTable is ModuleAppianTable
 
 
+def test_appian_table_label_only_matches_named_table() -> None:
+    page = MagicMock(spec=Page)
+    named_tables = MagicMock(spec=Locator)
+    page.get_by_role.return_value = named_tables
+
+    table = AppianTable(page, label="Items", visible=None)
+
+    assert table.locator is named_tables
+    page.get_by_role.assert_called_once_with("table", name="Items", exact=True)
+    named_tables.or_.assert_not_called()
+
+
+def test_appian_table_header_name_matches_named_region_containing_table() -> None:
+    page = MagicMock(spec=Page)
+    region = MagicMock(spec=Locator)
+    region_tables = MagicMock(spec=Locator)
+    page.get_by_role.return_value = region
+    region.locator.return_value = region_tables
+
+    table = AppianTable(page, header_name="List of Selected Attendees & Conference Details", visible=None)
+
+    assert table.locator is region_tables
+    page.get_by_role.assert_called_once_with(
+        "region", name="List of Selected Attendees & Conference Details", exact=True
+    )
+    region.locator.assert_called_once_with("table")
+
+
 def test_appian_table_visible_none_keeps_visible_and_hidden_matches() -> None:
     page = MagicMock(spec=Page)
     tables = MagicMock(spec=Locator)
     page.get_by_role.return_value = tables
+    tables.or_.return_value = tables
 
     table = AppianTable(page, label="Requests", visible=None)
 
@@ -29,6 +58,7 @@ def test_appian_table_visible_true_is_default_filter() -> None:
     tables = MagicMock(spec=Locator)
     visible_tables = MagicMock(spec=Locator)
     page.get_by_role.return_value = tables
+    tables.or_.return_value = tables
     tables.filter.return_value = visible_tables
 
     table = AppianTable(page, label="Requests")
@@ -43,6 +73,7 @@ def test_appian_table_visible_false_filters_hidden_matches() -> None:
     tables = MagicMock(spec=Locator)
     hidden_tables = MagicMock(spec=Locator)
     page.get_by_role.return_value = tables
+    tables.or_.return_value = tables
     tables.filter.return_value = hidden_tables
 
     table = AppianTable(page, label="Requests", visible=False)
@@ -70,6 +101,7 @@ def test_appian_table_blank_visibility_means_no_filter() -> None:
     page = MagicMock(spec=Page)
     tables = MagicMock(spec=Locator)
     page.get_by_role.return_value = tables
+    tables.or_.return_value = tables
 
     for visible in (None, "", "   "):
         table = AppianTable(page, label="Requests", visible=visible)
@@ -87,6 +119,7 @@ def test_appian_table_appian_row_scopes_row_component() -> None:
     matching_rows = MagicMock(spec=Locator)
     visible_rows = MagicMock(spec=Locator)
     page.get_by_role.return_value = tables
+    tables.or_.return_value = tables
     tables.filter.return_value = visible_tables
     visible_tables.locator.return_value = rows
     rows.filter.return_value = matching_rows
@@ -102,6 +135,32 @@ def test_appian_table_appian_row_scopes_row_component() -> None:
     matching_rows.filter.assert_called_with(visible=True)
 
 
+def test_appian_row_exact_name_matches_label_within_each_row() -> None:
+    page = MagicMock(spec=Page)
+    table = AppianTable(page, header_name="List of Selected Attendees & Conference Details")
+    rows = MagicMock(spec=Locator)
+    matching_rows = MagicMock(spec=Locator)
+    exact_rows = MagicMock(spec=Locator)
+    table_locator = MagicMock(spec=Locator)
+    table_locator.locator.return_value = rows
+    rows.filter.return_value = matching_rows
+    matching_rows.locator.return_value = exact_rows
+
+    with patch.object(
+        type(table), "locator", new_callable=PropertyMock, return_value=table_locator
+    ):
+        result = table.row(name="Registration Type", visible=None).locator
+
+    assert result is exact_rows.first
+    table_locator.locator.assert_called_once_with("tbody tr")
+    rows.filter.assert_called_once_with(has_text="Registration Type")
+    matching_rows.filter.assert_not_called()
+    matching_rows.locator.assert_called_once_with(
+        "xpath=self::tr[.//*[normalize-space(translate(string(.), '\u00a0', ' '))="
+        "'Registration Type']]"
+    )
+
+
 def test_appian_row_blank_visibility_means_no_filter() -> None:
     page = MagicMock(spec=Page)
     tables = MagicMock(spec=Locator)
@@ -109,6 +168,7 @@ def test_appian_row_blank_visibility_means_no_filter() -> None:
     rows = MagicMock(spec=Locator)
     matching_rows = MagicMock(spec=Locator)
     page.get_by_role.return_value = tables
+    tables.or_.return_value = tables
     tables.filter.return_value = visible_tables
     visible_tables.locator.return_value = rows
     rows.filter.return_value = matching_rows
@@ -134,6 +194,7 @@ def test_appian_row_cell_resolves_named_column() -> None:
     visible_cell = MagicMock(spec=Locator)
 
     page.get_by_role.return_value = table_locator
+    table_locator.or_.return_value = table_locator
     table_locator.filter.return_value = visible_table
     visible_table.locator.side_effect = lambda selector: (
         rows if selector == "tbody tr" else MagicMock(spec=Locator)
@@ -398,7 +459,7 @@ def test_appian_table_row_count_empty_table_returns_zero() -> None:
         assert table.row_count() == 0
 
 
-def test_appian_row_select_clicks_resolved_row_and_waits_for_appian() -> None:
+def test_appian_row_click_clicks_resolved_row_and_waits_for_appian() -> None:
     page = MagicMock(spec=Page)
     table = AppianTable(page, label="Requests")
     row = table.row(name="CDRH-OCD-27-M-J501", exact=False)
@@ -409,13 +470,13 @@ def test_appian_row_select_clicks_resolved_row_and_waits_for_appian() -> None:
             type(row), "locator", new_callable=PropertyMock, return_value=row_locator
         ),
         patch(
-            "robo_appian.appian.appian_row.ComponentUtils.wait_for_appian_action_completed"
+            "robo_appian.appian.appian_page.AppianPage.wait_for_appian_action_completed"
         ) as wait_for_appian,
     ):
-        result = row.select()
+        result = row.click()
 
     row_locator.click.assert_called_once_with()
-    wait_for_appian.assert_called_once_with(table.appian_page)
+    wait_for_appian.assert_called_once_with()
     assert result is row
 
 
@@ -479,10 +540,15 @@ def test_appian_cell_button_click_uses_cell_scope() -> None:
     cell = AppianCell(cell_locator, page=page)
     button = cell.button(name="Approve")
 
-    with patch.object(button, "_wait_until_ready_locator", return_value=button_locator):
+    appian_page = MagicMock()
+    with (
+        patch("robo_appian.appian.appian_page.AppianPage.get", return_value=appian_page),
+        patch.object(button, "_wait_until_ready_locator", return_value=button_locator),
+    ):
         button.click()
 
     button_locator.click.assert_called_once_with()
+    assert appian_page.wait_for_appian_action_completed.call_count == 2
     assert button._scope is cell
 
 
@@ -654,3 +720,74 @@ def test_appian_cell_text_normalizes_nonbreaking_and_mixed_whitespace() -> None:
     cell = AppianCell(locator, page=MagicMock())
 
     assert cell.text() == "Owner Name"
+
+
+def test_appian_table_column_index_waits_for_dynamic_semantic_header() -> None:
+    page = MagicMock(spec=Page)
+    table = AppianTable(page, label="Items", timeout=8)
+    table_locator = MagicMock(spec=Locator)
+    matching_headers = MagicMock(spec=Locator)
+    matching_header = MagicMock(spec=Locator)
+    headers = MagicMock(spec=Locator)
+    first_header = MagicMock(spec=Locator)
+    second_header = MagicMock(spec=Locator)
+
+    matching_headers.first = matching_header
+    headers.count.return_value = 2
+    headers.nth.side_effect = [first_header, second_header]
+    first_header.inner_text.return_value = ""
+    first_header.get_attribute.return_value = None
+    second_header.inner_text.return_value = "ROBO   APPIAN"
+    second_header.get_attribute.return_value = None
+
+    def get_by_role(role: str, **kwargs):
+        assert role == "columnheader"
+        if kwargs:
+            assert kwargs == {"name": "ROBO APPIAN", "exact": True}
+            return matching_headers
+        return headers
+
+    table_locator.get_by_role.side_effect = get_by_role
+
+    with (
+        patch.object(AppianTable, "locator", new_callable=PropertyMock, return_value=table_locator),
+        patch("robo_appian.appian.appian_table.expect") as expect_mock,
+    ):
+        assert table._column_index("ROBO APPIAN") == 1
+
+    expect_mock.assert_called_once_with(
+        matching_header,
+        "Column 'ROBO APPIAN' was not found in table.",
+    )
+    expect_mock.return_value.to_be_attached.assert_called_once_with(timeout=8000.0)
+
+
+def test_appian_table_column_index_wait_uses_context_default_timeout() -> None:
+    page = MagicMock(spec=Page)
+    table = AppianTable(page, label="Items")
+    table_locator = MagicMock(spec=Locator)
+    matching_headers = MagicMock(spec=Locator)
+    matching_header = MagicMock(spec=Locator)
+    headers = MagicMock(spec=Locator)
+    header = MagicMock(spec=Locator)
+
+    matching_headers.first = matching_header
+    headers.count.return_value = 1
+    headers.nth.return_value = header
+    header.inner_text.return_value = "Owner"
+    header.get_attribute.return_value = None
+
+    def get_by_role(role: str, **kwargs):
+        assert role == "columnheader"
+        return matching_headers if kwargs else headers
+
+    table_locator.get_by_role.side_effect = get_by_role
+
+    with (
+        patch.object(AppianTable, "locator", new_callable=PropertyMock, return_value=table_locator),
+        patch("robo_appian.appian.appian_table.expect") as expect_mock,
+    ):
+        assert table._column_index("Owner") == 0
+
+    expect_mock.return_value.to_be_attached.assert_called_once_with()
+

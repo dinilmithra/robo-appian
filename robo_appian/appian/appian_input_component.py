@@ -44,8 +44,9 @@ class AppianInputComponent:
         locator.blur()
 
     def _after_change(self, locator: Locator) -> None:
-        """Run shared behavior after a component value/state actually changes."""
+        """Blur the changed input, then wait for Appian processing to finish."""
         self._focus_out(locator)
+        self._page.wait_for_appian_action_completed(timeout=self._timeout)
 
 
 __all__ = ["AppianInputComponent"]

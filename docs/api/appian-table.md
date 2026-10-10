@@ -8,6 +8,13 @@ items = page.table(label="Items")
 
 A table can be identified by `label`, `header_name`, `row_name`, or `column_name`. Additional identifiers can narrow the match.
 
+`label` matches only the table's accessible name. Use `header_name` for a table
+inside an Appian section whose enclosing region has that accessible name:
+
+```python
+details = page.table(header_name="List of Selected Attendees & Conference Details")
+```
+
 ## Count the displayed rows
 
 ```python
@@ -24,7 +31,7 @@ Rows can be identified by visible text or by a one-based row number:
 items = page.table(label="Items")
 
 row = items.row(name="Item 1001")
-row.select()
+row.click()
 ```
 
 ## Work with a cell
@@ -84,3 +91,9 @@ page.table(label="Items", visible=None)
     options:
       show_root_heading: true
       members_order: source
+      members:
+        - cell
+        - appian_column
+        - row
+        - column
+        - row_count

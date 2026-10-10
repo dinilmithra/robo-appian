@@ -172,3 +172,15 @@ page.date(label="From").fill("12/12/2026")
 ```
 
 This separation keeps application code readable: `robo-automation` owns reusable automation infrastructure, while `robo-appian` owns Appian-specific component discovery, state, rerender handling, and interaction semantics.
+
+
+## Wait for Appian processing
+
+When a workflow step explicitly needs to wait for Appian's global processing to finish, call the page method directly:
+
+```python
+page.wait_for_appian_action_completed()
+page.wait_for_appian_action_completed(timeout=8)
+```
+
+`timeout` is expressed in seconds. When omitted, the configured framework `WAIT_TIME` applies.

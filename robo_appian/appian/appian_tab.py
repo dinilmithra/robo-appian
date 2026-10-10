@@ -123,7 +123,7 @@ class AppianTab:
             return self
 
         tab.click(**self._timeout_kwargs())
-        ComponentUtils.wait_for_appian_action_completed(self._page)
+        self._page.wait_for_appian_action_completed()
 
         # Appian can rerender the complete tab strip after selection, so resolve
         # the live locator again before checking the post-action state.

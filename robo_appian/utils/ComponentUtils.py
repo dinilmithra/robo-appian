@@ -416,32 +416,6 @@ class ComponentUtils:
         return values
 
     @staticmethod
-    def wait_for_appian_action_completed(scope: Scope) -> None:
-        """Wait until Appian global processing indicators are absent.
-
-        The completion assertion uses the configured browser automation expectation
-        timeout and returns only after Appian global processing indicators are
-        absent.
-
-        Args:
-            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to use the whole document; pass a ``Locator`` to restrict the operation to that locator/container.
-        """
-        logger.info("Before wait_for_appian_action_completed.")
-
-        raw_scope = ComponentUtils.unwrap_scope(scope)
-        processing = raw_scope.locator(
-            "#appian-nprogress, #appian-working-indicator-hidden"
-        )
-
-        expect(
-            processing,
-            "The application continued processing longer than expected.",
-        ).to_have_count(0)
-
-        logger.info("Appian processing completed: global processing indicators absent.")
-        logger.info("After wait_for_appian_action_completed: processing completed.")
-
-    @staticmethod
     def wait_until_visible(scope: Scope, message: str = None) -> None:
         """Wait until a scope or locator is visible.
 
@@ -532,30 +506,6 @@ class ComponentUtils:
             )
 
         return str(resolved_path)
-
-    @staticmethod
-    def wait_for_text_visible(scope: Scope, text: str) -> None:
-        """Waits for an exact text string to become visible.
-
-        Timeout is inherited from the browser automation default configured by
-        conftest.py.
-
-        Args:
-            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            text: Visible text used to identify the target element.
-        """
-        logger.info("Waiting for text '%s' to be visible...", text)
-        raw_scope = ComponentUtils.unwrap_scope(scope)
-        text_locator = (
-            raw_scope.get_by_text(text, exact=True).filter(visible=True).first
-        )
-
-        try:
-            text_locator.wait_for(state="visible")
-            logger.info("Text '%s' is loaded and visible.", text)
-        except PlaywrightTimeoutError:
-            logger.error("Timeout: Text '%s' did not become visible.", text)
-            raise
 
     @staticmethod
     def find_container(scope: Scope, field_label: str, header_text: str) -> Locator:

@@ -15,6 +15,20 @@ def _mock_page() -> Page:
     return page
 
 
+@pytest.fixture(autouse=True)
+def mock_appian_completion_wait(request):
+    """Keep component unit tests isolated from the real processing locator."""
+    if request.node.name.startswith(
+        "test_appian_page_wait_for_appian_action_completed"
+    ):
+        yield None
+        return
+    with patch.object(
+        AppianPage, "wait_for_appian_action_completed", autospec=True
+    ) as mocked:
+        yield mocked
+
+
 def test_appian_page_wraps_robo_page() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
@@ -26,6 +40,21 @@ def test_appian_page_wraps_robo_page() -> None:
     with pytest.raises(AttributeError):
         _ = appian_page.playwright_page
 
+
+
+def test_appian_page_exposes_wait_for_text_visible_explicitly() -> None:
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    assert hasattr(AppianPage, "wait_for_text_visible")
+    assert callable(appian_page.wait_for_text_visible)
+
+    with patch.object(
+        appian_page.robo_page, "wait_for_text_visible", autospec=True
+    ) as wait_for_text:
+        appian_page.wait_for_text_visible("Ready", timeout=8, exact=False)
+
+    wait_for_text.assert_called_once_with("Ready", timeout=8, exact=False)
 
 def test_appian_page_attribute_lookup_returns_appian_locator() -> None:
     page = _mock_page()
@@ -593,23 +622,18 @@ def test_appian_date_placeholder_uses_date_picker_test_id() -> None:
     assert "@class" not in xpath
 
 
-def test_component_utils_unwraps_appian_locator_for_low_level_locator_calls() -> None:
-    """Legacy helpers must unwrap AppianLocator before calling locator(...)."""
+def test_appian_page_wait_for_appian_action_completed_uses_global_indicators() -> None:
     from unittest.mock import patch
 
-    from robo_appian import ComponentUtils
-
-    raw_scope = MagicMock(spec=Locator)
+    page = _mock_page()
     processing = MagicMock(spec=Locator)
-    raw_scope.locator.return_value = processing
-    wrapped_scope = AppianLocator.get(raw_scope)
+    page.locator.return_value = processing
+    appian_page = AppianPage.get(page)
 
-    assert ComponentUtils.unwrap_scope(wrapped_scope) is raw_scope
+    with patch("robo_appian.appian.appian_page.expect") as expect_mock:
+        appian_page.wait_for_appian_action_completed()
 
-    with patch("robo_appian.utils.ComponentUtils.expect") as expect_mock:
-        ComponentUtils.wait_for_appian_action_completed(wrapped_scope)
-
-    raw_scope.locator.assert_called_once_with(
+    page.locator.assert_called_once_with(
         "#appian-nprogress, #appian-working-indicator-hidden"
     )
     expect_mock.assert_called_once_with(
@@ -617,6 +641,20 @@ def test_component_utils_unwraps_appian_locator_for_low_level_locator_calls() ->
         "The application continued processing longer than expected.",
     )
     expect_mock.return_value.to_have_count.assert_called_once_with(0)
+
+
+def test_appian_page_wait_for_appian_action_completed_accepts_seconds_timeout() -> None:
+    from unittest.mock import patch
+
+    page = _mock_page()
+    processing = MagicMock(spec=Locator)
+    page.locator.return_value = processing
+    appian_page = AppianPage.get(page)
+
+    with patch("robo_appian.appian.appian_page.expect") as expect_mock:
+        appian_page.wait_for_appian_action_completed(timeout=8)
+
+    expect_mock.return_value.to_have_count.assert_called_once_with(0, timeout=8000.0)
 
 
 def test_appian_date_fill_blurs_after_entering_value() -> None:
@@ -633,6 +671,23 @@ def test_appian_date_fill_blurs_after_entering_value() -> None:
     date_input.fill.assert_called_once_with("10/07/2026")
     date_input.blur.assert_called_once_with()
     date_input.press.assert_not_called()
+
+
+def test_appian_input_blur_waits_for_appian_completion(
+    mock_appian_completion_wait,
+) -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    textbox = AppianTextbox(page=appian_page, label="Title", timeout=8)
+    text_input = MagicMock(spec=Locator)
+    textbox._wait_until_ready_locator = MagicMock(return_value=text_input)  # type: ignore[method-assign]
+
+    textbox.fill("Example")
+
+    text_input.blur.assert_called_once_with()
+    mock_appian_completion_wait.assert_called_once_with(appian_page, timeout=8)
 
 
 def test_appian_textbox_fill_blurs_after_entering_value() -> None:
@@ -776,7 +831,7 @@ def test_appian_radio_select_clicks_associated_label() -> None:
     with (
         patch("robo_appian.appian.appian_radio_select.expect") as expect_mock,
         patch(
-            "robo_appian.appian.appian_radio_select.ComponentUtils.wait_for_appian_action_completed"
+            "robo_appian.appian.appian_page.AppianPage.wait_for_appian_action_completed"
         ),
     ):
         component.select("Yes")
@@ -937,7 +992,7 @@ def test_appian_checkbox_check_only_when_unchecked() -> None:
     with (
         patch("robo_appian.appian.appian_checkbox.expect") as expect_mock,
         patch(
-            "robo_appian.appian.appian_checkbox.ComponentUtils.wait_for_appian_action_completed"
+            "robo_appian.appian.appian_page.AppianPage.wait_for_appian_action_completed"
         ),
     ):
         result = component.check()
@@ -981,7 +1036,7 @@ def test_appian_checkbox_uncheck_only_when_checked() -> None:
     with (
         patch("robo_appian.appian.appian_checkbox.expect") as expect_mock,
         patch(
-            "robo_appian.appian.appian_checkbox.ComponentUtils.wait_for_appian_action_completed"
+            "robo_appian.appian.appian_page.AppianPage.wait_for_appian_action_completed"
         ),
     ):
         result = component.uncheck()
@@ -1197,7 +1252,7 @@ def test_appian_tab_select_is_idempotent_when_already_selected() -> None:
     with (
         patch("robo_appian.appian.appian_tab.expect"),
         patch(
-            "robo_appian.appian.appian_tab.ComponentUtils.wait_for_appian_action_completed"
+            "robo_appian.appian.appian_page.AppianPage.wait_for_appian_action_completed"
         ) as wait_mock,
     ):
         result = component.select()
@@ -1223,14 +1278,14 @@ def test_appian_tab_select_clicks_and_re_resolves_after_rerender() -> None:
     with (
         patch("robo_appian.appian.appian_tab.expect") as expect_mock,
         patch(
-            "robo_appian.appian.appian_tab.ComponentUtils.wait_for_appian_action_completed"
+            "robo_appian.appian.appian_page.AppianPage.wait_for_appian_action_completed"
         ) as wait_mock,
     ):
         result = component.select()
 
     assert result is component
     before.click.assert_called_once_with()
-    wait_mock.assert_called_once_with(component._page)
+    wait_mock.assert_called_once_with()
     expect_mock.return_value.to_have_count.assert_called_once_with(1)
 
 
@@ -1302,14 +1357,14 @@ def test_appian_link_click_waits_for_appian_action_completion() -> None:
     with (
         patch("robo_appian.appian.appian_link.expect"),
         patch(
-            "robo_appian.appian.appian_link.ComponentUtils.wait_for_appian_action_completed"
+            "robo_appian.appian.appian_page.AppianPage.wait_for_appian_action_completed"
         ) as wait_mock,
     ):
         result = component.click()
 
     assert result is component
     target.click.assert_called_once_with()
-    wait_mock.assert_called_once_with(component._page)
+    wait_mock.assert_called_once_with()
 
 
 def test_appian_link_href_supports_anchor_and_linked_card() -> None:

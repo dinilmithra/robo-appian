@@ -103,3 +103,12 @@ page.dropdown(label="Subcategory", timeout=8).select(value="Standard")
     options:
       show_root_heading: true
       members_order: source
+      members:
+        - wait_until_visible
+        - is_visible
+        - is_disabled
+        - is_enabled
+        - value
+        - is_selected
+        - options
+        - select

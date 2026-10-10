@@ -41,6 +41,12 @@ link.click()
     options:
       show_source: false
       members_order: source
+      members:
+        - is_visible
+        - wait_until_visible
+        - click
+        - get_text
+        - href
 
 ## Exact matching and visibility
 

@@ -125,11 +125,16 @@ class AppianButton:
         return locator.first
 
     def click(self) -> None:
-        """Wait until the button is actionable, then click it."""
+        """Wait for Appian, click the actionable button, then wait for completion."""
+        from .appian_page import AppianPage
+
+        page = AppianPage.get(self._page)
+        page.wait_for_appian_action_completed(timeout=self._timeout)
         button = self._wait_until_ready_locator()
         logger.info("Before Appian button click: name='%s'.", self._name)
         button.click(**self._timeout_kwargs())
         logger.info("After Appian button click: name='%s'.", self._name)
+        page.wait_for_appian_action_completed(timeout=self._timeout)
 
     def is_visible(self) -> bool:
         """Return whether the button is currently visible."""

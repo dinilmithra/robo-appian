@@ -107,9 +107,9 @@ page.button(name="Next").click()
 
 ## Automatic focus-out
 
-After a textbox, date, or selection value actually changes, `robo-appian` moves focus out automatically so Appian can process the value.
+After a textbox, date, or selection value actually changes, `robo-appian` moves focus out automatically and waits for Appian action processing to complete before returning.
 
-You normally should **not** add a Tab press or manual blur in application tests.
+You normally should **not** add a Tab press, manual blur, or duplicate `wait_for_appian_action_completed()` call after the input operation.
 
 ## Advanced locators
 

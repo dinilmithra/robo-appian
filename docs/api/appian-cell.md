@@ -81,6 +81,8 @@ All semantic cell-scoped factories default to `exact=True` and `visible=True`. P
     options:
       show_root_heading: true
       members_order: source
+      members:
+        - text
 
 
 ## Timeout

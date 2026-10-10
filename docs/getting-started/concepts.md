@@ -33,7 +33,7 @@ page.date(label="Start Date").fill("10/15/2026")
 
 instead of treating it as a normal textbox.
 
-Textboxes, dates, and selection controls automatically move focus out after a value changes so Appian can process the update.
+Textboxes, dates, and selection controls automatically move focus out after a value changes and then wait for Appian action processing to complete.
 
 ## Only use lower-level locators when necessary
 

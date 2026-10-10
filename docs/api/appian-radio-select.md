@@ -21,6 +21,17 @@ if priority.is_selected("High"):
 
 Use [`AppianCheckbox`](appian-checkbox.md) for native checkboxes.
 
+## API
+
+::: robo_appian.appian.appian_radio_select.AppianRadioSelect
+    options:
+      show_root_heading: true
+      members_order: source
+      members:
+        - is_selected
+        - select
+
+
 ## Exact matching and visibility
 
 Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exact=False` for intentional partial label/name matching. Use `visible=False` for hidden matches, or `visible=None` (also blank/whitespace) to apply no visibility filter.

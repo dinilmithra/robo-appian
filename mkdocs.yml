@@ -54,6 +54,8 @@ plugins:
             inherited_members: false
             filters:
               - "!^_"
+            # API pages opt in to callable members. Constructor and method
+            # parameters stay in signatures instead of becoming attribute headings.
 
 markdown_extensions:
   - md_in_html

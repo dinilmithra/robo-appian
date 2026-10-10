@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from playwright.sync_api import Page
+from playwright.sync_api import Page, expect
 
 from robo_automation import RoboAutomationError, RoboPage
 
@@ -57,6 +57,52 @@ class AppianPage:
     def __dir__(self) -> list[str]:
         """Include RoboPage and underlying page members in introspection."""
         return sorted(set(super().__dir__()) | set(dir(self._robo_page)))
+
+    def wait_for_text_visible(
+        self,
+        text: str,
+        *,
+        timeout: float | int | None = None,
+        exact: bool = True,
+    ) -> None:
+        """Wait until matching text is visible.
+
+        Args:
+            text: Visible text to wait for.
+            timeout: Maximum wait in seconds. ``None`` uses the configured
+                browser/context default timeout (normally ``WAIT_TIME``).
+            exact: Whether ``text`` must match exactly. Defaults to ``True``.
+        """
+        self._robo_page.wait_for_text_visible(
+            text,
+            timeout=timeout,
+            exact=exact,
+        )
+
+    def wait_for_appian_action_completed(
+        self, *, timeout: float | int | None = None
+    ) -> None:
+        """Wait until Appian global processing indicators are absent.
+
+        Args:
+            timeout: Maximum wait in seconds. ``None`` uses the configured
+                browser/context default timeout (normally ``WAIT_TIME``).
+
+        Raises:
+            TypeError: If ``timeout`` is not a number or ``None``.
+            ValueError: If ``timeout`` is not a positive finite number.
+            TimeoutError: If Appian continues processing beyond the timeout.
+        """
+        from robo_appian.utils.ComponentUtils import ComponentUtils
+
+        timeout_kwargs = ComponentUtils.timeout_kwargs(timeout)
+        processing = self._robo_page._page.locator(
+            "#appian-nprogress, #appian-working-indicator-hidden"
+        )
+        expect(
+            processing,
+            "The application continued processing longer than expected.",
+        ).to_have_count(0, **timeout_kwargs)
 
     def same_page(self, other: object) -> bool:
         """Return whether another wrapper owns the same underlying page."""

@@ -192,7 +192,7 @@ class AppianCheckbox(AppianInputComponent):
             f"Checkbox '{self._label}' did not reach checked={desired}.",
         ).to_be_checked(checked=desired, **self._timeout_kwargs())
         self._after_change(checkbox)
-        ComponentUtils.wait_for_appian_action_completed(self._page)
+        self._page.wait_for_appian_action_completed()
         return self
 
     def check(self) -> "AppianCheckbox":

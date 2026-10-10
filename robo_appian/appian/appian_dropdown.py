@@ -171,9 +171,10 @@ class AppianDropdown:
         return self.value() == expected_value
 
     def _blur(self, dropdown: Locator | None = None) -> None:
-        """Immediately move focus out of the current Appian combobox."""
+        """Blur the combobox, then wait for Appian processing to finish."""
         target = dropdown if dropdown is not None else self._resolved_locator()
         target.evaluate("element => element.blur()")
+        self._page.wait_for_appian_action_completed(timeout=self._timeout)
 
     def _expand(self, dropdown: Locator) -> None:
         expect(dropdown, f"Dropdown '{self._label}' was not visible.").to_be_visible(

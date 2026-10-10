@@ -95,7 +95,7 @@ class AppianLink:
             **self._timeout_kwargs()
         )
         link.click(**self._timeout_kwargs())
-        ComponentUtils.wait_for_appian_action_completed(self._page)
+        self._page.wait_for_appian_action_completed()
         return self
 
     def get_text(self) -> str:

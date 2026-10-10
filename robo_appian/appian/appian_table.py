@@ -223,12 +223,32 @@ class AppianTable:
         )
 
     def _column_index(self, column_name: str, *, exact: bool = True) -> int:
-        """Return the zero-based index for a semantic column name."""
+        """Return the zero-based index for a semantic column name.
+
+        Appian can rerender editable-grid headers asynchronously after an action
+        adds or removes a dynamic column. Resolve headers through their semantic
+        ``columnheader`` role so this works for both conventional ``<thead><th>``
+        tables and Appian grids whose accessible header structure differs from
+        that DOM shape.
+        """
         normalized = " ".join(str(column_name or "").split())
         if not normalized:
             raise ValueError("Column name cannot be empty or whitespace.")
 
-        headers = self.locator.locator("thead th")
+        headers = self.locator.get_by_role("columnheader")
+        matching_header = self.locator.get_by_role(
+            "columnheader", name=normalized, exact=exact
+        ).first
+        try:
+            expect(
+                matching_header,
+                f"Column '{normalized}' was not found in table.",
+            ).to_be_attached(**self._timeout_kwargs())
+        except AssertionError as exc:
+            raise AssertionError(
+                f"Column '{normalized}' was not found in table."
+            ) from exc
+
         for index in range(headers.count()):
             header = headers.nth(index)
             text = " ".join((header.inner_text() or "").split())
@@ -317,11 +337,6 @@ class AppianTable:
         if normalized_visible is not None:
             rows = rows.filter(visible=normalized_visible)
         return rows.count()
-
-    def click_row(self, *, row_number: int) -> None:
-        """Click a one-based rendered data row."""
-        self.row(row_number=row_number).select()
-
 
 
 __all__ = ["AppianTable"]

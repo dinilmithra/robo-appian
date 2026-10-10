@@ -201,7 +201,7 @@ class AppianRadioSelect(AppianInputComponent):
             f"Appian radio field {description} did not become selected.",
         ).to_be_checked(checked=True, **self._timeout_kwargs())
         self._after_change(target)
-        ComponentUtils.wait_for_appian_action_completed(self._page)
+        self._page.wait_for_appian_action_completed()
         return self
 
 

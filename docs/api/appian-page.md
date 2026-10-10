@@ -48,12 +48,25 @@ page.button(name="Edit", exact=True)[1].click()
 
 This component index is separate from APIs with their own domain indexing. For example, dropdown option `index=1` means the first real option (excluding `Select a Value`), while `page.dropdown[0]` means the first dropdown component.
 
-## Visible text
+## Wait for Appian processing
 
-Use `page.get_by_text("...")` when you need rendered text that is not represented by one of the component helpers.
+Use `wait_for_appian_action_completed()` when the next step must wait until Appian has finished its global processing. The default uses the configured framework timeout (`WAIT_TIME`). Pass `timeout` to override that wait in seconds for this call.
 
 ```python
-message = page.get_by_text("Item saved")
+page.wait_for_appian_action_completed()
+page.wait_for_appian_action_completed(timeout=8)
+```
+
+The method returns when Appian's global processing indicators are absent. If processing continues beyond the allowed timeout, the normal automation timeout error is raised.
+
+## Wait for visible text
+
+Use `wait_for_text_visible()` when the next step depends on text becoming visible. Matching is exact by default. The default timeout uses the configured framework timeout (`WAIT_TIME`); pass `timeout` in seconds to override it for the call.
+
+```python
+page.wait_for_text_visible("Ready")
+page.wait_for_text_visible("Processing complete", timeout=8)
+page.wait_for_text_visible("partial message", exact=False)
 ```
 
 For operations inside a dialog, region, or smaller part of the page, use [`AppianLocator`](appian-locator.md).
@@ -64,6 +77,18 @@ For operations inside a dialog, region, or smaller part of the page, use [`Appia
     options:
       show_root_heading: true
       members_order: source
+      members:
+        - wait_for_text_visible
+        - wait_for_appian_action_completed
+        - button
+        - textbox
+        - dropdown
+        - checkbox
+        - radio
+        - link
+        - tab
+        - date
+        - table
 
 ## Per-component timeout
 

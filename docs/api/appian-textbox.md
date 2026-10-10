@@ -20,6 +20,15 @@ Common operations include `fill()`, `clear()`, `click()`, `is_visible()`, `is_en
     options:
       show_root_heading: true
       members_order: source
+      members:
+        - fill
+        - clear
+        - click
+        - is_visible
+        - is_disabled
+        - is_enabled
+        - value
+        - wait_until_ready
 ## Date fields
 
 Use `page.date(...)` for Appian date fields rather than `page.textbox(...)`.

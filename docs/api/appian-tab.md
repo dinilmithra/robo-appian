@@ -24,6 +24,13 @@ The component is based on the accessible DOM contract rendered by Appian rather 
 `is_selected(timeout=...)` waits only for the tab to exist and become visible, then returns its current state. It does not wait for an inactive tab to become selected.
 
 ::: robo_appian.appian.appian_tab.AppianTab
+    options:
+      show_root_heading: true
+      members_order: source
+      members:
+        - is_visible
+        - is_selected
+        - select
 
 ## Exact matching and visibility
 

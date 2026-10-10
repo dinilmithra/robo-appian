@@ -42,6 +42,21 @@ include_details.set_checked(False)
 
 Use [`AppianRadioSelect`](appian-radio-select.md) for radio-button groups.
 
+## API
+
+::: robo_appian.appian.appian_checkbox.AppianCheckbox
+    options:
+      show_root_heading: true
+      members_order: source
+      members:
+        - is_visible
+        - is_checked
+        - check
+        - uncheck
+        - set_checked
+        - select
+
+
 ## Exact matching and visibility
 
 Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exact=False` for intentional partial label/name matching. Use `visible=False` for hidden matches, or `visible=None` (also blank/whitespace) to apply no visibility filter.

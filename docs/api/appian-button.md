@@ -8,6 +8,16 @@ button.click()
 ```
 
 ::: robo_appian.appian.AppianButton
+    options:
+      show_root_heading: true
+      members_order: source
+      members:
+        - click
+        - is_visible
+        - is_disabled
+        - is_enabled
+        - wait_until_ready
+        - wait_until_hidden
 
 Use the fluent component to interact with Appian buttons and query their state through methods such as `click()`, `is_visible()`, `is_enabled()`, and `is_disabled()`.
 

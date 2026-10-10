@@ -9,6 +9,7 @@ from playwright.sync_api import Locator
 from robo_appian.appian.appian_cell import AppianCell
 from robo_appian.appian.appian_link import AppianLink
 from robo_appian.appian.appian_locator import AppianLocator
+from robo_appian.appian.appian_page import AppianPage
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 if TYPE_CHECKING:
@@ -55,26 +56,25 @@ class AppianRow:
         if self._row_number is not None:
             return rows.nth(self._row_number - 1)
         if self._exact:
-            # Keep the locator live while requiring normalized full-row text.
             literal = ComponentUtils.xpath_literal(self._name or "")
-            return rows.filter(
-                has=self._table.locator.locator(
-                    "xpath=.//*[normalize-space(translate(string(.), '\u00a0', ' '))="
-                    + literal
-                    + "]"
-                )
+            return rows.locator(
+                "xpath=self::tr[.//*[normalize-space(translate(string(.), '\u00a0', ' '))="
+                + literal
+                + "]]"
             ).first
         return rows.first
 
-    def select(self) -> "AppianRow":
-        """Select this row by clicking its resolved row element.
+    def click(self) -> "AppianRow":
+        """Click this row using its resolved row element.
 
         The row locator is resolved immediately before the click so Appian
         rerenders do not leave this component holding a stale element.
         """
         row = self.locator
         row.click()
-        ComponentUtils.wait_for_appian_action_completed(self._table.appian_page)
+        owner = self._table.appian_page
+        page = owner if isinstance(owner, AppianPage) else AppianPage.get(owner)
+        page.wait_for_appian_action_completed()
         return self
 
     def cell(
