@@ -84,8 +84,8 @@ selected = page.radio(
 `page.link(name=...)` returns an [`AppianLink`](../api/appian-link.md) for native anchors and Appian linked-card controls.
 
 ```python
-page.link(name="Create a New Request").click()
-page.link(name="RETURN TO DASHBOARD").click()
+page.link(name="Open Request").click()
+page.link(name="Return").click()
 ```
 
 `page.tab(name=...)` returns an [`AppianTab`](../api/appian-tab.md).

@@ -50,10 +50,10 @@ assert page.dropdown(label="Status").is_selected("Active")
 Use `page.link(name=...)` for both native Appian `<a>` links and linked-card controls exposed with `role="link"`. It returns an [`AppianLink`](../api/appian-link.md).
 
 ```python
-page.link(name="Create a New Request").click()
-page.link(name="CDRH-OCD-27-M-J501").click()
-page.link(name="HFP-OCE-27-P-J500 - CORE Testcase").click()
-page.link(name="RETURN TO DASHBOARD").click()
+page.link(name="Open Request").click()
+page.link(name="Request 1001").click()
+page.link(name="Request Details").click()
+page.link(name="Return").click()
 ```
 
 For links inside a table cell, resolve the cell and use its Appian link component, for example `table.cell(...).link(name="Open").click()`.
@@ -76,7 +76,7 @@ Create a semantic table component from `AppianPage`. At least one of `label`, `h
 ```python
 requests = page.table(
     label="Requests",
-    row_name="CDRH-OCD-27-M-J501",
+    row_name="Request 1001",
     column_name="Created By",
 )
 ```

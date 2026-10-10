@@ -14,7 +14,7 @@ Additional identifiers narrow the match.
 ```python
 requests = page.table(
     label="Requests",
-    row_name="CDRH-OCD-27-M-J501",
+    row_name="Request 1001",
     column_name="Created By",
 )
 ```
@@ -48,9 +48,9 @@ Resolve a row from an `AppianTable` and continue with row-scoped semantic compon
 
 ```python
 row = page.table(label="Requests").row(
-    name="CDRH-OCD-27-M-J501"
+    name="Request 1001"
 )
-row.link(name="robo appian").click()
+row.link(name="View").click()
 ```
 
 `row()` accepts either `name` or `row_number`. Its `visible` argument follows the common tri-state rule: `True` (default) selects visible rows, `False` selects hidden rows, and `None`, `""`, or whitespace-only strings apply no visibility filter.
@@ -63,15 +63,15 @@ Resolve cells from the table, row, or column direction:
 requests = page.table(label="Requests")
 
 created_by = requests.row(
-    name="CDRH-OCD-27-M-J501",
+    name="Request 1001",
 ).cell(column_name="Created By")
 
 cin = requests.appian_column(
     name="CIN #",
-).cell(row_name="CDRH-OCD-27-M-J501")
+).cell(row_name="Request 1001")
 
 direct = requests.cell(
-    row_name="CDRH-OCD-27-M-J501",
+    row_name="Request 1001",
     column_number=16,
 )
 ```
@@ -82,19 +82,19 @@ Every cell lookup returns `AppianCell`, so Appian components inside the cell rem
 
 ```python
 requests.cell(
-    row_name="CDRH-OCD-27-M-J501",
+    row_name="Request 1001",
     column_number=16,
 ).button(name="Approve").click()
 
 requests.row(
-    name="CDRH-OCD-27-M-J501",
-).cell(column_name="Created By").link(name="robo appian").click()
+    name="Request 1001",
+).cell(column_name="Created By").link(name="View").click()
 ```
 
 A resolved row can be selected/clicked directly:
 
 ```python
-requests.row(name="CDRH-OCD-27-M-J501").select()
+requests.row(name="Request 1001").select()
 ```
 
 Cell and column visibility follows the common tri-state rule: `True` selects visible elements, `False` selects hidden elements, and `None`, `""`, or whitespace-only strings apply no visibility filter.

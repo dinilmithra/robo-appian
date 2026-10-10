@@ -80,7 +80,7 @@ Dropdown **option** indexing remains one-based, so `page.dropdown[0].select(inde
 
 ```python
 page.table(label="Requests").cell(
-    row_name="CDRH-OCD-27-M-J501",
+    row_name="Request 1001",
     column_name="Status",
 ).dropdown(label="Status").select("Approved")
 ```

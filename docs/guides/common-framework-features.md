@@ -18,7 +18,7 @@ This guide summarizes the common functionality available to a `robo-appian` cons
 | Before/after action snapshots | Yes | `robo-automation` |
 | Appian semantic components | Yes | `robo-appian` |
 | Appian-specific errors | Yes | `robo-appian` |
-| Application/test failure snapshots | Application controlled | Consuming application (for example CORE) |
+| Application/test failure snapshots | Application controlled | Consuming application (for example a consuming test project) |
 
 ## Browser and context lifecycle
 
@@ -147,7 +147,7 @@ A consuming application can assign different credentials or storage state to eac
 Common framework services should not replace Appian semantics. Continue to use the Appian component API for application interactions:
 
 ```python
-page.textbox(label="Request Title").fill("CORE Test")
+page.textbox(label="Request Title").fill("Example Request")
 page.checkbox(label="IT").check()
 page.radio(label="Conference Type").select("Scientific")
 page.date(label="From").fill("12/12/2026")

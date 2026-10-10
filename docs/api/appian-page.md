@@ -28,9 +28,9 @@ Think about the page the same way an end user does: identify the visible field o
 Appian component factories use `exact=True` and `visible=True` by default. `exact=True` requires the complete normalized semantic label/name to match; pass `exact=False` when a partial match is intentional. `visible=False` targets hidden matches, while `visible=None`, `visible=""`, or a whitespace-only string removes visibility filtering.
 
 ```python
-page.link(name="RETURN TO DASHBOARD")  # exact=True, visible=True
+page.link(name="Return")  # exact=True, visible=True
 page.link(name="RETURN TO", exact=False)
-page.link(name="RETURN TO DASHBOARD", visible=False)
+page.link(name="Return", visible=False)
 page.table(label="Requests", visible=None)  # visible and hidden tables
 ```
 

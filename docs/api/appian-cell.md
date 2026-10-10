@@ -4,7 +4,7 @@
 
 ```python
 cell = page.table(label="Requests").cell(
-    row_name="CDRH-OCD-27-M-J501",
+    row_name="Request 1001",
     column_number=16,
 )
 
@@ -14,7 +14,7 @@ cell.button(name="Approve").click()
 The same scoped pattern is available for the other Appian semantic components:
 
 ```python
-cell.link(name="robo appian").click()
+cell.link(name="View").click()
 cell.dropdown(label="Status").select("Approved")
 cell.checkbox(label="Include").check()
 cell.radio(label="Decision").select("Yes")
