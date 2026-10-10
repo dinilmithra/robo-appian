@@ -98,22 +98,22 @@ nav:
       - Appian Button: api/appian-button.md
       - Appian Textbox: api/appian-textbox.md
       - Appian Date: api/appian-date.md
+      - Appian Dropdown: api/appian-dropdown.md
       - Appian Checkbox: api/appian-checkbox.md
       - Appian Radio Select: api/appian-radio-select.md
+      - Appian Link: api/appian-link.md
+      - Appian Tab: api/appian-tab.md
+      - Appian Table: api/appian-table.md
+      - Appian Cell: api/appian-cell.md
       - Appian Input Component: api/appian-input-component.md
       - Runtime: api/runtime.md
       - Assertions: api/assertions.md
       - Errors: api/errors.md
       - Components:
-          - Dropdown: api/dropdown.md
-          - Link: api/link.md
           - MenuButton: api/menu-button.md
           - RecordList: api/record-list.md
           - Region: api/region.md
-          - SearchDropdown: api/search-dropdown.md
           - SearchInput: api/search-input.md
-          - Tab: api/tab.md
-          - Table: api/table.md
           - ComponentUtils: api/component-utils.md
       - Compatibility:
           - Legacy Scope: api/scope.md

@@ -85,6 +85,16 @@ class MenuButton:
         return item
 
     @staticmethod
+    def _owner_page(scope: Scope):
+        """Return the page-like owner for a page or locator scope.
+
+        Page wrappers such as RoboPage and AppianPage are already page owners.
+        Locator wrappers are unwrapped first and use their Playwright owner page.
+        """
+        raw_scope = ComponentUtils.unwrap_scope(scope)
+        return raw_scope.page if isinstance(raw_scope, Locator) else scope
+
+    @staticmethod
     def select(scope: Scope, label: str, value: str) -> Page:
         """Choose a header-menu option that opens a new browser scope.
 
@@ -114,7 +124,7 @@ class MenuButton:
 
         listbox = MenuButton.__find_menu_listbox(scope, menu_id)
         item = MenuButton.__find_menu_item_by_value(listbox, value)
-        owner_page = scope if isinstance(scope, (Page, RoboPage)) else scope.page
+        owner_page = MenuButton._owner_page(scope)
         with owner_page.expect_popup() as new_page_info:
             ComponentUtils.click(item)
 

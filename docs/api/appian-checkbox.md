@@ -1,9 +1,9 @@
 # AppianCheckbox
 
-`AppianCheckbox` represents a true Appian checkbox. Create it with `page.appian_checkbox(...)`.
+`AppianCheckbox` represents a true Appian checkbox. Create it with `page.checkbox(...)`.
 
 ```python
-missing_vendor = page.appian_checkbox(
+missing_vendor = page.checkbox(
     label="Vendor is missing in approved list"
 )
 ```
@@ -41,3 +41,12 @@ missing_vendor.set_checked(False)
 `AppianCheckbox` inherits the shared post-change focus-out behavior from `AppianInputComponent`. It uses semantic HTML relationships such as `label[for]`, `role="group"`, and `aria-labelledby`; it does not rely on generated Appian CSS class names.
 
 Use [`AppianRadioSelect`](appian-radio-select.md) for radio-button groups.
+
+## Exact matching and visibility
+
+Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exact=False` for intentional partial label/name matching. Use `visible=False` for hidden matches, or `visible=None` (also blank/whitespace) to apply no visibility filter.
+
+
+## Timeout
+
+Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework Playwright timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.

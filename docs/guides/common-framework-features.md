@@ -30,10 +30,10 @@ from robo_appian import AppianPage
 
 def test_example(page: AppianPage) -> None:
     page.goto("https://your-appian-site.example/")
-    page.appian_button(name="Submit").is_visible()
+    page.button(name="Submit").is_visible()
 ```
 
-The generic lifecycle is implemented by `robo-automation`; `robo-appian` specializes the page object so Appian components and semantic locators are available. Application projects should not close framework-owned pages, contexts, or browsers from normal tests.
+The generic lifecycle is implemented by `robo-automation`; `robo-appian` wraps the `RoboPage` so Appian components and semantic locators are available without hiding Playwright `Page` methods. Application projects should not close framework-owned pages, contexts, or browsers from normal tests.
 
 See [Browser Management](browser-management.md) and [Pytest Integration](pytest-integration.md).
 
@@ -129,7 +129,7 @@ That application flag is not a `robo-appian` configuration option. It controls t
 from robo_appian import RoboAppianError
 
 try:
-    page.appian_checkbox(label="Acknowledgement").check()
+    page.checkbox(label="Acknowledgement").check()
 except RoboAppianError as exc:
     print(exc)
 ```
@@ -147,10 +147,10 @@ A consuming application can assign different credentials or storage state to eac
 Common framework services should not replace Appian semantics. Continue to use the Appian component API for application interactions:
 
 ```python
-page.appian_textbox(label="Request Title").fill("CORE Test")
-page.appian_checkbox(label="IT").check()
-page.appian_radio(label="Conference Type").select("Scientific")
-page.appian_date(label="From").fill("12/12/2026")
+page.textbox(label="Request Title").fill("CORE Test")
+page.checkbox(label="IT").check()
+page.radio(label="Conference Type").select("Scientific")
+page.date(label="From").fill("12/12/2026")
 ```
 
 This separation keeps application code readable: `robo-automation` owns reusable automation infrastructure, while `robo-appian` owns Appian-specific component discovery, state, rerender handling, and interaction semantics.

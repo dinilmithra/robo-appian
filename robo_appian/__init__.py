@@ -6,7 +6,12 @@ consumer project's component layer.
 """
 
 from robo_appian.errors import RoboAppianError, RoboAppianNavigationError
-from robo_appian.assertions import assert_not_text, assert_text, assert_visible, wait_visible
+from robo_appian.assertions import (
+    assert_not_text,
+    assert_text,
+    assert_visible,
+    wait_visible,
+)
 from robo_appian.runtime import (
     AppianRuntime,
     AppianContext,
@@ -24,19 +29,21 @@ from robo_appian.appian import (
     AppianInputComponent,
     AppianRadioSelect,
     AppianDate,
+    AppianDropdown,
     AppianTextbox,
+    AppianTab,
+    AppianLink,
+    AppianRow,
+    AppianCell,
+    AppianColumn,
     AppianLocator,
     AppianPage,
     AppianScope,
+    AppianTable,
 )
 from robo_appian.components import (
-    Dropdown,
-    Link,
     MenuButton,
     SearchInput,
-    SearchDropdown,
-    Table,
-    Tab,
     Region,
     RecordList,
 )
@@ -64,16 +71,18 @@ __all__ = [
     "AppianInputComponent",
     "AppianRadioSelect",
     "AppianDate",
+    "AppianDropdown",
     "AppianTextbox",
+    "AppianTab",
+    "AppianLink",
+    "AppianRow",
+    "AppianCell",
+    "AppianColumn",
     "AppianLocator",
     "AppianScope",
-    "Dropdown",
-    "Link",
     "MenuButton",
     "SearchInput",
-    "SearchDropdown",
-    "Table",
-    "Tab",
+    "AppianTable",
     "ComponentUtils",
     "Region",
     "RecordList",

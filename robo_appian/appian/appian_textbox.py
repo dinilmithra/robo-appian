@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from robo_appian.utils.ComponentUtils import ComponentUtils
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -30,6 +32,8 @@ class AppianTextbox(AppianInputComponent):
         header: str | None = None,
         exact: bool = True,
         scope: "AppianLocator | None" = None,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
     ) -> None:
         normalized_label = self._normalize_optional(label)
         normalized_placeholder = self._normalize_optional(placeholder)
@@ -42,12 +46,18 @@ class AppianTextbox(AppianInputComponent):
                 "for a textbox."
             )
 
-        super().__init__(page=page)
+        super().__init__(page=page, timeout=timeout)
         self._label = normalized_label
         self._placeholder = normalized_placeholder
         self._header = normalized_header
         self._exact = exact
         self._scope = scope
+        self._visible = ComponentUtils.normalize_visibility(visible)
+
+    @property
+    def visible(self) -> bool | None:
+        """Return the visibility constraint used to resolve this component."""
+        return self._visible
 
     @staticmethod
     def _normalize_optional(value: str | None) -> str | None:
@@ -174,6 +184,9 @@ class AppianTextbox(AppianInputComponent):
         ).first
 
     def _locator(self) -> Locator:
+        indexed = getattr(self, "_indexed_locator", None)
+        if indexed is not None:
+            return indexed
         if self._label is not None:
             return self._locator_by_label()
         if self._placeholder is not None:
@@ -181,7 +194,10 @@ class AppianTextbox(AppianInputComponent):
         return self._locator_by_header()
 
     def _visible_locator(self) -> Locator:
-        return self._locator().filter(visible=True).first
+        locator = self._locator()
+        if self._visible is not None:
+            locator = locator.filter(visible=self._visible)
+        return locator.first
 
     @property
     def label(self) -> str | None:
@@ -201,7 +217,7 @@ class AppianTextbox(AppianInputComponent):
     def fill(self, value: object) -> None:
         """Wait until the textbox is ready, then replace its value."""
         textbox = self._wait_until_ready_locator()
-        textbox.fill("" if value is None else str(value))
+        textbox.fill("" if value is None else str(value), **self._timeout_kwargs())
         self._after_fill(textbox)
         logger.info("Filled Appian textbox: %s.", self._description())
 
@@ -215,7 +231,7 @@ class AppianTextbox(AppianInputComponent):
 
     def click(self) -> None:
         """Wait until the textbox is ready, then click it."""
-        self._wait_until_ready_locator().click()
+        self._wait_until_ready_locator().click(**self._timeout_kwargs())
 
     def is_visible(self) -> bool:
         """Return whether the textbox is currently visible."""
@@ -225,9 +241,27 @@ class AppianTextbox(AppianInputComponent):
         """Return whether the textbox is currently disabled."""
         return self._visible_locator().get_attribute("disabled") is not None
 
-    def is_enabled(self) -> bool:
-        """Return whether the textbox is currently enabled."""
-        return not self.is_disabled()
+    def is_enabled(self, timeout: float | int | None = None) -> bool:
+        """Return whether the textbox is enabled, optionally waiting.
+
+        Omitting ``timeout`` performs an immediate state query. Supplying a
+        positive timeout in seconds waits up to that duration and returns
+        ``False`` if the textbox never becomes enabled.
+        """
+        textbox = self._visible_locator()
+        if timeout is None:
+            if textbox.count() == 0:
+                return False
+            return textbox.get_attribute("disabled", timeout=0) is None
+
+        try:
+            expect(
+                textbox,
+                f"Textbox {self._description()} did not become enabled.",
+            ).to_be_enabled(**ComponentUtils.timeout_kwargs(timeout))
+            return True
+        except AssertionError:
+            return False
 
     def value(self) -> str:
         """Return the textbox's current value."""
@@ -238,11 +272,11 @@ class AppianTextbox(AppianInputComponent):
         expect(
             textbox,
             f"Textbox {self._description()} was not visible.",
-        ).to_be_visible()
+        ).to_be_visible(**self._timeout_kwargs())
         expect(
             textbox,
             f"Textbox {self._description()} was not enabled.",
-        ).to_be_enabled()
+        ).to_be_enabled(**self._timeout_kwargs())
         return textbox
 
     def wait_until_ready(self) -> "AppianTextbox":

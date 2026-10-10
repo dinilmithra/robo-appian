@@ -7,8 +7,8 @@ from robo_appian import AppianPage
 
 
 def test_create_request(page: AppianPage) -> None:
-    page.appian_textbox(label="Request Name").fill("Example Request")
-    page.appian_button(name="Submit").click()
+    page.textbox(label="Request Name").fill("Example Request")
+    page.button(name="Submit").click()
 ```
 
 ## What is `page`?
@@ -22,17 +22,17 @@ You do not create `page` yourself. pytest provides it to the test automatically.
 ```python
 
 def test_create_request(page: AppianPage) -> None:
-    page.appian_textbox(label="Request Name").fill("Example Request")
+    page.textbox(label="Request Name").fill("Example Request")
 
-    page.appian_date(
+    page.date(
         label="Required Award Date"
     ).fill("10/15/2026")
 
-    page.appian_radio(
+    page.radio(
         label="Is this request for a conference?"
     ).select("Yes")
 
-    page.appian_button(name="Submit").click()
+    page.button(name="Submit").click()
 ```
 
 Prefer the label or button text a real user sees on the screen.

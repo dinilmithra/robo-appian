@@ -46,10 +46,10 @@ hide:
       <pre><code><span class="ln">1</span> <span class="kw">from</span> robo_appian <span class="kw">import</span> AppianPage
 <span class="ln">2</span>
 <span class="ln">3</span> <span class="kw">def</span> test_create_request(page: AppianPage):
-<span class="ln">4</span>     page.appian_textbox(label=<span class="st">"Request Name"</span>).fill(<span class="st">"Example Request"</span>)
-<span class="ln">5</span>     page.appian_date(label=<span class="st">"Required Award Date"</span>).fill(<span class="st">"10/15/2026"</span>)
-<span class="ln">6</span>     page.appian_radio(label=<span class="st">"Is this request for a conference?"</span>).select(<span class="st">"Yes"</span>)
-<span class="ln">7</span>     page.appian_button(name=<span class="st">"Next"</span>).click()</code></pre>
+<span class="ln">4</span>     page.textbox(label=<span class="st">"Request Name"</span>).fill(<span class="st">"Example Request"</span>)
+<span class="ln">5</span>     page.date(label=<span class="st">"Required Award Date"</span>).fill(<span class="st">"10/15/2026"</span>)
+<span class="ln">6</span>     page.radio(label=<span class="st">"Is this request for a conference?"</span>).select(<span class="st">"Yes"</span>)
+<span class="ln">7</span>     page.button(name=<span class="st">"Next"</span>).click()</code></pre>
     </div>
 
     <div class="ra-target-architecture">

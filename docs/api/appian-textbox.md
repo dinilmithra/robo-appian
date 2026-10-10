@@ -1,17 +1,17 @@
 # Appian Textbox
 
-Use `AppianPage.appian_textbox(...)` to work with a text field by its label, placeholder, or nearby header text.
+Use `AppianPage.textbox(...)` to work with a text field by its label, placeholder, or nearby header text.
 
 ```python
-textbox = page.appian_textbox(label="Title")
+textbox = page.textbox(label="Title")
 textbox.fill("Example request")
 ```
 
 A placeholder can be used when that is the natural identifier for the field:
 
 ```python
-page.appian_textbox(placeholder="example@example.com").fill("user@example.com")
-page.appian_textbox(header="Conference Description").fill("General conference details")
+page.textbox(placeholder="example@example.com").fill("user@example.com")
+page.textbox(header="Conference Description").fill("General conference details")
 ```
 
 Common operations include `fill()`, `clear()`, `click()`, `is_visible()`, `is_enabled()`, `is_disabled()`, `value()`, and `wait_until_ready()`.
@@ -22,9 +22,18 @@ Common operations include `fill()`, `clear()`, `click()`, `is_visible()`, `is_en
       members_order: source
 ## Date fields
 
-Use `page.appian_date(...)` for Appian date fields rather than `page.appian_textbox(...)`.
+Use `page.date(...)` for Appian date fields rather than `page.textbox(...)`.
 
 ```python
-page.appian_date(label="Required Award Date").fill("10/07/2026")
+page.date(label="Required Award Date").fill("10/07/2026")
 ```
 
+
+## Exact matching and visibility
+
+Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exact=False` for intentional partial label/name matching. Use `visible=False` for hidden matches, or `visible=None` (also blank/whitespace) to apply no visibility filter.
+
+
+## Timeout
+
+Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework Playwright timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.

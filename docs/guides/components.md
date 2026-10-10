@@ -3,7 +3,7 @@
 The preferred import style is through the package-level API:
 
 ```python
-from robo_appian import AppianPage, Dropdown, Table
+from robo_appian import AppianPage, AppianTable
 ```
 
 Component helpers encapsulate reusable Appian-specific interaction mechanics. Browser lifecycle belongs to `robo-automation`; Appian component interactions use `AppianPage` and `AppianLocator`.
@@ -11,17 +11,17 @@ Component helpers encapsulate reusable Appian-specific interaction mechanics. Br
 ## Buttons
 
 ```python
-page.appian_button(name="Submit").click()
+page.button(name="Submit").click()
 ```
 
 ## Radio and checkbox selections
 
-Use `page.appian_checkbox(...)` for true Appian checkbox fields. It returns an [`AppianCheckbox`](../api/appian-checkbox.md).
+Use `page.checkbox(...)` for true Appian checkbox fields. It returns an [`AppianCheckbox`](../api/appian-checkbox.md).
 
-Use `page.appian_radio(...)` for Appian radio groups. It returns an [`AppianRadioSelect`](../api/appian-radio-select.md).
+Use `page.radio(...)` for Appian radio groups. It returns an [`AppianRadioSelect`](../api/appian-radio-select.md).
 
 ```python
-page.appian_radio(
+page.radio(
     label="Is this request for a conference?"
 ).select("Yes")
 ```
@@ -32,22 +32,81 @@ Use the complete question text when possible so common option values such as `Ye
 ## Text inputs
 
 ```python
-page.appian_textbox(label="Request Name").fill("Example Request")
+page.textbox(label="Request Name").fill("Example Request")
 ```
 
 ## Dropdowns
 
+Use `page.dropdown(...)` for semantic Appian dropdown fields. It returns an [`AppianDropdown`](../api/appian-dropdown.md).
+
 ```python
-Dropdown.select(page, "Status", "Active")
+page.dropdown(label="Status").select("Active")
+assert page.dropdown(label="Status").is_selected("Active")
 ```
+
+
+## Appian links
+
+Use `page.link(name=...)` for both native Appian `<a>` links and linked-card controls exposed with `role="link"`. It returns an [`AppianLink`](../api/appian-link.md).
+
+```python
+page.link(name="Create a New Request").click()
+page.link(name="CDRH-OCD-27-M-J501").click()
+page.link(name="HFP-OCE-27-P-J500 - CORE Testcase").click()
+page.link(name="RETURN TO DASHBOARD").click()
+```
+
+For links inside a table cell, resolve the cell and use its Appian link component, for example `table.cell(...).link(name="Open").click()`.
+
+## Appian tabs
+
+Use `page.tab(name=...)` for Appian linked-card tabs. It returns an [`AppianTab`](../api/appian-tab.md).
+
+```python
+page.tab(name="Contacts").select()
+assert page.tab(name="Contacts").is_selected()
+```
+
+Selection is idempotent and state is derived from Appian accessibility text (`Selected Tab.` / `Unselected Tab.`), not generated CSS classes.
 
 ## Tables
 
-```python
-from robo_appian import Table
+Create a semantic table component from `AppianPage`. At least one of `label`, `header_name`, `row_name`, or `column_name` is required.
 
-# See the Table API reference for supported table/grid operations.
+```python
+requests = page.table(
+    label="Requests",
+    row_name="CDRH-OCD-27-M-J501",
+    column_name="Created By",
+)
 ```
+
+Matching is consistent across Appian component factories: `exact=True` and `visible=True` are the defaults. Use `exact=False` for intentional partial semantic-name/label matching. `visible=False` targets hidden matches; `visible=None`, `visible=""`, or whitespace removes visibility filtering. For tables, no visibility filter leaves both visible and hidden matches in the live locator.
+
+All semantic Appian component factories also accept `timeout` in **seconds**. The default is `None`, which preserves the Playwright/context timeout configured from `WAIT_TIME`. A positive finite value overrides `WAIT_TIME` for waits and actions owned by that component:
+
+```python
+page.dropdown(label="Request Category", timeout=10).select(value="Purchase Request")
+page.button(name="Submit", timeout=15).click()
+```
+
+This is useful for dependent Appian controls that are rendered immediately but remain disabled while a preceding selection loads their values. Dropdown value selection waits for either the requested value to be auto-selected by Appian or for the control to become editable, instead of relying on a snapshot `is_enabled()` check.
+
+`AppianTable` is the single table component API. Legacy `Table` helpers are removed.
+
+## Common matching and indexing
+
+The page and cell component accessors share the same matching model:
+
+```python
+page.button(name="Save")                         # exact=True, visible=True
+page.button(name="Sav", exact=False)             # partial semantic match
+page.dropdown(label="CAN", visible=None)         # no visibility filter
+page.dropdown[0].select(value="Dinil")           # first dropdown on page
+page.dropdown(label="CAN")[0].select(value="12345")
+```
+
+Component collection indexing is zero-based. Semantic filtering happens before an index such as `[0]` is applied. The same model is available from `AppianCell`.
 
 ## Appian scoping
 
@@ -58,16 +117,32 @@ Some older non-button component helpers still expose the generic lower-layer `Sc
 `AppianButton` is the reference fluent component API:
 
 ```python
-button = page.appian_button(name="Save")
+button = page.button(name="Save")
 button.click()
 ```
 
 ## Input textbox
 
-Use `AppianPage.appian_textbox(...)` for text fields:
+Use `AppianPage.textbox(...)` for text fields:
 
 ```python
-page.appian_textbox(label="Request Name").fill("Example Request")
-page.appian_textbox(placeholder="example@example.com").fill("user@example.com")
-page.appian_textbox(header="Conference Description").fill("General conference details")
+page.textbox(label="Request Name").fill("Example Request")
+page.textbox(placeholder="example@example.com").fill("user@example.com")
+page.textbox(header="Conference Description").fill("General conference details")
 ```
+
+### Waiting for an Appian component to become enabled
+
+Enabled-state queries are immediate unless a timeout is explicitly supplied. This is intentional: `component.is_enabled()` never inherits `WAIT_TIME` or the component's configured timeout.
+
+```python
+# Snapshot of the current state; no wait.
+page.dropdown(label="Request Category").is_enabled()
+
+# Wait up to WAIT_TIME_SHORT seconds for an Appian dependency to enable it.
+dropdown = page.dropdown(label="Request Category")
+if dropdown.is_enabled(timeout=short_wait_seconds):
+    dropdown.select(value="Grant")
+```
+
+An explicit `timeout` is expressed in seconds. `is_enabled(timeout=...)` returns `True` as soon as the live component becomes enabled and returns `False` if the timeout expires; the state-query timeout is not raised as an automation failure. This is useful for dependent Appian controls such as Request Category, Request Sub-Category, and Fiscal Year.

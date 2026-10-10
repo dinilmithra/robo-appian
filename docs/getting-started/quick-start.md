@@ -16,10 +16,10 @@ from robo_appian import AppianPage
 
 
 def test_create_request(page: AppianPage) -> None:
-    page.appian_textbox(label="Request Name").fill("Example Request")
-    page.appian_date(label="Required Award Date").fill("10/15/2026")
-    page.appian_radio(label="Is this request for a conference?").select("Yes")
-    page.appian_button(name="Submit").click()
+    page.textbox(label="Request Name").fill("Example Request")
+    page.date(label="Required Award Date").fill("10/15/2026")
+    page.radio(label="Is this request for a conference?").select("Yes")
+    page.button(name="Submit").click()
 ```
 
 Read the code the same way a user would describe the page:

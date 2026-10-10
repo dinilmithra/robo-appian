@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from robo_appian.utils.ComponentUtils import ComponentUtils
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -29,6 +31,8 @@ class AppianButton:
         name: str,
         exact: bool = True,
         scope: "AppianLocator | None" = None,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
     ) -> None:
         if not isinstance(name, str) or not name.strip():
             raise ValueError("Button name cannot be empty or whitespace.")
@@ -36,11 +40,27 @@ class AppianButton:
         self._name = name
         self._exact = exact
         self._scope = scope
+        self._visible = ComponentUtils.normalize_visibility(visible)
+        self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
 
     @property
     def name(self) -> str:
         """Return the button name used to identify this component."""
         return self._name
+
+    @property
+    def visible(self) -> bool | None:
+        """Return the visibility constraint used to resolve this component."""
+        return self._visible
+
+    @property
+    def timeout(self) -> float | None:
+        """Return this component's timeout override in seconds, if any."""
+        return self._timeout
+
+    def _timeout_kwargs(self, timeout: float | int | None = None) -> dict[str, float]:
+        effective = self._timeout if timeout is None else timeout
+        return ComponentUtils.timeout_kwargs(effective)
 
     @staticmethod
     def _xpath_literal(value: str) -> str:
@@ -72,6 +92,9 @@ class AppianButton:
 
     def _locator(self) -> Locator:
         """Return the live locator for this Appian button."""
+        indexed = getattr(self, "_indexed_locator", None)
+        if indexed is not None:
+            return indexed
         normalized_name = " ".join(self._name.split()).upper()
         expected = self._xpath_literal(normalized_name)
 
@@ -95,14 +118,17 @@ class AppianButton:
         return self._page.locator(xpath)
 
     def _visible_locator(self) -> Locator:
-        """Return the first visible match for this button."""
-        return self._locator().filter(visible=True).first
+        """Return the first match after applying the visibility constraint."""
+        locator = self._locator()
+        if self._visible is not None:
+            locator = locator.filter(visible=self._visible)
+        return locator.first
 
     def click(self) -> None:
         """Wait until the button is actionable, then click it."""
         button = self._wait_until_ready_locator()
         logger.info("Before Appian button click: name='%s'.", self._name)
-        button.click()
+        button.click(**self._timeout_kwargs())
         logger.info("After Appian button click: name='%s'.", self._name)
 
     def is_visible(self) -> bool:
@@ -113,9 +139,27 @@ class AppianButton:
         """Return whether the HTML ``disabled`` attribute is present."""
         return self._visible_locator().get_attribute("disabled") is not None
 
-    def is_enabled(self) -> bool:
-        """Return whether the HTML ``disabled`` attribute is absent."""
-        return not self.is_disabled()
+    def is_enabled(self, timeout: float | int | None = None) -> bool:
+        """Return whether the button is enabled, optionally waiting.
+
+        Omitting ``timeout`` performs an immediate state query. Supplying a
+        positive timeout in seconds waits up to that duration and returns
+        ``False`` if the button never becomes enabled.
+        """
+        button = self._visible_locator()
+        if timeout is None:
+            if button.count() == 0:
+                return False
+            return button.get_attribute("disabled", timeout=0) is None
+
+        try:
+            expect(
+                button,
+                f"Button '{self._name}' did not become enabled.",
+            ).to_be_enabled(**ComponentUtils.timeout_kwargs(timeout))
+            return True
+        except AssertionError:
+            return False
 
     def _wait_until_ready_locator(self) -> Locator:
         """Wait until the button is visible and has no ``disabled`` attribute."""
@@ -123,11 +167,11 @@ class AppianButton:
         expect(
             button,
             f"Button '{self._name}' was not rendered and visible.",
-        ).to_be_visible()
+        ).to_be_visible(**self._timeout_kwargs())
         expect(
             button,
             f"Button '{self._name}' was visible but remained disabled.",
-        ).not_to_have_attribute("disabled", "")
+        ).not_to_have_attribute("disabled", "", **self._timeout_kwargs())
         return button
 
     def wait_until_ready(self) -> "AppianButton":
@@ -140,7 +184,7 @@ class AppianButton:
         expect(
             self._locator(),
             f"Button '{self._name}' remained visible.",
-        ).to_be_hidden()
+        ).to_be_hidden(**self._timeout_kwargs())
 
 
 __all__ = ["AppianButton"]

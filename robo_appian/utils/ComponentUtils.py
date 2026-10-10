@@ -20,6 +20,46 @@ class ComponentUtils:
     """Shared browser automation operations used by Appian components."""
 
     @staticmethod
+    def normalize_timeout_seconds(value: float | int | None) -> float | None:
+        """Normalize an optional Appian component timeout expressed in seconds.
+
+        ``None`` preserves the Playwright/context default timeout (normally
+        configured from ``WAIT_TIME``). A positive finite number overrides that
+        default for waits/actions performed by the component.
+        """
+        if value is None:
+            return None
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise TypeError("timeout must be a positive number of seconds or None.")
+        timeout = float(value)
+        if timeout <= 0 or timeout == float("inf") or timeout != timeout:
+            raise ValueError("timeout must be a positive finite number of seconds.")
+        return timeout
+
+    @staticmethod
+    def timeout_kwargs(value: float | int | None) -> dict[str, float]:
+        """Return Playwright timeout kwargs for an optional seconds value."""
+        timeout = ComponentUtils.normalize_timeout_seconds(value)
+        return {} if timeout is None else {"timeout": timeout * 1000}
+
+    @staticmethod
+    def normalize_visibility(value: bool | str | None) -> bool | None:
+        """Normalize the shared tri-state Appian visibility constraint.
+
+        ``None`` and blank/whitespace strings mean no visibility filter.
+        Boolean ``True`` and ``False`` retain their normal meanings.
+        """
+        if value is None:
+            return None
+        if isinstance(value, str):
+            if not value.strip():
+                return None
+            raise ValueError("visible must be True, False, None, or a blank string.")
+        if isinstance(value, bool):
+            return value
+        raise TypeError("visible must be a bool, None, or a blank string.")
+
+    @staticmethod
     def unwrap_scope(scope):
         """Return the underlying browser scope for framework locator wrappers.
 

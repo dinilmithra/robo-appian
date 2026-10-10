@@ -35,13 +35,21 @@ class AppianCheckbox(AppianInputComponent):
         label: str,
         exact: bool = True,
         scope: "AppianLocator | None" = None,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
     ) -> None:
         if not isinstance(label, str) or not label.strip():
             raise ValueError("Checkbox label cannot be empty or whitespace.")
-        super().__init__(page=page)
+        super().__init__(page=page, timeout=timeout)
         self._label = " ".join(label.split())
         self._exact = exact
         self._scope = scope
+        self._visible = ComponentUtils.normalize_visibility(visible)
+
+    @property
+    def visible(self) -> bool | None:
+        """Return the visibility constraint used to resolve this component."""
+        return self._visible
 
     @staticmethod
     def _xpath_literal(value: str) -> str:
@@ -87,6 +95,10 @@ class AppianCheckbox(AppianInputComponent):
 
         No generated Appian CSS classes are used.
         """
+        indexed = getattr(self, "_indexed_locator", None)
+        if indexed is not None:
+            return indexed
+
         if self._scope is not None:
             root = self._scope.locator
             named_checkbox = root.get_by_role(
@@ -104,15 +116,16 @@ class AppianCheckbox(AppianInputComponent):
         comparison = self._label_comparison()
         group_checkbox = self._root_locator(
             "xpath=.//*[@role='group' and @aria-labelledby = "
-            "//*[@id and ("
-            + comparison
-            + ")]/@id]//input[@type='checkbox']"
+            "//*[@id and (" + comparison + ")]/@id]//input[@type='checkbox']"
         )
 
         # ``or_`` keeps both branches live.  Playwright reevaluates them while
         # assertions/actions wait, so a checkbox added by a SAIL rerender can
         # be discovered without reconstructing the component.
-        return named_checkbox.or_(group_checkbox).first
+        combined = named_checkbox.or_(group_checkbox)
+        if self._visible is not None:
+            combined = combined.filter(visible=self._visible)
+        return combined.first
 
     def _checkbox_label_locator(self, target: Locator) -> Locator:
         """Resolve the native label associated with a checkbox input.
@@ -132,12 +145,8 @@ class AppianCheckbox(AppianInputComponent):
         target_id_literal = self._xpath_literal(target_id)
         group = target.locator("xpath=ancestor::*[@role='group'][1]")
         if group.count():
-            return group.locator(
-                f"xpath=.//label[@for={target_id_literal}]"
-            ).first
-        return self._root_locator(
-            f"xpath=.//label[@for={target_id_literal}]"
-        ).first
+            return group.locator(f"xpath=.//label[@for={target_id_literal}]").first
+        return self._root_locator(f"xpath=.//label[@for={target_id_literal}]").first
 
     def is_visible(self) -> bool:
         """Return whether a matching checkbox currently exists in this scope."""
@@ -153,17 +162,16 @@ class AppianCheckbox(AppianInputComponent):
                 this method wait for a state transition that was never requested.
         """
         checkbox = self._checkbox_locator()
-        timeout_ms = None if timeout is None else max(0.0, float(timeout)) * 1000
-        assertion = expect(checkbox, f"Checkbox '{self._label}' was not found.")
-        if timeout_ms is None:
-            assertion.to_be_attached()
-        else:
-            assertion.to_be_attached(timeout=timeout_ms)
+        expect(checkbox, f"Checkbox '{self._label}' was not found.").to_be_attached(
+            **self._timeout_kwargs(timeout)
+        )
         return checkbox.is_checked()
 
     def _set_checked(self, desired: bool) -> "AppianCheckbox":
         checkbox = self._checkbox_locator()
-        expect(checkbox, f"Checkbox '{self._label}' was not found.").to_be_attached()
+        expect(checkbox, f"Checkbox '{self._label}' was not found.").to_be_attached(
+            **self._timeout_kwargs()
+        )
 
         # Idempotent in both directions: interact only when state must change.
         if checkbox.is_checked() == desired:
@@ -174,15 +182,15 @@ class AppianCheckbox(AppianInputComponent):
         expect(
             label,
             f"Native label for Appian checkbox '{self._label}' was not found.",
-        ).to_be_attached()
-        label.click()
+        ).to_be_attached(**self._timeout_kwargs())
+        label.click(**self._timeout_kwargs())
 
         # Appian can replace the control during a SAIL rerender.
         checkbox = self._checkbox_locator()
         expect(
             checkbox,
             f"Checkbox '{self._label}' did not reach checked={desired}.",
-        ).to_be_checked(checked=desired)
+        ).to_be_checked(checked=desired, **self._timeout_kwargs())
         self._after_change(checkbox)
         ComponentUtils.wait_for_appian_action_completed(self._page)
         return self

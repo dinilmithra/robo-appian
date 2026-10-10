@@ -15,10 +15,16 @@ def _mock_page() -> Page:
     return page
 
 
-def test_appian_page_is_robo_page_specialization() -> None:
+def test_appian_page_wraps_robo_page() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
+
     assert isinstance(appian_page, AppianPage)
+    assert not isinstance(appian_page, RoboPage)
+    assert isinstance(appian_page.robo_page, RoboPage)
+
+    with pytest.raises(AttributeError):
+        _ = appian_page.playwright_page
 
 
 def test_appian_page_attribute_lookup_returns_appian_locator() -> None:
@@ -57,7 +63,7 @@ def test_appian_page_button_returns_appian_button() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    button = appian_page.appian_button(name="Save")
+    button = appian_page.button(name="Save")
 
     assert isinstance(button, AppianButton)
     assert button.name == "Save"
@@ -83,7 +89,7 @@ def test_appian_page_button_requires_name_keyword() -> None:
     appian_page = AppianPage.get(page)
 
     with pytest.raises(TypeError):
-        appian_page.appian_button("Save")  # type: ignore[misc]
+        appian_page.button("Save")  # type: ignore[misc]
 
 
 def test_button_locator_requires_type_button() -> None:
@@ -151,7 +157,7 @@ def test_appian_page_button_can_preserve_locator_scope() -> None:
     scoped_locator = AppianLocator.get(raw_scope)
     appian_page = AppianPage.get(page)
 
-    button = appian_page.appian_button(name="Confirm", scope=scoped_locator)
+    button = appian_page.button(name="Confirm", scope=scoped_locator)
     button._locator()
 
     raw_scope.locator.assert_called_once()
@@ -221,7 +227,7 @@ def test_appian_page_textbox_by_label_returns_appian_textbox() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    textbox = appian_page.appian_textbox(label="Title")
+    textbox = appian_page.textbox(label="Title")
 
     assert isinstance(textbox, AppianTextbox)
     assert textbox.label == "Title"
@@ -234,7 +240,7 @@ def test_appian_page_textbox_by_placeholder_returns_appian_textbox() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    textbox = appian_page.appian_textbox(placeholder="example@example.com")
+    textbox = appian_page.textbox(placeholder="example@example.com")
 
     assert isinstance(textbox, AppianTextbox)
     assert textbox.placeholder == "example@example.com"
@@ -247,7 +253,7 @@ def test_appian_page_textbox_by_header_returns_appian_textbox() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    textbox = appian_page.appian_textbox(header="Conference Description")
+    textbox = appian_page.textbox(header="Conference Description")
 
     assert isinstance(textbox, AppianTextbox)
     assert textbox.header == "Conference Description"
@@ -262,16 +268,16 @@ def test_appian_textbox_requires_exactly_one_identifier() -> None:
     appian_page = AppianPage.get(page)
 
     with pytest.raises(ValueError):
-        appian_page.appian_textbox()
+        appian_page.textbox()
 
     with pytest.raises(ValueError):
-        appian_page.appian_textbox(label="Title", placeholder="Title")
+        appian_page.textbox(label="Title", placeholder="Title")
 
     with pytest.raises(ValueError):
-        appian_page.appian_textbox(label="Title", header="Conference Description")
+        appian_page.textbox(label="Title", header="Conference Description")
 
     with pytest.raises(ValueError):
-        appian_page.appian_textbox(
+        appian_page.textbox(
             placeholder="Enter a value", header="Conference Description"
         )
 
@@ -508,7 +514,7 @@ def test_appian_page_date_returns_appian_date() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    date = appian_page.appian_date(label="Required Award Date")
+    date = appian_page.date(label="Required Award Date")
 
     assert isinstance(date, AppianDate)
     assert date.label == "Required Award Date"
@@ -645,9 +651,18 @@ def test_appian_textbox_fill_blurs_after_entering_value() -> None:
     text_input.press.assert_not_called()
 
 
-def test_appian_page_does_not_expose_generic_label_or_placeholder_methods() -> None:
-    assert not hasattr(AppianPage, "get_by_label")
-    assert not hasattr(AppianPage, "get_by_placeholder")
+def test_appian_page_preserves_default_playwright_methods() -> None:
+    page = _mock_page()
+    by_label = MagicMock(spec=Locator)
+    by_placeholder = MagicMock(spec=Locator)
+    page.get_by_label.return_value = by_label
+    page.get_by_placeholder.return_value = by_placeholder
+    appian_page = AppianPage.get(page)
+
+    assert appian_page.get_by_label("Email", exact=True) is by_label
+    assert appian_page.get_by_placeholder("Search") is by_placeholder
+    page.get_by_label.assert_called_once_with("Email", exact=True)
+    page.get_by_placeholder.assert_called_once_with("Search")
 
 
 def test_legacy_input_date_module_is_removed() -> None:
@@ -680,7 +695,7 @@ def test_appian_page_checkbox_returns_appian_checkbox() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    checkbox = appian_page.appian_checkbox(label="Vendor is missing in approved list")
+    checkbox = appian_page.checkbox(label="Vendor is missing in approved list")
 
     assert isinstance(checkbox, AppianCheckbox)
 
@@ -691,7 +706,7 @@ def test_appian_page_radio_returns_appian_radio_select() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    radio = appian_page.appian_radio(label="Is this request for a conference?")
+    radio = appian_page.radio(label="Is this request for a conference?")
 
     assert isinstance(radio, AppianRadioSelect)
 
@@ -702,21 +717,24 @@ def _radio_group_mocks(page: Page, label_id: str):
     label.get_attribute.return_value = label_id
     group = MagicMock(spec=Locator)
     group.count.return_value = 1
+    group.filter.return_value.first = group
     target = MagicMock(spec=Locator)
     group.locator.return_value.first = target
     page.locator.side_effect = [label, group]
     return label, group, target
 
 
-def test_appian_radio_select_radio_locator_scopes_value_to_aria_labelled_group() -> None:
+def test_appian_radio_select_radio_locator_scopes_value_to_aria_labelled_group() -> (
+    None
+):
     page = _mock_page()
     label, group, target = _radio_group_mocks(page, "conference-question-id")
     target.is_checked.return_value = True
     appian_page = AppianPage.get(page)
 
-    selected = appian_page.appian_radio(
-        label="Is this request for a conference?"
-    ).is_selected("Yes")
+    selected = appian_page.radio(label="Is this request for a conference?").is_selected(
+        "Yes"
+    )
 
     assert selected is True
     label_xpath = page.locator.call_args_list[0].args[0]
@@ -736,7 +754,7 @@ def test_appian_radio_select_is_idempotent_when_already_checked() -> None:
     target.is_checked.return_value = True
     appian_page = AppianPage.get(page)
 
-    appian_page.appian_radio(
+    appian_page.radio(
         label="How many people are you submitting in this travel request?"
     ).select("More than one")
 
@@ -747,7 +765,7 @@ def test_appian_radio_select_is_idempotent_when_already_checked() -> None:
 def test_appian_radio_select_clicks_associated_label() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.appian_radio(label="Is this request for a conference?")
+    component = appian_page.radio(label="Is this request for a conference?")
     before = MagicMock(spec=Locator)
     after = MagicMock(spec=Locator)
     choice_label = MagicMock(spec=Locator)
@@ -757,7 +775,9 @@ def test_appian_radio_select_clicks_associated_label() -> None:
 
     with (
         patch("robo_appian.appian.appian_radio_select.expect") as expect_mock,
-        patch("robo_appian.appian.appian_radio_select.ComponentUtils.wait_for_appian_action_completed"),
+        patch(
+            "robo_appian.appian.appian_radio_select.ComponentUtils.wait_for_appian_action_completed"
+        ),
     ):
         component.select("Yes")
 
@@ -769,14 +789,19 @@ def test_appian_radio_select_clicks_associated_label() -> None:
     expect_mock.return_value.to_be_checked.assert_called_once_with(checked=True)
 
 
-def test_appian_radio_select_falls_back_to_unique_visible_option_when_semantic_label_missing() -> None:
+def test_appian_radio_select_falls_back_to_unique_visible_option_when_semantic_label_missing() -> (
+    None
+):
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.appian_radio(label="Are you submitting this travel request for yourself or on behalf of someone else?")
+    component = appian_page.radio(
+        label="Are you submitting this travel request for yourself or on behalf of someone else?"
+    )
     missing_label = MagicMock(spec=Locator)
     missing_label.count.return_value = 0
     labels = MagicMock(spec=Locator)
     labels.count.return_value = 0
+    labels.filter.return_value = labels
     option_label = MagicMock(spec=Locator)
     labels.first = option_label
     radio = MagicMock(spec=Locator)
@@ -806,13 +831,14 @@ def test_appian_checkbox_uses_live_accessible_name_locator_for_choice_label() ->
     target = MagicMock(spec=Locator)
     target.is_checked.return_value = False
     named.or_.return_value = combined
+    combined.filter.return_value.first = target
     combined.first = target
     page.get_by_role.return_value = named
     page.locator.return_value = group
     appian_page = AppianPage.get(page)
 
     with patch("robo_appian.appian.appian_checkbox.expect"):
-        checked = appian_page.appian_checkbox(
+        checked = appian_page.checkbox(
             label="Vendor is missing in approved list"
         ).is_checked()
 
@@ -835,13 +861,14 @@ def test_appian_checkbox_keeps_field_group_fallback_live_for_rerender() -> None:
     target = MagicMock(spec=Locator)
     target.is_checked.return_value = False
     named.or_.return_value = combined
+    combined.filter.return_value.first = target
     combined.first = target
     page.get_by_role.return_value = named
     page.locator.return_value = group
     appian_page = AppianPage.get(page)
 
     with patch("robo_appian.appian.appian_checkbox.expect"):
-        checked = appian_page.appian_checkbox(label="IT").is_checked(timeout=10)
+        checked = appian_page.checkbox(label="IT").is_checked(timeout=10)
 
     assert checked is False
     group_xpath = page.locator.call_args.args[0]
@@ -860,7 +887,7 @@ def test_appian_checkbox_keeps_field_group_fallback_live_for_rerender() -> None:
 def test_appian_checkbox_timeout_waits_for_presence_not_checked_state() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.appian_checkbox(label="IT")
+    component = appian_page.checkbox(label="IT")
     target = MagicMock(spec=Locator)
     target.is_checked.return_value = False
     component._checkbox_locator = MagicMock(return_value=target)  # type: ignore[method-assign]
@@ -875,7 +902,7 @@ def test_appian_checkbox_timeout_waits_for_presence_not_checked_state() -> None:
 def test_appian_checkbox_clicks_native_label_for_pointer_intercepting_input() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.appian_checkbox(
+    component = appian_page.checkbox(
         label="I have read and understand the qualifications for the reimbursement."
     )
     target = MagicMock(spec=Locator)
@@ -899,7 +926,7 @@ def test_appian_checkbox_clicks_native_label_for_pointer_intercepting_input() ->
 def test_appian_checkbox_check_only_when_unchecked() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
+    component = appian_page.checkbox(label="Vendor is missing in approved list")
     before = MagicMock(spec=Locator)
     after = MagicMock(spec=Locator)
     choice_label = MagicMock(spec=Locator)
@@ -909,7 +936,9 @@ def test_appian_checkbox_check_only_when_unchecked() -> None:
 
     with (
         patch("robo_appian.appian.appian_checkbox.expect") as expect_mock,
-        patch("robo_appian.appian.appian_checkbox.ComponentUtils.wait_for_appian_action_completed"),
+        patch(
+            "robo_appian.appian.appian_checkbox.ComponentUtils.wait_for_appian_action_completed"
+        ),
     ):
         result = component.check()
 
@@ -925,7 +954,7 @@ def test_appian_checkbox_check_only_when_unchecked() -> None:
 def test_appian_checkbox_check_is_noop_when_already_checked() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
+    component = appian_page.checkbox(label="Vendor is missing in approved list")
     target = MagicMock(spec=Locator)
     target.is_checked.return_value = True
     component._checkbox_locator = MagicMock(return_value=target)  # type: ignore[method-assign]
@@ -941,7 +970,7 @@ def test_appian_checkbox_check_is_noop_when_already_checked() -> None:
 def test_appian_checkbox_uncheck_only_when_checked() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
+    component = appian_page.checkbox(label="Vendor is missing in approved list")
     before = MagicMock(spec=Locator)
     after = MagicMock(spec=Locator)
     choice_label = MagicMock(spec=Locator)
@@ -951,7 +980,9 @@ def test_appian_checkbox_uncheck_only_when_checked() -> None:
 
     with (
         patch("robo_appian.appian.appian_checkbox.expect") as expect_mock,
-        patch("robo_appian.appian.appian_checkbox.ComponentUtils.wait_for_appian_action_completed"),
+        patch(
+            "robo_appian.appian.appian_checkbox.ComponentUtils.wait_for_appian_action_completed"
+        ),
     ):
         result = component.uncheck()
 
@@ -967,7 +998,7 @@ def test_appian_checkbox_uncheck_only_when_checked() -> None:
 def test_appian_checkbox_uncheck_is_noop_when_already_unchecked() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
+    component = appian_page.checkbox(label="Vendor is missing in approved list")
     target = MagicMock(spec=Locator)
     target.is_checked.return_value = False
     component._checkbox_locator = MagicMock(return_value=target)  # type: ignore[method-assign]
@@ -983,7 +1014,7 @@ def test_appian_checkbox_uncheck_is_noop_when_already_unchecked() -> None:
 def test_appian_checkbox_set_checked_routes_to_expected_state() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
-    component = appian_page.appian_checkbox(label="Vendor is missing in approved list")
+    component = appian_page.checkbox(label="Vendor is missing in approved list")
     component.check = MagicMock(return_value=component)  # type: ignore[method-assign]
     component.uncheck = MagicMock(return_value=component)  # type: ignore[method-assign]
 
@@ -1022,7 +1053,7 @@ def test_appian_radio_select_pcard_radio_is_scoped_to_question_group() -> None:
     target.is_checked.return_value = True
     appian_page = AppianPage.get(page)
 
-    appian_page.appian_radio(
+    appian_page.radio(
         label="Will you be the one to receive the purchased product or service?"
     ).select("Yes, I will be receiving the purchased product or service")
 
@@ -1041,7 +1072,10 @@ def test_core_no_longer_references_legacy_radio_select() -> None:
     core_root = Path(__file__).resolve().parents[2] / "core-automation"
     matches = []
     for path in core_root.rglob("*.py"):
-        if any(part in {".venv", ".venv-core", "dist", "__pycache__"} for part in path.parts):
+        if any(
+            part in {".venv", ".venv-core", "dist", "__pycache__"}
+            for part in path.parts
+        ):
             continue
         if "RadioSelect" in path.read_text(encoding="utf-8"):
             matches.append(path)
@@ -1055,8 +1089,921 @@ def test_appian_page_exposes_checkbox_and_radio_factories() -> None:
     page = _mock_page()
     appian_page = AppianPage.get(page)
 
-    checkbox = appian_page.appian_checkbox(label="Vendor is missing in approved list")
-    radio = appian_page.appian_radio(label="Will you be the one to receive the purchased product or service?")
+    checkbox = appian_page.checkbox(label="Vendor is missing in approved list")
+    radio = appian_page.radio(
+        label="Will you be the one to receive the purchased product or service?"
+    )
 
     assert isinstance(checkbox, AppianCheckbox)
     assert isinstance(radio, AppianRadioSelect)
+
+
+def test_appian_page_tab_returns_appian_tab() -> None:
+    from robo_appian import AppianTab
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    tab = appian_page.tab(name="Attendee Details")
+
+    assert isinstance(tab, AppianTab)
+    assert tab.name == "Attendee Details"
+
+
+def test_appian_tab_locator_uses_role_label_and_accessibility_state() -> None:
+    page = _mock_page()
+    label = MagicMock(spec=Locator)
+    state = MagicMock(spec=Locator)
+    links = MagicMock(spec=Locator)
+    with_label = MagicMock(spec=Locator)
+    with_state = MagicMock(spec=Locator)
+    visible = MagicMock(spec=Locator)
+    target = MagicMock(spec=Locator)
+
+    page.get_by_text.side_effect = [label, state]
+    page.get_by_role.return_value = links
+    links.filter.return_value = with_label
+    with_label.filter.return_value = with_state
+    with_state.filter.return_value = visible
+    visible.first = target
+
+    component = AppianPage.get(page).tab(name="Attendee Details")
+    resolved = component._locator()
+
+    assert resolved is target
+    assert page.get_by_text.call_args_list[0].args == ("Attendee Details",)
+    assert page.get_by_text.call_args_list[0].kwargs == {"exact": True}
+    state_pattern = page.get_by_text.call_args_list[1].args[0]
+    assert state_pattern.search("Selected Tab.")
+    assert state_pattern.search("Unselected Tab. Press enter to select tab.")
+    page.get_by_role.assert_called_once_with("link")
+    links.filter.assert_called_once_with(has=label)
+    with_label.filter.assert_called_once_with(has=state)
+    with_state.filter.assert_called_once_with(visible=True)
+
+
+def test_appian_tab_does_not_use_generated_appian_css_classes() -> None:
+    source = (
+        Path(__file__).resolve().parents[1] / "robo_appian" / "appian" / "appian_tab.py"
+    ).read_text(encoding="utf-8")
+
+    assert "CardLayout---" not in source
+    assert "ColumnLayout---" not in source
+    assert "@class" not in source
+
+
+def test_appian_tab_attendee_details_is_selected_from_accessibility_marker() -> None:
+    page = _mock_page()
+    component = AppianPage.get(page).tab(name="Attendee Details")
+    target = MagicMock(spec=Locator)
+    selected_marker = MagicMock(spec=Locator)
+    selected_marker.count.return_value = 1
+    target.get_by_text.return_value = selected_marker
+    component._locator = MagicMock(return_value=target)  # type: ignore[method-assign]
+
+    with patch("robo_appian.appian.appian_tab.expect"):
+        assert component.is_selected() is True
+
+    target.get_by_text.assert_called_once_with("Selected Tab.", exact=True)
+
+
+def test_appian_tab_unselected_state_returns_false_without_waiting_for_selection() -> (
+    None
+):
+    page = _mock_page()
+    component = AppianPage.get(page).tab(name="Contacts")
+    target = MagicMock(spec=Locator)
+    selected_marker = MagicMock(spec=Locator)
+    selected_marker.count.return_value = 0
+    target.get_by_text.return_value = selected_marker
+    component._locator = MagicMock(return_value=target)  # type: ignore[method-assign]
+
+    with patch("robo_appian.appian.appian_tab.expect") as expect_mock:
+        assert component.is_selected(timeout=10) is False
+
+    expect_mock.return_value.to_be_visible.assert_called_once_with(timeout=10000.0)
+    expect_mock.return_value.to_have_count.assert_not_called()
+
+
+def test_appian_tab_select_is_idempotent_when_already_selected() -> None:
+    page = _mock_page()
+    component = AppianPage.get(page).tab(name="Attendee Details")
+    target = MagicMock(spec=Locator)
+    selected_marker = MagicMock(spec=Locator)
+    selected_marker.count.return_value = 1
+    target.get_by_text.return_value = selected_marker
+    component._locator = MagicMock(return_value=target)  # type: ignore[method-assign]
+
+    with (
+        patch("robo_appian.appian.appian_tab.expect"),
+        patch(
+            "robo_appian.appian.appian_tab.ComponentUtils.wait_for_appian_action_completed"
+        ) as wait_mock,
+    ):
+        result = component.select()
+
+    assert result is component
+    target.click.assert_not_called()
+    wait_mock.assert_not_called()
+
+
+def test_appian_tab_select_clicks_and_re_resolves_after_rerender() -> None:
+    page = _mock_page()
+    component = AppianPage.get(page).tab(name="Contacts")
+    before = MagicMock(spec=Locator)
+    after = MagicMock(spec=Locator)
+    before_marker = MagicMock(spec=Locator)
+    after_marker = MagicMock(spec=Locator)
+    before_marker.count.return_value = 0
+    after_marker.count.return_value = 1
+    before.get_by_text.return_value = before_marker
+    after.get_by_text.return_value = after_marker
+    component._locator = MagicMock(side_effect=[before, after])  # type: ignore[method-assign]
+
+    with (
+        patch("robo_appian.appian.appian_tab.expect") as expect_mock,
+        patch(
+            "robo_appian.appian.appian_tab.ComponentUtils.wait_for_appian_action_completed"
+        ) as wait_mock,
+    ):
+        result = component.select()
+
+    assert result is component
+    before.click.assert_called_once_with()
+    wait_mock.assert_called_once_with(component._page)
+    expect_mock.return_value.to_have_count.assert_called_once_with(1)
+
+
+def test_appian_page_link_returns_appian_link() -> None:
+    from robo_appian import AppianLink
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    link = appian_page.link(name="Create a New Request")
+
+    assert isinstance(link, AppianLink)
+    assert link.name == "Create a New Request"
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "Create a New Request",
+        "CDRH-OCD-27-M-J501",
+        "robo appian",
+        "HFP-OCE-27-P-J500 - CORE Testcase",
+        "RETURN TO DASHBOARD",
+    ],
+)
+def test_appian_link_uses_semantic_link_role_for_observed_shapes(name: str) -> None:
+    page = _mock_page()
+    role_locator = MagicMock(spec=Locator)
+    visible_locator = MagicMock(spec=Locator)
+    target = MagicMock(spec=Locator)
+    role_locator.filter.return_value = visible_locator
+    visible_locator.first = target
+    page.get_by_role.return_value = role_locator
+
+    component = AppianPage.get(page).link(name=name)
+    resolved = component._locator()
+
+    assert resolved is target
+    page.get_by_role.assert_called_once_with("link", name=name, exact=True)
+    role_locator.filter.assert_called_once_with(visible=True)
+
+
+def test_appian_link_scope_disambiguates_repeated_table_link() -> None:
+    page = _mock_page()
+    scope_locator = MagicMock(spec=Locator)
+    role_locator = MagicMock(spec=Locator)
+    visible_locator = MagicMock(spec=Locator)
+    target = MagicMock(spec=Locator)
+    role_locator.filter.return_value = visible_locator
+    visible_locator.first = target
+    scope_locator.get_by_role.return_value = role_locator
+    scope = AppianLocator.get(scope_locator)
+
+    component = AppianPage.get(page).link(name="robo appian", scope=scope)
+    assert component._locator() is target
+
+    scope_locator.get_by_role.assert_called_once_with(
+        "link", name="robo appian", exact=True
+    )
+    page.get_by_role.assert_not_called()
+
+
+def test_appian_link_click_waits_for_appian_action_completion() -> None:
+    page = _mock_page()
+    component = AppianPage.get(page).link(name="Create a New Request")
+    target = MagicMock(spec=Locator)
+    component._locator = MagicMock(return_value=target)  # type: ignore[method-assign]
+
+    with (
+        patch("robo_appian.appian.appian_link.expect"),
+        patch(
+            "robo_appian.appian.appian_link.ComponentUtils.wait_for_appian_action_completed"
+        ) as wait_mock,
+    ):
+        result = component.click()
+
+    assert result is component
+    target.click.assert_called_once_with()
+    wait_mock.assert_called_once_with(component._page)
+
+
+def test_appian_link_href_supports_anchor_and_linked_card() -> None:
+    page = _mock_page()
+    component = AppianPage.get(page).link(name="CDRH-OCD-27-M-J501")
+    target = MagicMock(spec=Locator)
+    target.get_attribute.return_value = (
+        "/suite/sites/core-admin-console/page/my-workspace?requestId=120244"
+    )
+    component._locator = MagicMock(return_value=target)  # type: ignore[method-assign]
+
+    with patch("robo_appian.appian.appian_link.expect"):
+        assert component.href() == (
+            "/suite/sites/core-admin-console/page/my-workspace?requestId=120244"
+        )
+
+    target.get_attribute.return_value = None
+    with patch("robo_appian.appian.appian_link.expect"):
+        assert component.href() is None
+
+
+def test_appian_link_does_not_use_generated_appian_css_classes() -> None:
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "robo_appian"
+        / "appian"
+        / "appian_link.py"
+    ).read_text(encoding="utf-8")
+
+    assert "CardLayout---" not in source
+    assert "LinkedItem---" not in source
+    assert "PagingGridLayout---" not in source
+    assert "@class" not in source
+
+
+def test_all_appian_page_component_factories_preserve_visible_none() -> None:
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    assert appian_page.button(name="Save", visible=None).visible is None
+    assert appian_page.textbox(label="Title", visible=None).visible is None
+    assert appian_page.checkbox(label="IT", visible=None).visible is None
+    assert appian_page.radio(label="Choice", visible=None).visible is None
+    assert appian_page.link(name="Dashboard", visible=None).visible is None
+    assert appian_page.tab(name="Request Details", visible=None).visible is None
+    assert appian_page.date(label="Date Needed By", visible=None).visible is None
+    assert appian_page.table(label="Requests", visible=None).visible is None
+
+
+def test_appian_page_dropdown_returns_appian_dropdown() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    dropdown = appian_page.dropdown(label="Order Type")
+
+    assert isinstance(dropdown, AppianDropdown)
+    assert dropdown.label == "Order Type"
+    assert dropdown.visible is True
+
+
+def test_appian_dropdown_locator_uses_semantic_aria_relationships() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    AppianDropdown(page=appian_page, label="Required Source")._locator()
+
+    xpath = page.locator.call_args.args[0]
+    assert "@role='combobox'" in xpath
+    assert "@aria-labelledby" in xpath
+    assert "Required Source" in xpath
+    assert "@class" not in xpath
+    assert "DropdownWidget" not in xpath
+
+
+def test_appian_dropdown_exact_label_allows_required_marker() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    AppianDropdown(page=appian_page, label="Order Type", exact=True)._locator()
+
+    xpath = page.locator.call_args.args[0]
+    assert "Order Type*" in xpath
+    assert "Order Type *" in xpath
+
+
+def test_appian_dropdown_blank_visibility_means_no_filter() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    dropdown = AppianDropdown(page=appian_page, label="Order Type", visible="   ")
+    result = dropdown._locator()
+
+    assert dropdown.visible is None
+    assert result is page.locator.return_value
+    page.locator.return_value.filter.assert_not_called()
+
+
+def test_appian_dropdown_is_selected_reads_current_value() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="Order Type")
+
+    with patch.object(dropdown, "value", return_value="Office Supplies"):
+        assert dropdown.is_selected("Office Supplies") is True
+        assert dropdown.is_selected("Other") is False
+
+
+def test_appian_dropdown_select_is_idempotent() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="Required Source")
+
+    with (
+        patch.object(dropdown, "is_selected", return_value=True),
+        patch.object(dropdown, "_expand") as expand,
+        patch.object(dropdown, "_blur") as blur,
+    ):
+        assert dropdown.select("No") is dropdown
+        expand.assert_not_called()
+        blur.assert_called_once_with()
+
+
+
+def test_appian_dropdown_select_blurs_after_selection() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="P-Card Holder")
+
+    combobox = MagicMock(spec=Locator)
+    refreshed = MagicMock(spec=Locator)
+    listbox = MagicMock(spec=Locator)
+    role_match = MagicMock(spec=Locator)
+    filtered = MagicMock(spec=Locator)
+    option = MagicMock(spec=Locator)
+    role_match.filter.return_value = filtered
+    filtered.first = option
+    listbox.get_by_role.return_value = role_match
+
+    with (
+        patch.object(dropdown, "is_selected", return_value=False),
+        patch.object(dropdown, "_resolved_locator", side_effect=[combobox, refreshed]),
+        patch.object(dropdown, "_expand"),
+        patch.object(dropdown, "_listbox", return_value=listbox),
+        patch.object(dropdown, "_search_input", return_value=None),
+        patch.object(dropdown, "_blur") as blur,
+        patch("robo_appian.appian.appian_dropdown.expect"),
+    ):
+        dropdown.select(value="Dinil")
+
+    option.click.assert_called_once_with()
+    blur.assert_called_once_with(refreshed)
+
+
+def test_appian_dropdown_blur_uses_live_combobox() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    dropdown = AppianDropdown(page=AppianPage.get(page), label="CAN")
+    live_combobox = MagicMock(spec=Locator)
+
+    dropdown._blur(live_combobox)
+
+    live_combobox.evaluate.assert_called_once_with("element => element.blur()")
+
+def test_appian_page_dropdown_alias_returns_appian_dropdown() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+
+    dropdown = appian_page.dropdown(label="CAN")
+
+    assert isinstance(dropdown, AppianDropdown)
+    assert dropdown.label == "CAN"
+
+
+def test_appian_dropdown_search_input_uses_field_aria_relationship() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="Order Type")
+
+    combobox = MagicMock(spec=Locator)
+    combobox.get_attribute.side_effect = lambda name: {
+        "aria-labelledby": "order_type_field",
+    }.get(name)
+    listbox = MagicMock(spec=Locator)
+    search = MagicMock(spec=Locator)
+    page.locator.return_value = search
+    search.first = search
+    search.count.return_value = 1
+
+    with patch("robo_appian.appian.appian_dropdown.expect"):
+        result = dropdown._search_input(combobox, listbox)
+
+    assert result is search
+    assert "order_type_field_searchInput" in page.locator.call_args.args[0]
+
+
+def test_appian_dropdown_search_input_is_optional() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="P-Card Holder")
+
+    combobox = MagicMock(spec=Locator)
+    combobox.get_attribute.return_value = "holder_field"
+    listbox = MagicMock(spec=Locator)
+    search = MagicMock(spec=Locator)
+    page.locator.return_value = search
+    search.first = search
+    search.count.return_value = 0
+
+    assert dropdown._search_input(combobox, listbox) is None
+
+
+def test_appian_dropdown_select_uses_search_input_when_present() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="Order Type")
+
+    combobox = MagicMock(spec=Locator)
+    refreshed = MagicMock(spec=Locator)
+    listbox = MagicMock(spec=Locator)
+    search = MagicMock(spec=Locator)
+    role_match = MagicMock(spec=Locator)
+    filtered = MagicMock(spec=Locator)
+    option = MagicMock(spec=Locator)
+    role_match.filter.return_value = filtered
+    filtered.first = option
+    listbox.get_by_role.return_value = role_match
+
+    with (
+        patch.object(dropdown, "is_selected", return_value=False),
+        patch.object(dropdown, "_resolved_locator", side_effect=[combobox, refreshed]),
+        patch.object(dropdown, "_expand") as expand,
+        patch.object(dropdown, "_listbox", return_value=listbox),
+        patch.object(dropdown, "_search_input", return_value=search),
+        patch("robo_appian.appian.appian_dropdown.expect"),
+    ):
+        result = dropdown.select("Office Supplies")
+
+    assert result is dropdown
+    expand.assert_called_once_with(combobox)
+    search.fill.assert_called_once_with("Office Supplies")
+    listbox.get_by_role.assert_called_once_with(
+        "option", name="Office Supplies", exact=True
+    )
+    option.click.assert_called_once_with()
+
+
+def test_appian_dropdown_select_supports_value_keyword() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="P-Card Holder")
+    combobox = MagicMock(spec=Locator)
+    refreshed = MagicMock(spec=Locator)
+    listbox = MagicMock(spec=Locator)
+    role_match = MagicMock(spec=Locator)
+    filtered = MagicMock(spec=Locator)
+    option = MagicMock(spec=Locator)
+    role_match.filter.return_value = filtered
+    filtered.first = option
+    listbox.get_by_role.return_value = role_match
+
+    with (
+        patch.object(dropdown, "is_selected", return_value=False),
+        patch.object(dropdown, "_resolved_locator", side_effect=[combobox, refreshed]),
+        patch.object(dropdown, "_expand") as expand,
+        patch.object(dropdown, "_listbox", return_value=listbox),
+        patch.object(dropdown, "_search_input", return_value=None),
+        patch("robo_appian.appian.appian_dropdown.expect"),
+    ):
+        result = dropdown.select(value="Dinil")
+
+    assert result is dropdown
+    expand.assert_called_once_with(combobox)
+    listbox.get_by_role.assert_called_once_with("option", name="Dinil", exact=True)
+    option.click.assert_called_once_with()
+
+
+def test_appian_dropdown_select_supports_search_text_and_value() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="CAN")
+
+    combobox = MagicMock(spec=Locator)
+    refreshed = MagicMock(spec=Locator)
+    listbox = MagicMock(spec=Locator)
+    search = MagicMock(spec=Locator)
+    role_match = MagicMock(spec=Locator)
+    filtered = MagicMock(spec=Locator)
+    option = MagicMock(spec=Locator)
+    role_match.filter.return_value = filtered
+    filtered.first = option
+    listbox.get_by_role.return_value = role_match
+
+    with (
+        patch.object(dropdown, "is_selected", return_value=False),
+        patch.object(dropdown, "_resolved_locator", side_effect=[combobox, refreshed]),
+        patch.object(dropdown, "_expand") as expand,
+        patch.object(dropdown, "_listbox", return_value=listbox),
+        patch.object(dropdown, "_search_input", return_value=search),
+        patch("robo_appian.appian.appian_dropdown.expect"),
+    ):
+        result = dropdown.select(search_text="1234", value="12345")
+
+    assert result is dropdown
+    expand.assert_called_once_with(combobox)
+    search.fill.assert_called_once_with("1234")
+    listbox.get_by_role.assert_called_once_with("option", name="12345", exact=True)
+    option.click.assert_called_once_with()
+
+
+def test_appian_dropdown_select_supports_one_based_index() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="P-Card Holder")
+
+    combobox = MagicMock(spec=Locator)
+    refreshed = MagicMock(spec=Locator)
+    listbox = MagicMock(spec=Locator)
+    role_options = MagicMock(spec=Locator)
+    visible_options = MagicMock(spec=Locator)
+    option = MagicMock(spec=Locator)
+    role_options.filter.return_value = visible_options
+    visible_options.count.return_value = 3
+    visible_options.nth.return_value = option
+    option.inner_text.return_value = "Brandi Saddler - 455448"
+    listbox.get_by_role.return_value = role_options
+
+    with (
+        patch.object(dropdown, "_resolved_locator", side_effect=[combobox, refreshed]),
+        patch.object(dropdown, "_expand"),
+        patch.object(dropdown, "_listbox", return_value=listbox),
+        patch.object(dropdown, "_search_input", return_value=None),
+        patch("robo_appian.appian.appian_dropdown.expect"),
+    ):
+        result = dropdown.select(index=2)
+
+    assert result is dropdown
+    role_options.filter.assert_called_once_with(visible=True)
+    visible_options.nth.assert_called_once_with(1)
+    option.click.assert_called_once_with()
+
+
+def test_appian_dropdown_select_positional_integer_is_one_based_index() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="P-Card Holder")
+
+    combobox = MagicMock(spec=Locator)
+    refreshed = MagicMock(spec=Locator)
+    listbox = MagicMock(spec=Locator)
+    role_options = MagicMock(spec=Locator)
+    visible_options = MagicMock(spec=Locator)
+    option = MagicMock(spec=Locator)
+    role_options.filter.return_value = visible_options
+    visible_options.count.return_value = 2
+    visible_options.nth.return_value = option
+    option.inner_text.return_value = "Aaron Chen - 516466"
+    listbox.get_by_role.return_value = role_options
+
+    with (
+        patch.object(dropdown, "_resolved_locator", side_effect=[combobox, refreshed]),
+        patch.object(dropdown, "_expand"),
+        patch.object(dropdown, "_listbox", return_value=listbox),
+        patch.object(dropdown, "_search_input", return_value=None),
+        patch("robo_appian.appian.appian_dropdown.expect"),
+    ):
+        dropdown.select(1)
+
+    visible_options.nth.assert_called_once_with(0)
+
+
+def test_appian_dropdown_search_text_requires_searchable_dropdown() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="CAN")
+
+    combobox = MagicMock(spec=Locator)
+    listbox = MagicMock(spec=Locator)
+
+    with (
+        patch.object(dropdown, "is_selected", return_value=False),
+        patch.object(dropdown, "_resolved_locator", return_value=combobox),
+        patch.object(dropdown, "_expand"),
+        patch.object(dropdown, "_listbox", return_value=listbox),
+        patch.object(dropdown, "_search_input", return_value=None),
+    ):
+        with pytest.raises(AssertionError, match="does not expose a searchable input"):
+            dropdown.select(search_text="1234", value="12345")
+
+
+def test_appian_dropdown_select_supports_search_text_and_string_index() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="CAN")
+
+    combobox = MagicMock(spec=Locator)
+    refreshed = MagicMock(spec=Locator)
+    listbox = MagicMock(spec=Locator)
+    search = MagicMock(spec=Locator)
+    role_options = MagicMock(spec=Locator)
+    visible_options = MagicMock(spec=Locator)
+    option = MagicMock(spec=Locator)
+    role_options.filter.return_value = visible_options
+    visible_options.count.return_value = 2
+    visible_options.nth.return_value = option
+    option.inner_text.return_value = "12345"
+    listbox.get_by_role.return_value = role_options
+
+    with (
+        patch.object(dropdown, "_resolved_locator", side_effect=[combobox, refreshed]),
+        patch.object(dropdown, "_expand"),
+        patch.object(dropdown, "_listbox", return_value=listbox),
+        patch.object(dropdown, "_search_input", return_value=search),
+        patch("robo_appian.appian.appian_dropdown.expect"),
+    ):
+        dropdown.select(search_text="123", index="1")
+
+    search.fill.assert_called_once_with("123")
+    visible_options.nth.assert_called_once_with(0)
+    option.click.assert_called_once_with()
+
+
+def test_appian_dropdown_index_must_be_one_based() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    appian_page = AppianPage.get(page)
+    dropdown = AppianDropdown(page=appian_page, label="CAN")
+
+    with pytest.raises(ValueError, match="index must be 1 or greater"):
+        dropdown.select(index=0)
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [
+        lambda page: page.button(name="Save", timeout=7),
+        lambda page: page.textbox(label="Description", timeout=7),
+        lambda page: page.dropdown(label="CAN", timeout=7),
+        lambda page: page.checkbox(label="Select", timeout=7),
+        lambda page: page.radio(label="Decision", timeout=7),
+        lambda page: page.link(name="Edit", timeout=7),
+        lambda page: page.tab(name="Budget Lines", timeout=7),
+        lambda page: page.date(label="Start Date", timeout=7),
+        lambda page: page.table(label="Requests", timeout=7),
+    ],
+)
+def test_appian_component_factories_support_timeout_seconds(factory) -> None:
+    page = _mock_page()
+    component = factory(AppianPage.get(page))
+
+    assert component.timeout == 7.0
+
+
+def test_appian_component_timeout_none_preserves_playwright_default() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    dropdown = AppianDropdown(page=AppianPage.get(page), label="CAN")
+
+    assert dropdown.timeout is None
+    assert dropdown._timeout_kwargs() == {}
+
+
+@pytest.mark.parametrize("timeout", [0, -1, float("inf"), float("nan")])
+def test_appian_component_timeout_must_be_positive_finite(timeout) -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    with pytest.raises(ValueError, match="positive finite"):
+        AppianDropdown(page=AppianPage.get(page), label="CAN", timeout=timeout)
+
+
+def test_appian_dropdown_timeout_overrides_waits_and_click() -> None:
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    dropdown = AppianDropdown(
+        page=AppianPage.get(page),
+        label="Request Category",
+        timeout=10,
+    )
+    combobox = MagicMock(spec=Locator)
+    combobox.get_attribute.return_value = "false"
+    assertion = MagicMock()
+
+    with patch("robo_appian.appian.appian_dropdown.expect", return_value=assertion):
+        dropdown._expand(combobox)
+
+    assertion.to_be_visible.assert_called_once_with(timeout=10000.0)
+    assertion.to_be_enabled.assert_called_once_with(timeout=10000.0)
+    assertion.not_to_have_attribute.assert_called_once_with(
+        "aria-disabled", "true", timeout=10000.0
+    )
+    assertion.to_have_attribute.assert_called_once_with(
+        "aria-expanded", "true", timeout=10000.0
+    )
+    combobox.click.assert_called_once_with(timeout=10000.0)
+
+
+def test_appian_dropdown_dependent_auto_selected_value_succeeds_while_disabled() -> (
+    None
+):
+    """A dependent dropdown may remain disabled after Appian auto-selects its value."""
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    component = AppianDropdown(
+        page=AppianPage.get(page),
+        label="Request Sub-Category",
+        timeout=10,
+    )
+    loading = MagicMock(spec=Locator)
+    loading.inner_text.return_value = "Grant"
+    loading.get_attribute.return_value = "true"
+
+    with (
+        patch.object(component, "is_selected", return_value=False),
+        patch.object(component, "_resolved_locator", return_value=loading),
+        patch.object(component, "_expand") as expand,
+    ):
+        result = component.select(value="Grant")
+
+    assert result is component
+    expand.assert_not_called()
+
+
+def test_appian_dropdown_dependent_waits_until_editable_then_selects() -> None:
+    """A dependent dropdown continues normally once aria-disabled clears."""
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    component = AppianDropdown(
+        page=AppianPage.get(page),
+        label="Request Sub-Category",
+        timeout=10,
+    )
+    loading = MagicMock(spec=Locator)
+    loading.inner_text.return_value = "Select a Value"
+    loading.get_attribute.side_effect = lambda name: (
+        "false" if name == "aria-disabled" else "false"
+    )
+    listbox = MagicMock(spec=Locator)
+    option = MagicMock(spec=Locator)
+    options = MagicMock(spec=Locator)
+    options.filter.return_value.first = option
+    listbox.get_by_role.return_value = options
+    refreshed = MagicMock(spec=Locator)
+    assertion = MagicMock()
+
+    with (
+        patch.object(component, "is_selected", return_value=False),
+        patch.object(
+            component, "_resolved_locator", side_effect=[loading, loading, refreshed]
+        ),
+        patch.object(component, "_expand") as expand,
+        patch.object(component, "_listbox", return_value=listbox),
+        patch.object(component, "_search_input", return_value=None),
+        patch("robo_appian.appian.appian_dropdown.expect", return_value=assertion),
+    ):
+        result = component.select(value="Grant")
+
+    assert result is component
+    expand.assert_called_once_with(loading)
+    option.click.assert_called_once_with(timeout=10000.0)
+
+
+def test_appian_dropdown_is_enabled_without_timeout_is_immediate() -> None:
+    """is_enabled() must not inherit component timeout or WAIT_TIME."""
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    component = AppianDropdown(
+        page=AppianPage.get(page),
+        label="Request Category",
+        timeout=10,
+    )
+    dropdown = MagicMock(spec=Locator)
+    dropdown.count.return_value = 1
+    dropdown.get_attribute.return_value = "true"
+
+    with (
+        patch.object(component, "_resolved_locator", return_value=dropdown),
+        patch("robo_appian.appian.appian_dropdown.expect") as expect_mock,
+    ):
+        result = component.is_enabled()
+
+    assert result is False
+    dropdown.get_attribute.assert_called_once_with("aria-disabled", timeout=0)
+    expect_mock.assert_not_called()
+
+
+def test_appian_dropdown_is_enabled_timeout_waits_and_returns_true() -> None:
+    """Explicit timeout waits for a dependent dropdown to become enabled."""
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    component = AppianDropdown(page=AppianPage.get(page), label="Request Category")
+    dropdown = MagicMock(spec=Locator)
+    assertion = MagicMock()
+
+    with (
+        patch.object(component, "_resolved_locator", return_value=dropdown),
+        patch("robo_appian.appian.appian_dropdown.expect", return_value=assertion),
+    ):
+        result = component.is_enabled(timeout=10)
+
+    assert result is True
+    assertion.not_to_have_attribute.assert_called_once_with(
+        "aria-disabled", "true", timeout=10000.0
+    )
+    assertion.to_be_enabled.assert_called_once_with(timeout=10000.0)
+
+
+def test_appian_dropdown_is_enabled_timeout_returns_false() -> None:
+    """An explicit state-query timeout is a False result, not an exception."""
+    from robo_appian import AppianDropdown
+
+    page = _mock_page()
+    component = AppianDropdown(page=AppianPage.get(page), label="Request Category")
+    dropdown = MagicMock(spec=Locator)
+    assertion = MagicMock()
+    assertion.not_to_have_attribute.side_effect = AssertionError("timed out")
+
+    with (
+        patch.object(component, "_resolved_locator", return_value=dropdown),
+        patch("robo_appian.appian.appian_dropdown.expect", return_value=assertion),
+    ):
+        result = component.is_enabled(timeout=10)
+
+    assert result is False
+
+
+def test_appian_button_is_enabled_without_timeout_is_immediate() -> None:
+    from robo_appian import AppianButton
+
+    page = _mock_page()
+    component = AppianButton(page=AppianPage.get(page), name="Submit", timeout=10)
+    button = MagicMock(spec=Locator)
+    button.count.return_value = 1
+    button.get_attribute.return_value = None
+
+    with patch.object(component, "_visible_locator", return_value=button):
+        assert component.is_enabled() is True
+
+    button.get_attribute.assert_called_once_with("disabled", timeout=0)
+
+
+def test_appian_textbox_is_enabled_timeout_waits() -> None:
+    from robo_appian import AppianTextbox
+
+    page = _mock_page()
+    component = AppianTextbox(page=AppianPage.get(page), label="Description")
+    textbox = MagicMock(spec=Locator)
+    assertion = MagicMock()
+
+    with (
+        patch.object(component, "_visible_locator", return_value=textbox),
+        patch("robo_appian.appian.appian_textbox.expect", return_value=assertion),
+    ):
+        assert component.is_enabled(timeout=3) is True
+
+    assertion.to_be_enabled.assert_called_once_with(timeout=3000.0)

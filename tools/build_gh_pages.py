@@ -31,15 +31,15 @@ API_MAP = {
     "button": ("Button", PKG / "components" / "Button.py"),
     "checkbox": ("AppianCheckbox", PKG / "appian" / "appian_checkbox.py"),
     "appian-checkbox": ("AppianCheckbox", PKG / "appian" / "appian_checkbox.py"),
-    "dropdown": ("Dropdown", PKG / "components" / "Dropdown.py"),
-    "link": ("Link", PKG / "components" / "Link.py"),
+    "dropdown": ("AppianDropdown", PKG / "appian" / "appian_dropdown.py"),
+    "link": ("AppianLink", PKG / "appian" / "appian_link.py"),
     "menu-button": ("MenuButton", PKG / "components" / "MenuButton.py"),
     "record-list": ("RecordList", PKG / "components" / "RecordList.py"),
     "region": ("Region", PKG / "components" / "Region.py"),
-    "search-dropdown": ("SearchDropdown", PKG / "components" / "SearchDropdown.py"),
+    "search-dropdown": ("AppianDropdown", PKG / "appian" / "appian_dropdown.py"),
     "search-input": ("SearchInput", PKG / "components" / "SearchInput.py"),
-    "tab": ("Tab", PKG / "components" / "Tab.py"),
-    "table": ("Table", PKG / "components" / "Table.py"),
+    "tab": ("AppianTab", PKG / "appian" / "appian_tab.py"),
+    "table": ("AppianTable", PKG / "appian" / "appian_table.py"),
     "text": ("Text", PKG / "components" / "Text.py"),
     "component-utils": ("ComponentUtils", PKG / "utils" / "ComponentUtils.py"),
 }
@@ -212,8 +212,8 @@ def home_body() -> str:
       <pre><code>from robo_appian import AppianPage
 
 def test_request(page: AppianPage):
-    page.appian_textbox(label="Request Name").fill("Example")
-    page.appian_button(name="Submit").click()</code></pre>
+    page.textbox(label="Request Name").fill("Example")
+    page.button(name="Submit").click()</code></pre>
     </div>
     <div class="ra-target-architecture">
       <div class="ra-target-panel-title light"><span>Architecture Overview</span><a href="getting-started/concepts/index.html">How it works &rarr;</a></div>

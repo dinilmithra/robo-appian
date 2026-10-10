@@ -34,13 +34,21 @@ class AppianRadioSelect(AppianInputComponent):
         label: str,
         exact: bool = True,
         scope: "AppianLocator | None" = None,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
     ) -> None:
         if not isinstance(label, str) or not label.strip():
             raise ValueError("Radio-group label cannot be empty or whitespace.")
-        super().__init__(page=page)
+        super().__init__(page=page, timeout=timeout)
         self._label = " ".join(label.split())
         self._exact = exact
         self._scope = scope
+        self._visible = ComponentUtils.normalize_visibility(visible)
+
+    @property
+    def visible(self) -> bool | None:
+        """Return the visibility constraint used to resolve this component."""
+        return self._visible
 
     @staticmethod
     def _xpath_literal(value: str) -> str:
@@ -83,6 +91,10 @@ class AppianRadioSelect(AppianInputComponent):
         long Playwright auto-wait for the latter by checking locator count
         before reading the label id.
         """
+        indexed = getattr(self, "_indexed_locator", None)
+        if indexed is not None:
+            return indexed
+
         label = self._label_locator()
         if label.count() == 0:
             return None
@@ -93,6 +105,10 @@ class AppianRadioSelect(AppianInputComponent):
         group = self._root_locator(
             f"xpath=(.//*[@role='radiogroup' and @aria-labelledby={label_id_literal}])[1]"
         )
+        if self._visible is not None:
+            if self._visible is not None:
+                group = group.filter(visible=self._visible)
+            group = group.first
         return group if group.count() else None
 
     def _radio_locator(self, value: str) -> Locator:
@@ -117,11 +133,13 @@ class AppianRadioSelect(AppianInputComponent):
         labels = self._root_locator(
             "xpath=.//label[@for and normalize-space(string(.))=" + option_text + "]"
         )
+        if self._visible is not None:
+            labels = labels.filter(visible=self._visible)
         option_label = labels.first
         expect(
             option_label,
             f"Visible radio option '{choice}' was not found for Appian field '{self._label}'.",
-        ).to_be_visible()
+        ).to_be_visible(**self._timeout_kwargs())
 
         # Once the live label has appeared, reject ambiguous global matches.
         label_count = labels.count()
@@ -134,12 +152,10 @@ class AppianRadioSelect(AppianInputComponent):
         # Appian renders the native radio immediately before its associated label.
         # Resolve through that live sibling relationship instead of caching a
         # transient dynamic id across a SAIL rerender.
-        radio = option_label.locator(
-            "xpath=preceding-sibling::input[@type='radio'][1]"
-        )
+        radio = option_label.locator("xpath=preceding-sibling::input[@type='radio'][1]")
         expect(
             radio, f"Radio input linked to visible option '{choice}' was not found."
-        ).to_be_attached()
+        ).to_be_attached(**self._timeout_kwargs())
         return radio
 
     def _radio_label_locator(self, target: Locator) -> Locator:
@@ -158,12 +174,8 @@ class AppianRadioSelect(AppianInputComponent):
         target_id_literal = self._xpath_literal(target_id)
         group = target.locator("xpath=ancestor::*[@role='radiogroup'][1]")
         if group.count():
-            return group.locator(
-                f"xpath=.//label[@for={target_id_literal}]"
-            ).first
-        return self._root_locator(
-            f"xpath=.//label[@for={target_id_literal}]"
-        ).first
+            return group.locator(f"xpath=.//label[@for={target_id_literal}]").first
+        return self._root_locator(f"xpath=.//label[@for={target_id_literal}]").first
 
     def is_selected(self, value: str) -> bool:
         """Return whether the requested radio option is selected."""
@@ -176,16 +188,18 @@ class AppianRadioSelect(AppianInputComponent):
         if target.is_checked():
             return self
 
-        expect(target, f"Appian radio field {description} was not found.").to_be_attached()
+        expect(
+            target, f"Appian radio field {description} was not found."
+        ).to_be_attached(**self._timeout_kwargs())
         target.scroll_into_view_if_needed()
-        self._radio_label_locator(target).click()
+        self._radio_label_locator(target).click(**self._timeout_kwargs())
 
         # Appian can re-render the control after the action, so resolve it again.
         target = self._radio_locator(value)
         expect(
             target,
             f"Appian radio field {description} did not become selected.",
-        ).to_be_checked(checked=True)
+        ).to_be_checked(checked=True, **self._timeout_kwargs())
         self._after_change(target)
         ComponentUtils.wait_for_appian_action_completed(self._page)
         return self

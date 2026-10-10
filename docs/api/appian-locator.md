@@ -26,8 +26,8 @@ Component helpers that accept a `scope=` argument can use an `AppianLocator` to 
 You normally do not create an `AppianLocator` just to fill a regular field. Prefer the simpler page APIs first:
 
 ```python
-page.appian_textbox(label="Request Title").fill("Example")
-page.appian_button(name="Next").click()
+page.textbox(label="Request Title").fill("Example")
+page.button(name="Next").click()
 ```
 
 ## API

@@ -11,7 +11,11 @@ from dataclasses import dataclass
 from typing import Any, Iterator, Mapping, Optional
 
 from robo_automation import build_test_case_id, current_correlation, is_framework_page
-from robo_automation.browser import close_resource, create_browser_context, create_browser_page
+from robo_automation.browser import (
+    close_resource,
+    create_browser_context,
+    create_browser_page,
+)
 
 from .appian import AppianPage
 
@@ -156,7 +160,6 @@ def automation_test_case_id(nodeid: str) -> str:
     return build_test_case_id(nodeid)
 
 
-
 def automation_context_for(value: Any, *, nodeid: str = "") -> AutomationContext:
     """Return correlation metadata stored on a pytest item/report-like object."""
     effective_nodeid = str(nodeid or getattr(value, "nodeid", "") or "")
@@ -190,6 +193,7 @@ def automation_test_log_path(value: Any) -> str:
         or ""
     )
 
+
 def resolve_appian_page(value: object) -> AppianPage | None:
     """Return ``value`` as an AppianPage when it is a framework page wrapper."""
     if isinstance(value, AppianPage):
@@ -200,7 +204,9 @@ def resolve_appian_page(value: object) -> AppianPage | None:
     return None
 
 
-def measure_appian_runtime(config: Any, action: str, *, metadata: Mapping[str, Any] | None = None):
+def measure_appian_runtime(
+    config: Any, action: str, *, metadata: Mapping[str, Any] | None = None
+):
     """Measure a pytest lifecycle operation through the lower runtime if available."""
     monitor = getattr(config, "_performance_monitor", None)
     if monitor is None:

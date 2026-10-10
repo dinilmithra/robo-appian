@@ -7,15 +7,281 @@ from playwright.sync_api import Locator, expect
 from robo_automation import Scope
 
 from robo_appian.appian.appian_date import AppianDate
-from robo_appian.components.Dropdown import Dropdown
+from robo_appian.appian.appian_cell import AppianCell
 from robo_appian.components.SearchInput import SearchInput
 from robo_appian.utils.ComponentUtils import ComponentUtils
 
 logger = logging.getLogger(__name__)
 
 
-class Table:
-    """Reusable operations for Appian tables and editable grids."""
+class AppianTable:
+    """Reusable operations for Appian tables and editable grids.
+
+    ``AppianTable`` provides semantic table/grid operations and can
+    be instantiated through ``AppianPage.table(...)`` as a semantic
+    Appian table component. At least one of ``label``, ``header_name``,
+    ``row_name``, or ``column_name`` is required for the component form.
+
+    ``visible`` is tri-state: ``True`` selects visible tables, ``False``
+    selects hidden tables, and ``None`` applies no visibility filter so the
+    live locator can contain both visible and hidden matches.
+    """
+
+    def __init__(
+        self,
+        scope: Scope,
+        *,
+        label: str | None = None,
+        header_name: str | None = None,
+        row_name: str | None = None,
+        column_name: str | None = None,
+        visible: bool | str | None = True,
+        exact: bool = True,
+        timeout: float | int | None = None,
+    ) -> None:
+        identifiers = {
+            "label": self.__normalize_optional_identifier(label, "label"),
+            "header_name": self.__normalize_optional_identifier(
+                header_name, "header_name"
+            ),
+            "row_name": self.__normalize_optional_identifier(row_name, "row_name"),
+            "column_name": self.__normalize_optional_identifier(
+                column_name, "column_name"
+            ),
+        }
+        if not any(identifiers.values()):
+            raise ValueError(
+                "AppianTable requires at least one of: "
+                "label, header_name, row_name, column_name."
+            )
+
+        self._component_scope = scope
+        self._component_label = identifiers["label"]
+        self._component_header_name = identifiers["header_name"]
+        self._component_row_name = identifiers["row_name"]
+        self._component_column_name = identifiers["column_name"]
+        self._component_visible = ComponentUtils.normalize_visibility(visible)
+        self._component_exact = exact
+        self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
+
+    @staticmethod
+    def __normalize_optional_identifier(value: str | None, name: str) -> str | None:
+        if value is None:
+            return None
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"AppianTable {name} cannot be empty or whitespace.")
+        return " ".join(value.split())
+
+    @property
+    def visible(self) -> bool | None:
+        """Return the table visibility constraint.
+
+        ``None`` means no visibility filtering is applied.
+        """
+        return self._component_visible
+
+    @property
+    def timeout(self) -> float | None:
+        """Return this table's timeout override in seconds, if any."""
+        return self._timeout
+
+    def _timeout_kwargs(self) -> dict[str, float]:
+        return ComponentUtils.timeout_kwargs(self._timeout)
+
+    @property
+    def locator(self) -> Locator:
+        """Return the live locator for this semantic table component.
+
+        When ``visible=None``, the returned locator is intentionally not
+        filtered by visibility and can therefore contain both visible and
+        hidden matching tables.
+        """
+        indexed = getattr(self, "_indexed_locator", None)
+        if indexed is not None:
+            return indexed
+
+        raw_scope = ComponentUtils.unwrap_scope(self._component_scope)
+
+        if self._component_label is not None:
+            tables = raw_scope.get_by_role(
+                "table",
+                name=self._component_label,
+                exact=self._component_exact,
+            )
+        elif self._component_header_name is not None:
+            region = raw_scope.get_by_role(
+                "region",
+                name=self._component_header_name,
+                exact=self._component_exact,
+            )
+            tables = region.locator("table")
+        else:
+            tables = raw_scope.locator("table")
+
+        if self._component_row_name is not None:
+            row_text = self.__xpath_literal(self._component_row_name)
+            row_match = raw_scope.locator(
+                "xpath=.//tbody/tr[td and contains("
+                "normalize-space(translate(string(.), '\u00a0', ' ')), "
+                + row_text
+                + ")]"
+            )
+            tables = tables.filter(has=row_match)
+
+        if self._component_column_name is not None:
+            column_text = self.__xpath_literal(self._component_column_name)
+            column_match = raw_scope.locator(
+                "xpath=.//thead//th[normalize-space(translate(string(.), '\u00a0', ' '))="
+                + column_text
+                + " or normalize-space(@abbr)="
+                + column_text
+                + "]"
+            )
+            tables = tables.filter(has=column_match)
+
+        if self._component_visible is not None:
+            tables = tables.filter(visible=self._component_visible)
+
+        return tables
+
+    @property
+    def appian_page(self):
+        """Return the AppianPage used to create this table when available."""
+        return self._component_scope
+
+    @property
+    def row_name(self) -> str | None:
+        """Return the optional row-name hint used to identify this table."""
+        return self._component_row_name
+
+    @property
+    def column_name(self) -> str | None:
+        """Return the optional column-name hint used to identify this table."""
+        return self._component_column_name
+
+    def cell(
+        self,
+        *,
+        row_name: str | None = None,
+        row_number: int | None = None,
+        column_name: str | None = None,
+        column_number: int | None = None,
+        visible: bool | str | None = True,
+        exact: bool = True,
+    ):
+        """Return a cell directly from this table.
+
+        The explicit row/column arguments take precedence. When omitted,
+        ``row_name`` and ``column_name`` supplied when this AppianTable was
+        created are reused. Row and column numbers are one-based.
+        """
+        normalized_row = None if row_name is None else " ".join(str(row_name).split())
+        if row_name is not None and not normalized_row:
+            raise ValueError(
+                "AppianAppianTable.cell row_name cannot be empty or whitespace."
+            )
+        if row_number is not None and row_number < 1:
+            raise ValueError("AppianAppianTable.cell row_number must be 1 or greater.")
+
+        normalized_column = (
+            None if column_name is None else " ".join(str(column_name).split())
+        )
+        if column_name is not None and not normalized_column:
+            raise ValueError(
+                "AppianAppianTable.cell column_name cannot be empty or whitespace."
+            )
+        if column_number is not None and column_number < 1:
+            raise ValueError(
+                "AppianAppianTable.cell column_number must be 1 or greater."
+            )
+
+        effective_row_name = normalized_row
+        if effective_row_name is None and row_number is None:
+            effective_row_name = self._component_row_name
+        if effective_row_name is None and row_number is None:
+            raise ValueError(
+                "AppianAppianTable.cell requires row_name or row_number, "
+                "unless the table was created with row_name."
+            )
+
+        effective_column_name = normalized_column
+        if effective_column_name is None and column_number is None:
+            effective_column_name = self._component_column_name
+        if effective_column_name is None and column_number is None:
+            raise ValueError(
+                "AppianAppianTable.cell requires column_name or column_number, "
+                "unless the table was created with column_name."
+            )
+
+        row = self.row(
+            name=effective_row_name,
+            row_number=row_number,
+            visible=None,
+            exact=exact,
+        )
+        return row.cell(
+            column_name=effective_column_name,
+            column_number=column_number,
+            visible=visible,
+            exact=exact,
+        )
+
+    def _column_index(self, column_name: str, *, exact: bool = True) -> int:
+        """Return the zero-based index for a semantic column name."""
+        normalized = " ".join(str(column_name or "").split())
+        if not normalized:
+            raise ValueError("Column name cannot be empty or whitespace.")
+
+        headers = self.locator.locator("thead th")
+        for index in range(headers.count()):
+            header = headers.nth(index)
+            text = " ".join((header.inner_text() or "").split())
+            abbr = " ".join((header.get_attribute("abbr") or "").split())
+            if exact:
+                matches = text == normalized or abbr == normalized
+            else:
+                matches = normalized in text or normalized in abbr
+            if matches:
+                return index
+        raise AssertionError(f"Column '{normalized}' was not found in table.")
+
+    def appian_column(
+        self,
+        *,
+        name: str | None = None,
+        column_number: int | None = None,
+        visible: bool | str | None = True,
+        exact: bool = True,
+    ):
+        """Return a semantic column scoped to this Appian table."""
+        from robo_appian.appian.appian_column import AppianColumn
+
+        return AppianColumn(
+            self,
+            name=name,
+            column_number=column_number,
+            visible=visible,
+            exact=exact,
+        )
+
+    def row(
+        self,
+        *,
+        name: str | None = None,
+        row_number: int | None = None,
+        visible: bool | str | None = True,
+        exact: bool = True,
+    ):
+        """Return a semantic row scoped to this Appian table."""
+        from robo_appian.appian.appian_row import AppianRow
+
+        return AppianRow(
+            self,
+            name=name,
+            row_number=row_number,
+            visible=visible,
+            exact=exact,
+        )
 
     @staticmethod
     def __xpath_literal(value: str) -> str:
@@ -34,7 +300,7 @@ class Table:
         if not text:
             raise ValueError("Radio option text cannot be empty.")
 
-        literal = Table.__xpath_literal(text)
+        literal = AppianTable.__xpath_literal(text)
         raw_scope = ComponentUtils.unwrap_scope(scope)
         label = raw_scope.locator(
             "xpath=(.//label[@for and normalize-space(string(.))=" + literal + "])[1]"
@@ -57,18 +323,18 @@ class Table:
     @staticmethod
     def __get_table(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         excat_match: bool = False,
         column_name: Optional[str] = None,
-        region_name: str = "",
+        header_name: str = "",
         table_column_name: Optional[str] = None,
     ) -> Locator:
         """
         Resolve a visible table using the first available identifier.
 
         Resolution precedence:
-        1. ``table_name`` - explicit accessible/name-based table lookup.
-        2. ``region_name`` - first visible table immediately under that region.
+        1. ``label`` - explicit accessible/name-based table lookup.
+        2. ``header_name`` - table scoped by an accessible region or visible heading/label.
         3. ``table_column_name`` - table containing that named column.
         4. ``column_name`` - compatibility fallback; useful when the target
            cell column itself uniquely identifies the table.
@@ -77,16 +343,16 @@ class Table:
         If more than one identifier is supplied, the higher-precedence
         identifier is used.
         """
-        normalized_table_name = str(table_name or "").strip()
-        normalized_region_name = str(region_name or "").strip()
+        normalized_label = str(label or "").strip()
+        normalized_header_name = str(header_name or "").strip()
         normalized_table_column = str(table_column_name or "").strip()
         normalized_column = str(column_name or "").strip()
 
-        if normalized_table_name:
+        if normalized_label:
             named_table = (
                 scope.get_by_role(
                     "table",
-                    name=normalized_table_name,
+                    name=normalized_label,
                     exact=excat_match,
                 )
                 .filter(visible=True)
@@ -97,7 +363,7 @@ class Table:
 
             table_label = (
                 scope.get_by_text(
-                    normalized_table_name,
+                    normalized_label,
                     exact=excat_match,
                 )
                 .filter(visible=True)
@@ -105,7 +371,7 @@ class Table:
             )
             expect(
                 table_label,
-                f"Table label '{normalized_table_name}' was not visible.",
+                f"Table label '{normalized_label}' was not visible.",
             ).to_be_visible()
 
             field_layout = table_label.locator(
@@ -129,28 +395,64 @@ class Table:
             )
             expect(
                 table,
-                f"Table '{normalized_table_name}' was not visible.",
+                f"Table '{normalized_label}' was not visible.",
             ).to_be_visible()
             return table
 
-        if normalized_region_name:
+        if normalized_header_name:
+            # Appian exposes table section headers in more than one semantic form.
+            # Prefer an accessible region name when present, then fall back to a
+            # visible heading/label and the table associated with that header.
             named_region = (
                 scope.get_by_role(
                     "region",
-                    name=normalized_region_name,
+                    name=normalized_header_name,
                     exact=excat_match,
                 )
                 .filter(visible=True)
                 .first
             )
+            if named_region.count() > 0:
+                table = named_region.locator("table").filter(visible=True).first
+                if table.count() > 0:
+                    return table
+
+            header = (
+                scope.get_by_role(
+                    "heading",
+                    name=normalized_header_name,
+                    exact=excat_match,
+                )
+                .filter(visible=True)
+                .first
+            )
+            if header.count() == 0:
+                header = (
+                    scope.get_by_text(
+                        normalized_header_name,
+                        exact=excat_match,
+                    )
+                    .filter(visible=True)
+                    .first
+                )
+
             expect(
-                named_region,
-                f"Region '{normalized_region_name}' was not visible.",
+                header,
+                f"Table header '{normalized_header_name}' was not visible.",
             ).to_be_visible()
-            table = named_region.locator("table").filter(visible=True).first
+
+            header_region = header.locator("xpath=ancestor::*[@role='region'][1]")
+            if header_region.count() > 0:
+                table = header_region.locator("table").filter(visible=True).first
+                if table.count() > 0:
+                    return table
+
+            table = (
+                header.locator("xpath=following::table[1]").filter(visible=True).first
+            )
             expect(
                 table,
-                f"No visible table was found inside region '{normalized_region_name}'.",
+                f"No visible table was found for header '{normalized_header_name}'.",
             ).to_be_visible()
             return table
 
@@ -161,7 +463,7 @@ class Table:
             )
             for index in range(tables.count()):
                 table = tables.nth(index)
-                if Table.__has_column(table, lookup_column):
+                if AppianTable.__has_column(table, lookup_column):
                     return table
             raise ValueError(f"No visible table contains column '{lookup_column}'.")
 
@@ -245,11 +547,11 @@ class Table:
     @staticmethod
     def __get_row_by_index(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_number: int,
         excat_match: bool = False,
         column_name: Optional[str] = None,
-        region_name: str = "",
+        header_name: str = "",
     ) -> Locator:
         """
         Return a one-based data row.
@@ -260,15 +562,15 @@ class Table:
         if row_number < 1:
             raise ValueError("Row number must be 1 or greater.")
 
-        table = Table.__get_table(
+        table = AppianTable.__get_table(
             scope,
-            table_name,
+            label,
             excat_match,
             column_name,
-            region_name,
+            header_name,
         )
 
-        rows = Table.__get_data_rows(table)
+        rows = AppianTable.__get_data_rows(table)
 
         row_count = rows.count()
 
@@ -312,7 +614,7 @@ class Table:
         if not normalized:
             raise ValueError("Row name cannot be empty or whitespace.")
 
-        rows = Table.__get_data_rows(table)
+        rows = AppianTable.__get_data_rows(table)
 
         for index in range(rows.count()):
             row = rows.nth(index)
@@ -339,18 +641,18 @@ class Table:
     @staticmethod
     def __get_cell(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         row_number: Optional[int] = None,
         column_name: str = "",
         excat_match: bool = False,
-        region_name: str = "",
+        header_name: str = "",
         row_name: str = "",
         column_number: Optional[int] = None,
         table_column_name: Optional[str] = None,
     ) -> Locator:
         """Resolve a table cell from flexible table/row/column identifiers.
 
-        Table precedence: ``table_name`` > ``region_name`` >
+        Table precedence: ``label`` > ``header_name`` >
         ``table_column_name`` > target ``column_name`` > first visible table.
 
         Row precedence: ``row_number`` > ``row_name``.
@@ -358,19 +660,19 @@ class Table:
 
         Row and column numbers are one-based.
         """
-        table = Table.__get_table(
+        table = AppianTable.__get_table(
             scope,
-            table_name=table_name,
+            label=label,
             excat_match=excat_match,
             column_name=column_name,
-            region_name=region_name,
+            header_name=header_name,
             table_column_name=table_column_name,
         )
 
         if row_number is not None:
             if row_number < 1:
                 raise ValueError("Row number must be 1 or greater.")
-            rows = Table.__get_data_rows(table)
+            rows = AppianTable.__get_data_rows(table)
             row = rows.nth(row_number - 1)
             expect(
                 row,
@@ -383,7 +685,7 @@ class Table:
                 raise ValueError(
                     "Specify row_number or row_name to locate a table cell."
                 )
-            row = Table.__get_row_by_name(table, normalized_row_name, excat_match)
+            row = AppianTable.__get_row_by_name(table, normalized_row_name, excat_match)
             row_description = f"'{normalized_row_name}'"
 
         if column_number is not None:
@@ -397,7 +699,7 @@ class Table:
                 raise ValueError(
                     "Specify column_number or column_name to locate a table cell."
                 )
-            column_index = Table.__get_column_index(table, normalized_column_name)
+            column_index = AppianTable.__get_column_index(table, normalized_column_name)
             column_description = f"'{normalized_column_name}'"
 
         cells = row.locator("td")
@@ -416,64 +718,64 @@ class Table:
     @staticmethod
     def __get_cell_by_named_row(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_name: str,
         column_name: str,
         excat_match: bool = False,
-        region_name: str = "",
+        header_name: str = "",
         table_column_name: Optional[str] = None,
     ) -> Locator:
         """Compatibility wrapper for named-row/named-column cell lookup."""
-        return Table.__get_cell(
+        return AppianTable.__get_cell(
             scope=scope,
-            table_name=table_name,
+            label=label,
             row_name=row_name,
             column_name=column_name,
             excat_match=excat_match,
-            region_name=region_name,
+            header_name=header_name,
             table_column_name=table_column_name,
         )
 
     @staticmethod
     def get_row_count(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         column_name: Optional[str] = None,
-        region_name: str = "",
+        header_name: str = "",
         table_column_name: Optional[str] = None,
     ) -> int:
         """Count visible data rows in a resolved Appian table.
 
-        Identify the table by region or heading text when ``table_name`` is
+        Identify the table by region or heading text when ``label`` is
         supplied. Otherwise, optionally use a visible column header and finally
         fall back to the first visible table. Empty-grid placeholder rows are
         excluded.
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Optional region or heading text identifying the table.
+            label: Optional region or heading text identifying the table.
             column_name: Optional header used when no table name is available.
-            region_name: Optional accessible region name identifying the table container.
+            header_name: Optional accessible header name identifying the table container.
             table_column_name: Optional visible column header used to resolve the table within a region.
 
         Returns:
             int: Number of visible body rows containing actual data.
         """
-        table = Table.__get_table(
+        table = AppianTable.__get_table(
             scope,
-            table_name=table_name,
+            label=label,
             column_name=column_name,
-            region_name=region_name,
+            header_name=header_name,
             table_column_name=table_column_name,
         )
 
-        return Table.__get_data_rows(table).count()
+        return AppianTable.__get_data_rows(table).count()
 
     @staticmethod
     def get_cell(
         scope: Scope,
-        table_name: str = "",
-        region_name: str = "",
+        label: str = "",
+        header_name: str = "",
         table_column_name: Optional[str] = None,
         row_number: Optional[int] = None,
         row_name: str = "",
@@ -483,14 +785,14 @@ class Table:
     ) -> Locator:
         """Return a visible table cell using flexible semantic selectors.
 
-        Table: table_name > region_name > table_column_name > column_name.
+        Table: label > header_name > table_column_name > column_name.
         Row: row_number > row_name.
         Column: column_number > column_name.
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
-            region_name: Optional region name used to narrow the lookup.
+            label: Visible or accessible name of the target table.
+            header_name: Optional header name used to narrow the lookup.
             table_column_name: Optional table-column identifier used when resolving a cell.
             row_number: One-based row number of the target table row.
             row_name: Visible text identifying the target row.
@@ -502,10 +804,10 @@ class Table:
         Returns:
             Locator: The matching table cell locator.
         """
-        return Table.__get_cell(
+        return AppianTable.__get_cell(
             scope=scope,
-            table_name=table_name,
-            region_name=region_name,
+            label=label,
+            header_name=header_name,
             table_column_name=table_column_name,
             row_number=row_number,
             row_name=row_name,
@@ -517,26 +819,26 @@ class Table:
     @staticmethod
     def get_cell_text(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         row_number: Optional[int] = None,
         column_name: str = "",
-        region_name: str = "",
+        header_name: str = "",
         row_name: str = "",
         column_number: Optional[int] = None,
         table_column_name: Optional[str] = None,
     ) -> str:
         """Read text from a resolved table cell.
 
-        Table lookup uses table_name, region_name, or a column name.
+        Table lookup uses label, header_name, or a column name.
         Cell lookup accepts row_number or row_name and column_number or
         column_name. Numeric selectors take precedence when both are supplied.
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             row_name: Visible text identifying the target row.
             column_number: One-based column number used when a column name is unavailable.
             table_column_name: Optional table-column identifier used when resolving a cell.
@@ -545,10 +847,10 @@ class Table:
         Returns:
             str: The visible text from the matching table cell.
         """
-        cell = Table.__get_cell(
+        cell = AppianTable.__get_cell(
             scope=scope,
-            table_name=table_name,
-            region_name=region_name,
+            label=label,
+            header_name=header_name,
             table_column_name=table_column_name,
             row_number=row_number,
             row_name=row_name,
@@ -560,7 +862,7 @@ class Table:
     @staticmethod
     def get_cell_text_in_named_row(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_name: str,
         column_name: str,
     ) -> str:
@@ -568,7 +870,7 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
 
@@ -576,9 +878,9 @@ class Table:
         Returns:
             str: The visible text from the requested cell in the named row.
         """
-        cell = Table.__get_cell_by_named_row(
+        cell = AppianTable.__get_cell_by_named_row(
             scope,
-            table_name,
+            label,
             row_name,
             column_name,
         )
@@ -588,11 +890,11 @@ class Table:
     @staticmethod
     def fill_input_in_named_row(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         row_name: str = "",
         column_name: str = "",
         value: str = "",
-        region_name: str = "",
+        header_name: str = "",
     ) -> None:
         """Fill a text input or textarea at a named-row/column intersection.
 
@@ -601,18 +903,18 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
             value: Value to enter or select.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
         """
-        cell = Table.__get_cell_by_named_row(
+        cell = AppianTable.__get_cell_by_named_row(
             scope,
-            table_name,
+            label,
             row_name,
             column_name,
-            region_name=region_name,
+            header_name=header_name,
         )
 
         textbox = cell.get_by_role("textbox").filter(visible=True).first
@@ -638,11 +940,11 @@ class Table:
     @staticmethod
     def fill_input_in_cell(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         row_number: Optional[int] = None,
         column_name: str = "",
         value: str = "",
-        region_name: str = "",
+        header_name: str = "",
         row_name: str = "",
         column_number: Optional[int] = None,
         table_column_name: Optional[str] = None,
@@ -651,19 +953,19 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
             value: Value to enter or select.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             row_name: Visible text identifying the target row.
             column_number: One-based column number used when a column name is unavailable.
             table_column_name: Optional table-column identifier used when resolving a cell.
         """
-        cell = Table.__get_cell(
+        cell = AppianTable.__get_cell(
             scope=scope,
-            table_name=table_name,
-            region_name=region_name,
+            label=label,
+            header_name=header_name,
             table_column_name=table_column_name,
             row_number=row_number,
             row_name=row_name,
@@ -680,11 +982,11 @@ class Table:
     @staticmethod
     def fill_date_in_named_row(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         row_name: str = "",
         column_name: str = "",
         value: str = "",
-        region_name: str = "",
+        header_name: str = "",
         column_number: Optional[int] = None,
         table_column_name: Optional[str] = None,
     ) -> None:
@@ -692,18 +994,18 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
             value: Value to enter or select.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             column_number: One-based column number used when a column name is unavailable.
             table_column_name: Optional table-column identifier used when resolving a cell.
         """
-        cell = Table.__get_cell(
+        cell = AppianTable.__get_cell(
             scope=scope,
-            table_name=table_name,
-            region_name=region_name,
+            label=label,
+            header_name=header_name,
             table_column_name=table_column_name,
             row_name=row_name,
             column_number=column_number,
@@ -720,11 +1022,11 @@ class Table:
     @staticmethod
     def select_dropdown_in_cell(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         row_number: Optional[int] = None,
         column_name: str = "",
         option_name: str = "",
-        region_name: str = "",
+        header_name: str = "",
         row_name: str = "",
         column_number: Optional[int] = None,
         table_column_name: Optional[str] = None,
@@ -733,36 +1035,35 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
             option_name: Visible option text to select.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             row_name: Visible text identifying the target row.
             column_number: One-based column number used when a column name is unavailable.
             table_column_name: Optional table-column identifier used when resolving a cell.
         """
-        cell = Table.__get_cell(
+        cell = AppianTable.__get_cell(
             scope=scope,
-            table_name=table_name,
-            region_name=region_name,
+            label=label,
+            header_name=header_name,
             table_column_name=table_column_name,
             row_number=row_number,
             row_name=row_name,
             column_number=column_number,
             column_name=column_name,
         )
-        dropdown = cell.get_by_role("combobox").filter(visible=True).first
-        expect(
-            dropdown, "Dropdown was not found in the resolved table cell."
-        ).to_be_visible()
-        Dropdown.select_by_locator(scope, dropdown, option_name)
+        from .appian_page import AppianPage
+
+        appian_cell = AppianCell(cell, page=AppianPage.get(cell.page))
+        appian_cell.dropdown[0].select(value=option_name)
         logger.debug("Selected '%s' in resolved table cell.", option_name)
 
     @staticmethod
     def select_dropdown_in_named_row(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_name: str,
         column_name: str,
         option_name: str,
@@ -774,38 +1075,26 @@ class Table:
             column_name="ROBO APPIAN"
             option_name="Other"
 
-        Table only locates the dropdown. Dropdown retains
-        responsibility for interacting with the Appian component.
+        AppianTable locates the cell and delegates dropdown interaction to AppianDropdown.
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
             option_name: Visible option text to select.
         """
-        cell = Table.__get_cell_by_named_row(
+        cell = AppianTable.__get_cell_by_named_row(
             scope,
-            table_name,
+            label,
             row_name,
             column_name,
         )
 
-        dropdown = cell.get_by_role("combobox").filter(visible=True).first
+        from .appian_page import AppianPage
 
-        expect(
-            dropdown,
-            (
-                f"Dropdown was not found in row "
-                f"'{row_name}', column '{column_name}'."
-            ),
-        ).to_be_visible()
-
-        Dropdown.select_by_locator(
-            scope,
-            dropdown,
-            option_name,
-        )
+        appian_cell = AppianCell(cell, page=AppianPage.get(cell.page))
+        appian_cell.dropdown[0].select(value=option_name)
 
         logger.debug(
             ("Selected '%s' from dropdown " "in row '%s', column '%s'."),
@@ -817,26 +1106,26 @@ class Table:
     @staticmethod
     def select_search_input_in_named_row(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_name: str,
         column_name: str,
         option_name: str,
     ) -> None:
         """Select a value from an Appian SearchInput in a named table row.
 
-        Table resolves the row/column intersection and SearchInput.
+        AppianTable resolves the row/column intersection and SearchInput.
         SearchInput performs the actual picker interaction.
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
             option_name: Visible option text to select.
         """
-        cell = Table.__get_cell_by_named_row(
+        cell = AppianTable.__get_cell_by_named_row(
             scope,
-            table_name,
+            label,
             row_name,
             column_name,
         )
@@ -869,7 +1158,7 @@ class Table:
     @staticmethod
     def get_label_value_in_cell(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_number: int,
         column_name: str,
     ) -> str:
@@ -879,7 +1168,7 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
 
@@ -887,16 +1176,16 @@ class Table:
         Returns:
             str: The value associated with the requested label in the table cell.
         """
-        return Table.get_cell_text(scope, table_name, row_number, column_name)
+        return AppianTable.get_cell_text(scope, label, row_number, column_name)
 
     @staticmethod
     def fill_textbox_in_cell(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         row_number: Optional[int] = None,
         column_name: str = "",
         value: str = "",
-        region_name: str = "",
+        header_name: str = "",
         row_name: str = "",
         column_number: Optional[int] = None,
         table_column_name: Optional[str] = None,
@@ -905,22 +1194,22 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
             value: Value to enter or select.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             row_name: Visible text identifying the target row.
             column_number: One-based column number used when a column name is unavailable.
             table_column_name: Optional table-column identifier used when resolving a cell.
         """
-        Table.fill_input_in_cell(
+        AppianTable.fill_input_in_cell(
             scope=scope,
-            table_name=table_name,
+            label=label,
             row_number=row_number,
             column_name=column_name,
             value=value,
-            region_name=region_name,
+            header_name=header_name,
             row_name=row_name,
             column_number=column_number,
             table_column_name=table_column_name,
@@ -929,11 +1218,11 @@ class Table:
     @staticmethod
     def fill_date_in_cell(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         row_number: Optional[int] = None,
         column_name: str = "",
         value: str = "",
-        region_name: str = "",
+        header_name: str = "",
         row_name: str = "",
         column_number: Optional[int] = None,
         table_column_name: Optional[str] = None,
@@ -942,19 +1231,19 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
             value: Value to enter or select.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             row_name: Visible text identifying the target row.
             column_number: One-based column number used when a column name is unavailable.
             table_column_name: Optional table-column identifier used when resolving a cell.
         """
-        cell = Table.__get_cell(
+        cell = AppianTable.__get_cell(
             scope=scope,
-            table_name=table_name,
-            region_name=region_name,
+            label=label,
+            header_name=header_name,
             table_column_name=table_column_name,
             row_number=row_number,
             row_name=row_name,
@@ -972,11 +1261,11 @@ class Table:
     @staticmethod
     def select_radio_in_cell(
         scope: Scope,
-        table_name: str = "",
+        label: str = "",
         row_number: Optional[int] = None,
         column_name: str = "",
         value: str = "",
-        region_name: str = "",
+        header_name: str = "",
         row_name: str = "",
         column_number: Optional[int] = None,
         table_column_name: Optional[str] = None,
@@ -985,31 +1274,79 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
             value: Value to enter or select.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             row_name: Visible text identifying the target row.
             column_number: One-based column number used when a column name is unavailable.
             table_column_name: Optional table-column identifier used when resolving a cell.
         """
-        cell = Table.__get_cell(
+        cell = AppianTable.__get_cell(
             scope=scope,
-            table_name=table_name,
-            region_name=region_name,
+            label=label,
+            header_name=header_name,
             table_column_name=table_column_name,
             row_number=row_number,
             row_name=row_name,
             column_number=column_number,
             column_name=column_name,
         )
-        Table.__select_radio_option(cell, value)
+        AppianTable.__select_radio_option(cell, value)
+
+    @staticmethod
+    def click_link_in_cell(
+        scope: Scope,
+        label: str = "",
+        row_number: Optional[int] = None,
+        column_name: str = "",
+        link_name: str = "",
+        header_name: str = "",
+        row_name: str = "",
+        column_number: Optional[int] = None,
+        table_column_name: Optional[str] = None,
+        exact: bool = True,
+    ) -> None:
+        """Click a semantic link contained in a resolved Appian table cell.
+
+        AppianTable owns table/row/cell resolution. The link itself is resolved by
+        Playwright's semantic ``link`` role inside that cell, so native
+        ``<a>`` links and other elements exposed with ``role="link"`` are
+        supported without relying on Appian CSS classes.
+
+        Row and column numbers are one-based. Numeric selectors take
+        precedence when both numeric and named selectors are supplied.
+        """
+        normalized_link = str(link_name or "").strip()
+        if not normalized_link:
+            raise ValueError("Link name cannot be empty or whitespace.")
+
+        cell = AppianTable.__get_cell(
+            scope=scope,
+            label=label,
+            header_name=header_name,
+            table_column_name=table_column_name,
+            row_number=row_number,
+            row_name=row_name,
+            column_number=column_number,
+            column_name=column_name,
+            excat_match=exact,
+        )
+
+        from .appian_page import AppianPage
+
+        appian_cell = AppianCell(cell, page=AppianPage.get(cell.page))
+        appian_cell.link(name=normalized_link, exact=exact).click()
+        logger.debug(
+            "Clicked link '%s' in resolved Appian table cell.",
+            normalized_link,
+        )
 
     @staticmethod
     def click_action_in_cell(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_number: int,
         column_name: str,
         action_label: str,
@@ -1029,7 +1366,7 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             column_name: Visible column header identifying the target column.
             action_label: Visible label of the action to invoke.
@@ -1039,9 +1376,9 @@ class Table:
         if not normalized_action:
             raise ValueError("Action label cannot be empty or whitespace.")
 
-        cell = Table.__get_cell(
+        cell = AppianTable.__get_cell(
             scope,
-            table_name,
+            label,
             row_number,
             column_name,
         )
@@ -1086,14 +1423,14 @@ class Table:
         if action is None:
             raise AssertionError(
                 f"Action '{normalized_action}' was not found in table "
-                f"'{table_name}', row {row_number}, column '{column_name}'."
+                f"'{label}', row {row_number}, column '{column_name}'."
             )
 
         expect(
             action,
             (
                 f"Action '{normalized_action}' was not visible in table "
-                f"'{table_name}', row {row_number}, column '{column_name}'."
+                f"'{label}', row {row_number}, column '{column_name}'."
             ),
         ).to_be_visible()
 
@@ -1102,7 +1439,7 @@ class Table:
         logger.debug(
             "Clicked action '%s' in table '%s', row %s, column '%s'.",
             normalized_action,
-            table_name,
+            label,
             row_number,
             column_name,
         )
@@ -1110,7 +1447,7 @@ class Table:
     @staticmethod
     def click_row(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_number: int,
         excat_match: bool = False,
     ) -> None:
@@ -1118,13 +1455,13 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_number: One-based row number of the target table row.
             excat_match: Whether matching must use the complete label or text.
         """
-        row = Table.__get_row_by_index(
+        row = AppianTable.__get_row_by_index(
             scope,
-            table_name,
+            label,
             row_number,
             excat_match,
         )
@@ -1133,7 +1470,7 @@ class Table:
     @staticmethod
     def click_checkbox_in_named_row(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_name: str,
         checked: bool = True,
     ) -> None:
@@ -1141,12 +1478,12 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             checked: Desired checkbox state.
         """
-        table = Table.__get_table(scope, table_name=table_name)
-        row = Table.__get_row_by_name(
+        table = AppianTable.__get_table(scope, label=label)
+        row = AppianTable.__get_row_by_name(
             table,
             row_name,
             excat_match=False,
@@ -1167,7 +1504,7 @@ class Table:
     @staticmethod
     def select_radio_in_named_row(
         scope: Scope,
-        table_name: str,
+        label: str,
         row_name: str,
         column_name: str,
         option_name: str,
@@ -1176,20 +1513,20 @@ class Table:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            table_name: Visible or accessible name of the target table.
+            label: Visible or accessible name of the target table.
             row_name: Visible text identifying the target row.
             column_name: Visible column header identifying the target column.
             option_name: Visible option text to select.
         """
-        cell = Table.__get_cell_by_named_row(
+        cell = AppianTable.__get_cell_by_named_row(
             scope,
-            table_name,
+            label,
             row_name,
             column_name,
             excat_match=False,
         )
 
-        Table.__select_radio_option(
+        AppianTable.__select_radio_option(
             cell,
             option_name,
         )
@@ -1200,3 +1537,6 @@ class Table:
             row_name,
             column_name,
         )
+
+
+__all__ = ["AppianTable"]

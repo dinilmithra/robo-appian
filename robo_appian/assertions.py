@@ -9,7 +9,9 @@ from playwright.sync_api import TimeoutError as PlaywrightTimeoutError, expect
 from .errors import RoboAppianError
 
 
-def wait_visible(locator: Any, *, timeout: float | None = None, message: str = "") -> None:
+def wait_visible(
+    locator: Any, *, timeout: float | None = None, message: str = ""
+) -> None:
     """Wait for a locator to become visible using the configured Appian timeout."""
     try:
         if timeout is None:
@@ -24,7 +26,9 @@ def wait_visible(locator: Any, *, timeout: float | None = None, message: str = "
         ) from exc
 
 
-def assert_text(locator: Any, expected: Any, *, message: str = "", **kwargs: Any) -> None:
+def assert_text(
+    locator: Any, expected: Any, *, message: str = "", **kwargs: Any
+) -> None:
     """Assert locator text through the Appian public error boundary."""
     try:
         expect(locator, message or None).to_have_text(expected, **kwargs)
@@ -36,7 +40,9 @@ def assert_text(locator: Any, expected: Any, *, message: str = "", **kwargs: Any
         ) from exc
 
 
-def assert_not_text(locator: Any, expected: Any, *, message: str = "", **kwargs: Any) -> None:
+def assert_not_text(
+    locator: Any, expected: Any, *, message: str = "", **kwargs: Any
+) -> None:
     """Assert locator text does not match ``expected``."""
     try:
         expect(locator, message or None).not_to_have_text(expected, **kwargs)

@@ -63,27 +63,27 @@ class RecordList:
     @staticmethod
     def count(
         scope: Scope,
-        region_name: str,
+        header_name: str,
         record_labels: Sequence[str],
     ) -> int:
         """Return the number of visible records in the named record region.
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             record_labels: Labels used to identify candidate records.
 
 
         Returns:
             int: The number of matching records currently available.
         """
-        region = Region.get(scope, region_name)
+        region = Region.get(scope, header_name)
         return RecordList._matching_blocks(region, record_labels).count()
 
     @staticmethod
     def latest_snapshot(
         scope: Scope,
-        region_name: str,
+        header_name: str,
         record_labels: Sequence[str],
     ) -> Optional[str]:
         """Return the newest visible record text, or None when the list is empty.
@@ -93,14 +93,14 @@ class RecordList:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             record_labels: Labels used to identify candidate records.
 
 
         Returns:
             Optional[str]: The latest matching record snapshot, or ``None`` when no snapshot is available.
         """
-        region = Region.get(scope, region_name)
+        region = Region.get(scope, header_name)
         records = RecordList._matching_blocks(region, record_labels)
         if records.count() == 0:
             return None
@@ -111,7 +111,7 @@ class RecordList:
     @staticmethod
     def latest_matching_locator(
         scope: Scope,
-        region_name: str,
+        header_name: str,
         record_labels: Sequence[str],
         expected_texts: Sequence[str],
     ) -> Locator:
@@ -122,7 +122,7 @@ class RecordList:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             record_labels: Labels used to identify candidate records.
             expected_texts: Text values that must be present in the matching record.
 
@@ -133,7 +133,7 @@ class RecordList:
         if not expected_texts:
             raise ValueError("At least one expected record text must be provided.")
 
-        region = Region.get(scope, region_name)
+        region = Region.get(scope, header_name)
         records = RecordList._matching_blocks(region, record_labels)
         container = RecordList._record_container(records.first)
 
@@ -148,7 +148,7 @@ class RecordList:
     @staticmethod
     def wait_for_latest_match(
         scope: Scope,
-        region_name: str,
+        header_name: str,
         record_labels: Sequence[str],
         expected_texts: Sequence[str],
     ) -> Locator:
@@ -160,7 +160,7 @@ class RecordList:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             record_labels: Labels used to identify candidate records.
             expected_texts: Text values that must be present in the matching record.
 
@@ -179,14 +179,14 @@ class RecordList:
 
         latest = RecordList.latest_matching_locator(
             scope,
-            region_name,
+            header_name,
             record_labels,
             normalized_expected,
         )
 
         expect(
             latest,
-            f"Newest record in region '{region_name}' did not contain expected "
+            f"Newest record in region '{header_name}' did not contain expected "
             f"text(s) {normalized_expected}.",
         ).to_be_visible()
 
@@ -195,7 +195,7 @@ class RecordList:
     @staticmethod
     def latest_adjacent_strong_value(
         scope: Scope,
-        region_name: str,
+        header_name: str,
         label_block_texts: Sequence[str],
         value_index: int,
     ) -> str:
@@ -203,7 +203,7 @@ class RecordList:
 
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            region_name: Optional region name used to narrow the lookup.
+            header_name: Optional header name used to narrow the lookup.
             label_block_texts: Labels used to identify the record block containing the value.
             value_index: Zero-based index of the adjacent strong value to return.
 
@@ -214,7 +214,7 @@ class RecordList:
         if value_index < 0:
             raise ValueError("Value index cannot be negative.")
 
-        region = Region.get(scope, region_name)
+        region = Region.get(scope, header_name)
         label_block = RecordList._matching_blocks(
             region,
             label_block_texts,

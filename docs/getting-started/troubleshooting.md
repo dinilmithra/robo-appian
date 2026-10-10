@@ -7,7 +7,7 @@ Start from what you see in the failure.
 Check the text visible on the page.
 
 ```python
-page.appian_textbox(label="Request Title")
+page.textbox(label="Request Title")
 ```
 
 If the application label changed, update the automation to use the current label.
@@ -15,17 +15,17 @@ If the application label changed, update the automation to use the current label
 For radio questions, use the complete question text whenever possible:
 
 ```python
-page.appian_radio(
+page.radio(
     label="Are you submitting this travel request for yourself or on behalf of someone else?"
 ).select("For myself")
 ```
 
 ## A date is filled but Appian does not react
 
-Use `page.appian_date(...)` rather than a normal textbox:
+Use `page.date(...)` rather than a normal textbox:
 
 ```python
-page.appian_date(label="Required Award Date").fill("10/15/2026")
+page.date(label="Required Award Date").fill("10/15/2026")
 ```
 
 Focus-out is automatic. Do not add Tab just to trigger Appian validation.
