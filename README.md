@@ -10,10 +10,10 @@ It is designed for people who know their web application and only need basic Pyt
 from robo_appian import AppianPage
 
 
-def test_create_request(page: AppianPage) -> None:
-    page.textbox(label="Request Name").fill("Example Request")
-    page.date(label="Required Award Date").fill("10/15/2026")
-    page.radio(label="Is this request for a conference?").select("Yes")
+def test_update_item(page: AppianPage) -> None:
+    page.textbox(label="Description").fill("Example item")
+    page.date(label="Start Date").fill("10/15/2026")
+    page.radio(label="Priority").select("High")
     page.button(name="Submit").click()
 ```
 
@@ -31,10 +31,10 @@ Python 3.12 is required. `robo-appian` uses `robo-automation` for generic browse
 ## Common controls
 
 ```python
-page.textbox(label="Request Name").fill("Example Request")
+page.textbox(label="Description").fill("Example item")
 page.textbox(placeholder="example@example.com").fill("user@example.com")
-page.date(label="Required Award Date").fill("10/15/2026")
-page.radio(label="Is this request for a conference?").select("Yes")
+page.date(label="Start Date").fill("10/15/2026")
+page.radio(label="Priority").select("High")
 page.button(name="Next").click()
 ```
 

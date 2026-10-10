@@ -12,7 +12,7 @@ A table can be identified by `label`, `header_name`, `row_name`, or `column_name
 inside an Appian section whose enclosing region has that accessible name:
 
 ```python
-details = page.table(header_name="List of Selected Attendees & Conference Details")
+details = page.table(header_name="Item Details")
 ```
 
 ## Count the displayed rows

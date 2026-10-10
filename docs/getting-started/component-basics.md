@@ -91,8 +91,8 @@ page.link(name="Return").click()
 `page.tab(name=...)` returns an [`AppianTab`](../api/appian-tab.md).
 
 ```python
-attendee = page.tab(name="Attendee Details")
-assert attendee.is_selected()
+details = page.tab(name="Details")
+assert details.is_selected()
 
 page.tab(name="Contacts").select()
 ```

@@ -3,8 +3,8 @@
 Use a dropdown when a user needs to choose one value from a list.
 
 ```python
-dropdown = page.dropdown(label="Category")
-dropdown.select(value="General")
+dropdown = page.dropdown(label="Status")
+dropdown.select(value="Active")
 ```
 
 ## Read the current value
@@ -36,7 +36,7 @@ page.dropdown(label="Status", visible=None)
 Option indexes are one-based:
 
 ```python
-page.dropdown(label="Category").select(index=1)
+page.dropdown(label="Status").select(index=1)
 ```
 
 `index=1` selects the first real option. Placeholder values such as `Select a Value` are not counted.
@@ -64,8 +64,8 @@ The dropdown waits for the requested option to become available when Appian is s
 Component indexes are zero-based Python indexes:
 
 ```python
-page.dropdown[0].select(value="General")
-page.dropdown(label="Category")[0].select(value="General")
+page.dropdown[0].select(value="Active")
+page.dropdown(label="Status")[0].select(value="Active")
 ```
 
 This is different from option indexes, which are one-based.
@@ -84,17 +84,17 @@ page.table(label="Items").cell(
 Some fields become enabled after another selection. `is_enabled()` checks immediately; `is_enabled(timeout=...)` waits up to the supplied number of seconds.
 
 ```python
-page.dropdown(label="Category").select(value="General")
+page.dropdown(label="Status").select(value="Active")
 
-subcategory = page.dropdown(label="Subcategory")
-if subcategory.is_enabled(timeout=8):
-    subcategory.select(value="Standard")
+owner = page.dropdown(label="Owner")
+if owner.is_enabled(timeout=8):
+    owner.select(value="Example User")
 ```
 
 A component-level `timeout` can also be supplied when creating the dropdown:
 
 ```python
-page.dropdown(label="Subcategory", timeout=8).select(value="Standard")
+page.dropdown(label="Owner", timeout=8).select(value="Example User")
 ```
 
 ## API

@@ -13,7 +13,7 @@ from robo_appian import AppianPage
 ```python
 page.textbox(label="Description").fill("Example item")
 page.date(label="Start Date").fill("10/15/2026")
-page.dropdown(label="Category").select("General")
+page.dropdown(label="Status").select("General")
 page.checkbox(label="Include Details").check()
 page.radio(
     label="Priority"
@@ -41,8 +41,8 @@ For `AppianTable`, at least one of `label`, `header_name`, `row_name`, or `colum
 Each short component accessor can be called with semantic identifiers or indexed as a collection. Filtering can be followed by indexing when multiple matching components exist. Component indexes are normal zero-based Python indexes.
 
 ```python
-page.dropdown[0].select(value="General")
-page.dropdown(label="Category")[0].select(value="General")
+page.dropdown[0].select(value="Active")
+page.dropdown(label="Status")[0].select(value="Active")
 page.button(name="Edit", exact=True)[1].click()
 ```
 
@@ -95,7 +95,7 @@ For operations inside a dialog, region, or smaller part of the page, use [`Appia
 Every semantic component factory accepts `timeout` in seconds. The default `None` leaves the framework `WAIT_TIME` timeout unchanged; a positive finite value overrides it for that component.
 
 ```python
-page.dropdown(label="Category", timeout=10).select(value="General")
+page.dropdown(label="Status", timeout=10).select(value="Active")
 page.textbox(label="Description", timeout=5).fill("Test")
 page.button(name="Submit", timeout=10).click()
 ```

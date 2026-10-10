@@ -37,7 +37,7 @@ status = page.table(label="Items").cell(
 Appian cells do not always render a field label or accessible component name. For those cells, the short component accessors are both callable and zero-based indexable. Indexing is scoped strictly to the resolved cell.
 
 ```python
-cell.dropdown[0].select(value="General")
+cell.dropdown[0].select(value="Active")
 cell.button[0].click()
 cell.checkbox[0].check()
 cell.radio[0].select("High")
@@ -50,8 +50,8 @@ cell.tab[0].select()
 The same short accessors remain callable when semantic identification is available:
 
 ```python
-cell.dropdown(label="Category").select(value="General")
-cell.dropdown(label="Category")[0].select(value="General")
+cell.dropdown(label="Status").select(value="Active")
+cell.dropdown(label="Status")[0].select(value="Active")
 cell.button(name="Approve").click()
 cell.checkbox(label="Include").check()
 ```

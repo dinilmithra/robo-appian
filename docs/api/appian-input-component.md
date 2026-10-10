@@ -16,7 +16,7 @@ Most tests use the specific component directly:
 
 ```python
 page.textbox(label="Description").fill("Example description")
-page.dropdown(label="Category").select(value="General")
+page.dropdown(label="Status").select(value="Active")
 page.checkbox(label="Include Details").check()
 ```
 
@@ -45,20 +45,20 @@ page.textbox(label="Description", visible=None)
 `is_enabled()` checks the current state immediately:
 
 ```python
-field = page.dropdown(label="Subcategory")
+field = page.dropdown(label="Owner")
 
 if field.is_enabled():
-    field.select(value="Standard")
+    field.select(value="Example User")
 ```
 
 Some Appian fields become available only after another field changes. Supply a timeout when the test should wait for that field to become enabled:
 
 ```python
-page.dropdown(label="Category").select(value="General")
+page.dropdown(label="Status").select(value="Active")
 
-subcategory = page.dropdown(label="Subcategory")
-if subcategory.is_enabled(timeout=8):
-    subcategory.select(value="Standard")
+owner = page.dropdown(label="Owner")
+if owner.is_enabled(timeout=8):
+    owner.select(value="Example User")
 ```
 
 `timeout` is measured in seconds. `is_enabled()` without a timeout does not wait.

@@ -3,9 +3,9 @@
 `AppianTab` represents an Appian linked-card tab. Create it from `AppianPage` with `page.tab(...)`.
 
 ```python
-attendee_details = page.tab(name="Attendee Details")
+details = page.tab(name="Details")
 
-assert attendee_details.is_selected()
+assert details.is_selected()
 
 page.tab(name="Contacts").select()
 ```
