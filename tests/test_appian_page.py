@@ -1311,11 +1311,12 @@ def test_appian_page_link_returns_appian_link() -> None:
         "RETURN TO DASHBOARD",
     ],
 )
-def test_appian_link_uses_semantic_link_role_for_observed_shapes(name: str) -> None:
+def test_appian_link_matches_named_link_or_button_actions(name: str) -> None:
     page = _mock_page()
     role_locator = MagicMock(spec=Locator)
     visible_locator = MagicMock(spec=Locator)
     target = MagicMock(spec=Locator)
+    role_locator.or_.return_value = role_locator
     role_locator.filter.return_value = visible_locator
     visible_locator.first = target
     page.get_by_role.return_value = role_locator
@@ -1324,7 +1325,10 @@ def test_appian_link_uses_semantic_link_role_for_observed_shapes(name: str) -> N
     resolved = component._locator()
 
     assert resolved is target
-    page.get_by_role.assert_called_once_with("link", name=name, exact=True)
+    assert page.get_by_role.call_count == 2
+    page.get_by_role.assert_any_call("link", name=name, exact=True)
+    page.get_by_role.assert_any_call("button", name=name, exact=True)
+    role_locator.or_.assert_called_once_with(role_locator)
     role_locator.filter.assert_called_once_with(visible=True)
 
 
@@ -1334,6 +1338,7 @@ def test_appian_link_scope_disambiguates_repeated_table_link() -> None:
     role_locator = MagicMock(spec=Locator)
     visible_locator = MagicMock(spec=Locator)
     target = MagicMock(spec=Locator)
+    role_locator.or_.return_value = role_locator
     role_locator.filter.return_value = visible_locator
     visible_locator.first = target
     scope_locator.get_by_role.return_value = role_locator
@@ -1342,8 +1347,12 @@ def test_appian_link_scope_disambiguates_repeated_table_link() -> None:
     component = AppianPage.get(page).link(name="robo appian", scope=scope)
     assert component._locator() is target
 
-    scope_locator.get_by_role.assert_called_once_with(
+    assert scope_locator.get_by_role.call_count == 2
+    scope_locator.get_by_role.assert_any_call(
         "link", name="robo appian", exact=True
+    )
+    scope_locator.get_by_role.assert_any_call(
+        "button", name="robo appian", exact=True
     )
     page.get_by_role.assert_not_called()
 

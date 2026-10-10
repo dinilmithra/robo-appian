@@ -18,8 +18,9 @@ class AppianLink:
 
     Appian renders links in more than one semantic HTML shape. Native rich-text
     links are ``<a>`` elements, while linked cards expose ``role="link"`` on a
-    non-anchor container. The runtime's role locator covers both forms without
-    relying on generated Appian CSS classes.
+    non-anchor container. Named link actions can also be rendered as buttons.
+    The caller identifies the action as a link; its HTML implementation is
+    resolved by accessible name without generated Appian CSS classes.
     """
 
     def __init__(
@@ -71,7 +72,10 @@ class AppianLink:
         if indexed is not None:
             return indexed
         """Return a live semantic locator for the first visible matching link."""
-        locator = self._root().get_by_role("link", name=self._name, exact=self._exact)
+        root = self._root()
+        links = root.get_by_role("link", name=self._name, exact=self._exact)
+        buttons = root.get_by_role("button", name=self._name, exact=self._exact)
+        locator = links.or_(buttons)
         if self._visible is not None:
             locator = locator.filter(visible=self._visible)
         return locator.first
@@ -107,7 +111,7 @@ class AppianLink:
         return " ".join((link.inner_text() or "").split())
 
     def href(self) -> str | None:
-        """Return the native ``href`` value, or ``None`` for linked-card links."""
+        """Return the native ``href``, or ``None`` for non-anchor link actions."""
         link = self._locator()
         expect(link, f"Appian link '{self._name}' was not visible.").to_be_visible(
             **self._timeout_kwargs()

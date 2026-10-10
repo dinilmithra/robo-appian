@@ -11,7 +11,7 @@ def test_appian_table_is_public_component() -> None:
     assert AppianTable is ModuleAppianTable
 
 
-def test_appian_table_label_only_matches_named_table() -> None:
+def test_appian_table_label_matches_only_named_table() -> None:
     page = MagicMock(spec=Page)
     named_tables = MagicMock(spec=Locator)
     page.get_by_role.return_value = named_tables
@@ -23,20 +23,35 @@ def test_appian_table_label_only_matches_named_table() -> None:
     named_tables.or_.assert_not_called()
 
 
-def test_appian_table_header_name_matches_named_region_containing_table() -> None:
+def test_appian_table_header_name_matches_region_or_header_text() -> None:
     page = MagicMock(spec=Page)
     region = MagicMock(spec=Locator)
     region_tables = MagicMock(spec=Locator)
+    header = MagicMock(spec=Locator)
+    container = MagicMock(spec=Locator)
+    header_tables = MagicMock(spec=Locator)
+    combined = MagicMock(spec=Locator)
     page.get_by_role.return_value = region
+    page.get_by_text.return_value = header
     region.locator.return_value = region_tables
+    header.locator.return_value = container
+    container.locator.return_value = header_tables
+    region_tables.or_.return_value = combined
 
-    table = AppianTable(page, header_name="List of Selected Attendees & Conference Details", visible=None)
+    table = AppianTable(page, header_name="Item Details", visible=None)
 
-    assert table.locator is region_tables
+    assert table.locator is combined
     page.get_by_role.assert_called_once_with(
-        "region", name="List of Selected Attendees & Conference Details", exact=True
+        "region", name="Item Details", exact=True
     )
+    page.get_by_text.assert_called_once_with("Item Details", exact=True)
     region.locator.assert_called_once_with("table")
+    header.locator.assert_called_once_with(
+        "xpath=self::*[not(ancestor::table) or ancestor::caption]"
+        "/ancestor::*[self::table or .//table][1]"
+    )
+    container.locator.assert_called_once_with("xpath=self::table | .//table")
+    region_tables.or_.assert_called_once_with(header_tables)
 
 
 def test_appian_table_visible_none_keeps_visible_and_hidden_matches() -> None:
@@ -739,6 +754,7 @@ def test_appian_table_column_index_waits_for_dynamic_semantic_header() -> None:
     first_header.get_attribute.return_value = None
     second_header.inner_text.return_value = "ROBO   APPIAN"
     second_header.get_attribute.return_value = None
+    table_locator.locator.return_value = headers
 
     def get_by_role(role: str, **kwargs):
         assert role == "columnheader"
@@ -760,6 +776,9 @@ def test_appian_table_column_index_waits_for_dynamic_semantic_header() -> None:
         "Column 'ROBO APPIAN' was not found in table.",
     )
     expect_mock.return_value.to_be_attached.assert_called_once_with(timeout=8000.0)
+    table_locator.locator.assert_called_once_with(
+        "thead th, thead td, [role='columnheader']"
+    )
 
 
 def test_appian_table_column_index_wait_uses_context_default_timeout() -> None:
@@ -776,6 +795,7 @@ def test_appian_table_column_index_wait_uses_context_default_timeout() -> None:
     headers.nth.return_value = header
     header.inner_text.return_value = "Owner"
     header.get_attribute.return_value = None
+    table_locator.locator.return_value = headers
 
     def get_by_role(role: str, **kwargs):
         assert role == "columnheader"

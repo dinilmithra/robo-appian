@@ -2,12 +2,16 @@
 
 `AppianLink` is the semantic Appian link component returned by `AppianPage.link(...)`.
 
-It supports both Appian link shapes observed in SAIL pages:
+Named link actions support these Appian rendering shapes:
 
 - native `<a>` links, including rich-text page links;
-- linked-card controls that expose `role="link"` without an `<a>` element.
+- linked-card controls that expose `role="link"` without an `<a>` element;
+- actions represented as links in the workflow but rendered as buttons.
 
-The component identifies links by accessible/visible name through the native link role. It does not use generated Appian CSS classes.
+Use `link(name=...)` when the action is a link from the user's perspective.
+Named lookup accepts link or button roles with that accessible name, within the
+requested scope. It does not infer appearance from generated Appian CSS classes
+or change the control's role. Scope repeated action names to their row or cell.
 
 ```python
 page.link(name="View Details").click()
@@ -31,7 +35,7 @@ link = page.link(name="Item 1001")
 link.is_visible()
 link.wait_until_visible()
 link.get_text()
-link.href()       # None for linked-card links with no native href
+link.href()       # None when the link action has no native href
 link.click()
 ```
 

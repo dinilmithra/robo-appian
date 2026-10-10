@@ -8,8 +8,13 @@ items = page.table(label="Items")
 
 A table can be identified by `label`, `header_name`, `row_name`, or `column_name`. Additional identifiers can narrow the match.
 
-`label` matches only the table's accessible name. Use `header_name` for a table
-inside an Appian section whose enclosing region has that accessible name:
+`label` matches only the table's own accessible name. `header_name` matches
+either a region's accessible name or header text, without requiring a heading
+role. Header text can appear in a heading, nested span, paragraph, strong text,
+or table caption. Text outside the table resolves through its nearest
+table-containing ancestor; a caption resolves to its own table. Ordinary cell
+text is not treated as a header. A table matched by both region and text paths
+is returned only once:
 
 ```python
 details = page.table(header_name="Item Details")

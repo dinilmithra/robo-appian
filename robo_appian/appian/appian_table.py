@@ -106,12 +106,20 @@ class AppianTable:
                 exact=self._component_exact,
             )
         elif self._component_header_name is not None:
-            region = raw_scope.get_by_role(
+            region_tables = raw_scope.get_by_role(
                 "region",
                 name=self._component_header_name,
                 exact=self._component_exact,
+            ).locator("table")
+            header = raw_scope.get_by_text(
+                self._component_header_name,
+                exact=self._component_exact,
             )
-            tables = region.locator("table")
+            header_tables = header.locator(
+                "xpath=self::*[not(ancestor::table) or ancestor::caption]"
+                "/ancestor::*[self::table or .//table][1]"
+            ).locator("xpath=self::table | .//table")
+            tables = region_tables.or_(header_tables)
         else:
             tables = raw_scope.locator("table")
 
@@ -227,16 +235,15 @@ class AppianTable:
         """Return the zero-based index for a semantic column name.
 
         Appian can rerender editable-grid headers asynchronously after an action
-        adds or removes a dynamic column. Resolve headers through their semantic
-        ``columnheader`` role so this works for both conventional ``<thead><th>``
-        tables and Appian grids whose accessible header structure differs from
-        that DOM shape.
+        adds or removes a dynamic column. Include physical header cells even
+        when a checkbox column overrides its role to ``cell``, so the resolved
+        index stays aligned with the data cells.
         """
         normalized = " ".join(str(column_name or "").split())
         if not normalized:
             raise ValueError("Column name cannot be empty or whitespace.")
 
-        headers = self.locator.get_by_role("columnheader")
+        headers = self.locator.locator("thead th, thead td, [role='columnheader']")
         matching_header = self.locator.get_by_role(
             "columnheader", name=normalized, exact=exact
         ).first
