@@ -91,6 +91,7 @@ class AppianTable:
         When ``visible=None``, the returned locator is intentionally not
         filtered by visibility and can therefore contain both visible and
         hidden matching tables.
+        
         """
         indexed = getattr(self, "_indexed_locator", None)
         if indexed is not None:
