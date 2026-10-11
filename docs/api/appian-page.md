@@ -41,7 +41,7 @@ page.dialog[0].button("Confirm").click()
 
 ## Exact matching and visibility
 
-Appian component factories use `exact=True` and `visible=True` by default. `exact=True` requires the complete normalized semantic label/name to match; pass `exact=False` when a partial match is intentional. `visible=False` targets hidden matches, while `visible=None`, `visible=""`, or a whitespace-only string removes visibility filtering.
+robo-appian uses `exact=True` and `visible=True` by default. This means it normally chooses a visible component whose displayed name or label exactly matches the value you provide. Use `exact=False` only when a partial match is intentional, and change `visible` only when the business scenario requires it.
 
 ```python
 page.link(name="Return")  # exact=True, visible=True
@@ -109,7 +109,7 @@ For operations inside a dialog, region, or smaller part of the page, use [`Appia
 
 ## Per-component timeout
 
-Every semantic component factory accepts `timeout` in seconds. The default `None` leaves the framework `WAIT_TIME` timeout unchanged; a positive finite value overrides it for that component.
+Every component accepts `timeout` in seconds. Leave it as `None` to use the normal configured wait time, or provide a positive value when that component needs a different wait time.
 
 ```python
 page.dropdown(label="Status", timeout=10).select(value="Active")

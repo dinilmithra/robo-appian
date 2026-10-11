@@ -11,7 +11,7 @@ cell = page.table(label="Items").cell(
 cell.button(name="Approve").click()
 ```
 
-The same scoped pattern is available for the other Appian semantic components:
+The same pattern is available for other components inside the table cell:
 
 ```python
 cell.link(name="View").click()
@@ -73,7 +73,7 @@ nested = cell.table(label="Nested Items")
 nested = cell.table[0]
 ```
 
-All semantic cell-scoped factories default to `exact=True` and `visible=True`. Pass `exact=False` for intentional partial label/name matching. For visibility, `False` selects hidden matches, while `None`, `""`, or whitespace-only strings apply no visibility filter. Index access targets visible components by default.
+Components inside a table cell use `exact=True` and `visible=True` by default. Use `exact=False` only when you intentionally want a partial name or label match. In normal business automation, keep `visible=True`. When more than one matching component exists in the cell, use component indexing to choose the required one.
 
 ## API
 
@@ -87,4 +87,4 @@ All semantic cell-scoped factories default to `exact=True` and `visible=True`. P
 
 ## Timeout
 
-Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.
+`timeout` is expressed in seconds. Leave `timeout=None` to use the normal configured wait time, or provide a positive value when this particular action needs a different wait time.

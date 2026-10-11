@@ -88,7 +88,7 @@ When values vary by environment or scenario, pass them into the business flow ra
 
 ## What `robo-automation` does for you
 
-A BA normally does not call low-level `RoboPage` or `RoboLocator` APIs. `robo-automation` supports the test by providing browser lifecycle, pytest integration, timeout/configuration handling, logging, screenshots/evidence, and parallel execution infrastructure.
+`robo-automation` supports the test execution environment, while the business flow itself is written with the `robo-appian` component APIs shown in this guide.
 
 Use its documentation when you need to understand test execution, configuration, fixtures, or failure evidence. For Appian page interactions, stay with `robo-appian` whenever possible.
 

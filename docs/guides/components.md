@@ -47,7 +47,7 @@ assert page.dropdown(label="Status").is_selected("Active")
 
 ## Appian links
 
-Use `page.link(name=...)` for both native Appian `<a>` links and linked-card controls exposed with `role="link"`. It returns an [`AppianLink`](../api/appian-link.md).
+Use `page.link(name=...)` for business actions presented as links. It returns an [`AppianLink`](../api/appian-link.md).
 
 ```python
 page.link(name="View Details").click()
@@ -67,11 +67,11 @@ page.tab(name="Contacts").select()
 assert page.tab(name="Contacts").is_selected()
 ```
 
-Selection is idempotent and state is derived from Appian accessibility text (`Selected Tab.` / `Unselected Tab.`), not generated CSS classes.
+Selecting an already active tab is safe; no additional action is performed.
 
 ## Tables
 
-Create a semantic table component from `AppianPage`. At least one of `label`, `header_name`, `row_name`, or `column_name` is required.
+Create a table component from `AppianPage`. At least one of `label`, `header_name`, `row_name`, or `column_name` is required.
 
 ```python
 items = page.table(
@@ -81,16 +81,16 @@ items = page.table(
 )
 ```
 
-Matching is consistent across Appian component factories: `exact=True` and `visible=True` are the defaults. Use `exact=False` for intentional partial semantic-name/label matching. `visible=False` targets hidden matches; `visible=None`, `visible=""`, or whitespace removes visibility filtering. For tables, no visibility filter leaves both visible and hidden matches in the live locator.
+Matching is consistent across Appian component factories: `exact=True` and `visible=True` are the defaults. Use `exact=False` for intentional partial name/label matching. `visible=False` targets hidden matches; `visible=None`, `visible=""`, or whitespace removes visibility filtering. For tables, no visibility filter leaves both visible and hidden matches in the live locator.
 
-All semantic Appian component factories also accept `timeout` in **seconds**. The default is `None`, which preserves the framework timeout configured from `WAIT_TIME`. A positive finite value overrides `WAIT_TIME` for waits and actions owned by that component:
+Appian components accept an optional `timeout` in **seconds**. Leave it as `None` to use the configured default, or provide a positive value when a particular business action needs a different wait:
 
 ```python
 page.dropdown(label="Status", timeout=10).select(value="Active")
 page.button(name="Submit", timeout=15).click()
 ```
 
-This is useful for dependent Appian controls that are rendered immediately but remain disabled while a preceding selection loads their values. Dropdown value selection waits for either the requested value to be auto-selected by Appian or for the control to become editable, instead of relying on a snapshot `is_enabled()` check.
+This is useful when a dependent field needs extra time to become ready after an earlier business action.
 
 `AppianTable` is the single table component API. Legacy `Table` helpers are removed.
 
@@ -100,26 +100,13 @@ The page and cell component accessors share the same matching model:
 
 ```python
 page.button(name="Save")                         # exact=True, visible=True
-page.button(name="Sav", exact=False)             # partial semantic match
-page.dropdown(label="Status", visible=None)         # no visibility filter
+page.button(name="Sav", exact=False)             # partial match
+page.dropdown(label="Status", visible=None)       # include visible/hidden matches
 page.dropdown[0].select(value="Active")           # first dropdown on page
 page.dropdown(label="Status")[0].select(value="Active")
 ```
 
-Component collection indexing is zero-based. Semantic filtering happens before an index such as `[0]` is applied. The same model is available from `AppianCell`.
-
-## Appian scoping
-
-For new Appian APIs, use `AppianPage` for page-wide operations and `AppianLocator` for dialog/subtree operations. Reusable code that intentionally accepts both can use `AppianScope = AppianPage | AppianLocator`.
-
-Some older non-button component helpers still expose the generic lower-layer `Scope` annotation. Treat that as a compatibility signature. New component work should follow the Appian-layer model.
-
-`AppianButton` is the reference fluent component API:
-
-```python
-button = page.button(name="Save")
-button.click()
-```
+Component collection indexing is zero-based. The same indexing convention is available for components inside a table cell.
 
 ## Input textbox
 
@@ -147,11 +134,11 @@ page.textbox("Employee").select(
 )
 ```
 
-Suggestion indexes are **1-based**. Textbox collection indexes such as `page.textbox[0]` remain **zero-based**. Searchable textbox behavior is resolved from semantic HTML/ARIA relationships rather than Appian CSS classes.
+Suggestion indexes are **1-based**. Textbox collection indexes such as `page.textbox[0]` remain **zero-based**.
 
 ### Waiting for an Appian component to become enabled
 
-Enabled-state queries are immediate unless a timeout is explicitly supplied. This is intentional: `component.is_enabled()` never inherits `WAIT_TIME` or the component's configured timeout.
+Use `is_enabled()` to check the current state, or provide a timeout when the business flow needs to wait briefly for the component to become enabled.
 
 ```python
 # Snapshot of the current state; no wait.

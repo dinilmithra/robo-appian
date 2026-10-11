@@ -29,7 +29,7 @@ page.dropdown(label="Status", visible=False)
 page.dropdown(label="Status", visible=None)
 ```
 
-`visible=None`, `visible=""`, and whitespace-only visibility values apply no visibility filter.
+For normal business automation, keep the default `visible=True`. Change `visible` only when your scenario specifically requires a component that is not currently visible.
 
 ## Select by option position
 

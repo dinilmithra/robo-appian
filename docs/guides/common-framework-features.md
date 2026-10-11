@@ -33,7 +33,7 @@ def test_example(page: AppianPage) -> None:
     page.button(name="Submit").is_visible()
 ```
 
-The generic lifecycle is implemented by `robo-automation`; `robo-appian` wraps the `RoboPage` so Appian components and semantic locators are available without hiding browser page operations. Application projects should not close framework-owned pages, contexts, or browsers from normal tests.
+`robo-automation` manages the test runtime. Application tests should use the provided fixtures and let the framework manage setup and cleanup.
 
 See [Browser Management](browser-management.md) and [Pytest Integration](pytest-integration.md).
 

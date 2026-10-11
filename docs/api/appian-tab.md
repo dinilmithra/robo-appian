@@ -10,18 +10,16 @@ assert details.is_selected()
 page.tab(name="Contacts").select()
 ```
 
-## Semantics
+## Select and check a tab
 
-The component is based on the accessible DOM contract rendered by Appian rather than generated CSS classes:
+`select()` selects the requested tab. If it is already selected, no additional action is performed.
 
-- the tab container has `role="link"`;
-- the visible tab name identifies the tab;
-- the selected tab contains accessibility text `Selected Tab.`;
-- an inactive tab contains accessibility text beginning `Unselected Tab.`.
+Use `is_selected()` when the business flow needs to verify the active tab:
 
-`select()` is idempotent. If the requested tab is already selected, it performs no click. After selecting an inactive tab, the component re-resolves the live tab locator because Appian can rerender the complete tab strip.
-
-`is_selected(timeout=...)` waits only for the tab to exist and become visible, then returns its current state. It does not wait for an inactive tab to become selected.
+```python
+page.tab(name="Contacts").select()
+assert page.tab(name="Contacts").is_selected()
+```
 
 ::: robo_appian.appian.appian_tab.AppianTab
     options:
@@ -34,9 +32,9 @@ The component is based on the accessible DOM contract rendered by Appian rather 
 
 ## Exact matching and visibility
 
-Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exact=False` for intentional partial label/name matching. Use `visible=False` for hidden matches, or `visible=None` (also blank/whitespace) to apply no visibility filter.
+By default, robo-appian uses a visible component whose displayed name or label exactly matches what you provide. Keep `exact=True` and `visible=True` for normal business automation. Use `exact=False` only when you intentionally want a partial name or label match. Change `visible` only when your scenario specifically requires a component that is not currently visible.
 
 
 ## Timeout
 
-Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.
+Component `timeout` values are expressed in seconds. `timeout=None` uses the configured default timeout; a positive finite value overrides that timeout for waits/actions performed by the component.

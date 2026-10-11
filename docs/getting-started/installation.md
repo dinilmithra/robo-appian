@@ -84,7 +84,7 @@ robo-appian install-browser firefox
 
 Installing `robo-automation` registers `robo_automation.pytest_plugin` through pytest's `pytest11` entry-point group. Under normal plugin autoloading, no `conftest.py` import, `pytest_plugins` declaration, or `-p` option is required.
 
-The lower `robo-automation` plugin owns browser/runtime lifecycle, and the `robo-appian` plugin transparently wraps the `RoboPage` fixture for Appian consumers without hiding browser page operations:
+Use the `page` fixture in Appian tests. The supporting runtime is configured automatically through the installed plugins:
 
 ```text
 robo-automation: robo_page -> AppianPage

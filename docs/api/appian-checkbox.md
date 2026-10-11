@@ -38,8 +38,6 @@ include_details.set_checked(True)
 include_details.set_checked(False)
 ```
 
-`AppianCheckbox` inherits the shared post-change focus-out behavior from `AppianInputComponent`. It uses semantic HTML relationships such as `label[for]`, `role="group"`, and `aria-labelledby`; it does not rely on generated Appian CSS class names.
-
 Use [`AppianRadioSelect`](appian-radio-select.md) for radio-button groups.
 
 ## API
@@ -59,9 +57,9 @@ Use [`AppianRadioSelect`](appian-radio-select.md) for radio-button groups.
 
 ## Exact matching and visibility
 
-Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exact=False` for intentional partial label/name matching. Use `visible=False` for hidden matches, or `visible=None` (also blank/whitespace) to apply no visibility filter.
+By default, robo-appian uses a visible component whose displayed name or label exactly matches what you provide. Keep `exact=True` and `visible=True` for normal business automation. Use `exact=False` only when you intentionally want a partial name or label match. Change `visible` only when your scenario specifically requires a component that is not currently visible.
 
 
 ## Timeout
 
-Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.
+`timeout` is expressed in seconds. Leave `timeout=None` to use the normal configured wait time, or provide a positive value when this particular action needs a different wait time.

@@ -17,7 +17,7 @@ if priority.is_selected("High"):
     print("High priority")
 ```
 
-`select(value)` is idempotent. If the requested option is already selected, no click is performed. Radio groups are resolved by semantic Appian relationships such as `aria-labelledby`, and options are scoped to the owning group.
+`select(value)` is idempotent. If the requested option is already selected, no additional action is performed.
 
 Use [`AppianCheckbox`](appian-checkbox.md) for native checkboxes.
 
@@ -34,9 +34,9 @@ Use [`AppianCheckbox`](appian-checkbox.md) for native checkboxes.
 
 ## Exact matching and visibility
 
-Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exact=False` for intentional partial label/name matching. Use `visible=False` for hidden matches, or `visible=None` (also blank/whitespace) to apply no visibility filter.
+By default, robo-appian uses a visible component whose displayed name or label exactly matches what you provide. Keep `exact=True` and `visible=True` for normal business automation. Use `exact=False` only when you intentionally want a partial name or label match. Change `visible` only when your scenario specifically requires a component that is not currently visible.
 
 
 ## Timeout
 
-Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.
+`timeout` is expressed in seconds. Leave `timeout=None` to use the normal configured wait time, or provide a positive value when this particular action needs a different wait time.

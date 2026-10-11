@@ -2,16 +2,7 @@
 
 `AppianLink` is the semantic Appian link component returned by `AppianPage.link(...)`.
 
-Named link actions support these Appian rendering shapes:
-
-- native `<a>` links, including rich-text page links;
-- linked-card controls that expose `role="link"` without an `<a>` element;
-- actions represented as links in the workflow but rendered as buttons.
-
-Use `link(name=...)` when the action is a link from the user's perspective.
-Named lookup accepts link or button roles with that accessible name, within the
-requested scope. It does not infer appearance from generated Appian CSS classes
-or change the control's role. Scope repeated action names to their row or cell.
+Use `link(name=...)` when the business action is presented as a link. Scope repeated link names to their table row, cell, dialog, or other owning component.
 
 ```python
 page.link(name="View Details").click()
@@ -39,7 +30,7 @@ link.href()       # None when the link action has no native href
 link.click()
 ```
 
-`click()` waits for Appian action completion after activating the link. The locator remains live, so it is re-evaluated against the current Appian DOM when used.
+`click()` activates the link and waits for the resulting Appian action to complete.
 
 ::: robo_appian.appian.appian_link.AppianLink
     options:
@@ -54,9 +45,9 @@ link.click()
 
 ## Exact matching and visibility
 
-Semantic component lookup defaults to `exact=True` and `visible=True`. Use `exact=False` for intentional partial label/name matching. Use `visible=False` for hidden matches, or `visible=None` (also blank/whitespace) to apply no visibility filter.
+By default, robo-appian uses a visible component whose displayed name or label exactly matches what you provide. Keep `exact=True` and `visible=True` for normal business automation. Use `exact=False` only when you intentionally want a partial name or label match. Change `visible` only when your scenario specifically requires a component that is not currently visible.
 
 
 ## Timeout
 
-Component `timeout` values are expressed in seconds. `timeout=None` preserves the framework timeout configured from `WAIT_TIME`; a positive finite value overrides that timeout for waits/actions performed by the semantic component.
+Component `timeout` values are expressed in seconds. `timeout=None` uses the configured default timeout; a positive finite value overrides that timeout for waits/actions performed by the component.
