@@ -15,6 +15,7 @@ from .appian_checkbox import AppianCheckbox
 from .appian_component_accessor import AppianComponentAccessor
 from .appian_date import AppianDate
 from .appian_dropdown import AppianDropdown
+from .appian_dialog import AppianDialog
 from .appian_radio_select import AppianRadioSelect
 from .appian_textbox import AppianTextbox
 from .appian_tab import AppianTab
@@ -378,10 +379,35 @@ class AppianPage:
             timeout=timeout,
         )
 
+
+    def _dialog_factory(
+        self,
+        *,
+        name: str | None = None,
+        exact: bool = True,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> AppianDialog:
+        """Return an Appian modal dialog by accessible name."""
+        return AppianDialog(
+            self, name=name, exact=exact, visible=visible, timeout=timeout
+        )
+
     # Public Appian component accessors. Names intentionally omit the redundant
     # ``appian_`` prefix because the containing object is already AppianPage.
     def _page_nth(self, selector: str, index: int):
         return self.locator(selector).filter(visible=True).nth(index)
+
+
+    @property
+    def dialog(self) -> AppianComponentAccessor[AppianDialog]:
+        """Access Appian modal dialogs semantically or by zero-based index."""
+        def indexed(index: int) -> AppianDialog:
+            return AppianDialog(self, index=index)
+
+        return AppianComponentAccessor(
+            self._dialog_factory, indexed, component_name="dialog"
+        )
 
     @property
     def button(self) -> AppianComponentAccessor[AppianButton]:

@@ -15,10 +15,10 @@ def wait_visible(
     """Wait for a locator to become visible using the configured Appian timeout."""
     try:
         if timeout is None:
-            locator.wait_for(state="visible")
+            expect(locator, message or None).to_be_visible()
         else:
             locator.wait_for(state="visible", timeout=timeout)
-    except PlaywrightTimeoutError as exc:
+    except (PlaywrightTimeoutError, AssertionError) as exc:
         raise RoboAppianError(
             message or "Appian element did not become visible in time.",
             code="ROBO_APPIAN_TIMEOUT",

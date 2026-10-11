@@ -332,15 +332,17 @@ class AppianTable:
     ) -> int:
         """Return the number of currently rendered data rows.
 
-        Header rows and Appian paging totals are not counted. ``timeout`` waits
-        only for the table to exist; it does not wait for an empty table to gain
-        rows.
+        Header rows, empty-state placeholders, and Appian paging totals are not
+        counted. ``timeout`` waits only for the table to exist; it does not wait
+        for an empty table to gain rows.
         """
         table = self.locator
         effective_timeout = ComponentUtils.normalize_timeout_seconds(timeout)
         kwargs = ComponentUtils.timeout_kwargs(effective_timeout)
         expect(table.first, "Appian table was not found.").to_be_attached(**kwargs)
-        rows = table.first.locator("tbody tr")
+        rows = table.first.locator(
+            "tbody tr:not(:has([data-empty-grid-message='true']))"
+        )
         normalized_visible = ComponentUtils.normalize_visibility(visible)
         if normalized_visible is not None:
             rows = rows.filter(visible=normalized_visible)

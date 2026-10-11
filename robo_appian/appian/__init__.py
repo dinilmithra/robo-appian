@@ -6,6 +6,7 @@ from .appian_input_component import AppianInputComponent
 from .appian_radio_select import AppianRadioSelect
 from .appian_date import AppianDate
 from .appian_dropdown import AppianDropdown
+from .appian_dialog import AppianDialog
 from .appian_textbox import AppianTextbox
 from .appian_tab import AppianTab
 from .appian_link import AppianLink
@@ -26,6 +27,7 @@ __all__ = [
     "AppianRadioSelect",
     "AppianDate",
     "AppianDropdown",
+    "AppianDialog",
     "AppianTextbox",
     "AppianTab",
     "AppianLink",

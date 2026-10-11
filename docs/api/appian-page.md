@@ -2,7 +2,7 @@
 
 `AppianPage` is the main page object you use when automating an Appian application.
 
-Most application tests should start here. It gives you simple, readable component APIs such as `textbox()`, `date()`, `dropdown()`, `checkbox()`, `button()`, and `table()`.
+Most application tests should start here. It gives you simple, readable component APIs such as `textbox()`, `date()`, `dropdown()`, `checkbox()`, `button()`, `dialog()`, and `table()`.
 
 ```python
 from robo_appian import AppianPage
@@ -22,6 +22,21 @@ page.button(name="Next").click()
 ```
 
 Think about the page the same way an end user does: identify the visible field or button text, then choose the matching `AppianPage` component helper.
+
+## Dialogs
+
+Use `dialog()` to scope interactions to an Appian modal by its accessible name. Components inside the dialog use the same fluent APIs as page-level components.
+
+```python
+dialog = page.dialog(name="Confirm Action")
+dialog.button("Confirm").click()
+```
+
+Dialog collection indexing is zero-based, consistent with other component collections:
+
+```python
+page.dialog[0].button("Confirm").click()
+```
 
 ## Exact matching and visibility
 
@@ -81,6 +96,7 @@ For operations inside a dialog, region, or smaller part of the page, use [`Appia
         - wait_for_text_visible
         - wait_for_appian_action_completed
         - button
+        - dialog
         - textbox
         - dropdown
         - checkbox
