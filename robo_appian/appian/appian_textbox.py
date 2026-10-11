@@ -108,27 +108,30 @@ class AppianTextbox(AppianInputComponent):
     def _control_predicate(self) -> str:
         """Return the XPath predicate that identifies this component type."""
         return (
-            "((self::input and (@type='text' or @type='password') and "
+            "((self::input and (((@type='text' or @type='password') and "
             f"not(@data-testid='{self.DATE_TEST_ID}')) or "
+            "(@role='combobox' and @aria-autocomplete='list' and @aria-controls))) or "
             "(self::textarea and @role='textbox'))"
         )
 
     def _accessible_name_locator(self) -> Locator:
         """Resolve this textbox by its accessible name."""
         assert self._label is not None
-        if self._scope is not None:
-            locator = self._scope.locator.get_by_role(
-                "textbox",
-                name=self._label,
-                exact=self._exact,
-            ).first
-        else:
-            locator = self._page.get_by_role(
-                "textbox",
-                name=self._label,
-                exact=self._exact,
-            ).first
-        return locator.locator("xpath=self::*[" + self._control_predicate() + "]").first
+        root = self._scope.locator if self._scope is not None else self._page
+        textbox = root.get_by_role(
+            "textbox", name=self._label, exact=self._exact
+        ).locator("xpath=self::*[" + self._control_predicate() + "]")
+        if textbox.count() > 0:
+            return textbox.first
+
+        # Appian searchable text inputs expose role=combobox while remaining
+        # text-entry controls. Restrict this fallback to actual input elements
+        # with list autocomplete so dropdown/listbox widgets are not captured.
+        return root.get_by_role(
+            "combobox", name=self._label, exact=self._exact
+        ).locator(
+            "xpath=self::input[@aria-autocomplete='list' and @aria-controls]"
+        ).first
 
     def _locator_by_label(self) -> Locator:
         assert self._label is not None
@@ -214,16 +217,114 @@ class AppianTextbox(AppianInputComponent):
         """Return the header text used to identify this textbox, when applicable."""
         return self._header
 
-    def fill(self, value: object) -> None:
-        """Wait until the textbox is ready, then replace its value."""
+    @staticmethod
+    def _is_searchable(textbox: Locator) -> bool:
+        """Return whether a textbox exposes semantic search suggestions."""
+        return (
+            textbox.get_attribute("role") == "combobox"
+            and textbox.get_attribute("aria-autocomplete") == "list"
+            and bool(textbox.get_attribute("aria-controls"))
+        )
+
+    def fill(self, value: object) -> "AppianTextbox":
+        """Replace the textbox value and return this component for chaining.
+
+        Searchable Appian textboxes are entered with keyboard events and retain
+        focus so a following ``select(...)`` can choose from their suggestions.
+        Ordinary textboxes preserve the normal blur-and-wait Appian lifecycle.
+        """
         textbox = self._wait_until_ready_locator()
-        textbox.fill("" if value is None else str(value), **self._timeout_kwargs())
-        self._after_fill(textbox)
+        text = "" if value is None else str(value)
+        if self._is_searchable(textbox):
+            textbox.click(**self._timeout_kwargs())
+            textbox.press("Control+A")
+            textbox.press("Backspace")
+            if text:
+                textbox.press_sequentially(text, delay=50)
+        else:
+            textbox.fill(text, **self._timeout_kwargs())
+            self._after_fill(textbox)
         logger.info("Filled Appian textbox: %s.", self._description())
+        return self
 
     def _after_fill(self, textbox: Locator) -> None:
-        """Commit the changed textbox value by moving focus away."""
+        """Commit the changed ordinary textbox value by moving focus away."""
         self._after_change(textbox)
+
+    def select(
+        self,
+        value: str | None = None,
+        *,
+        search_text: str | None = None,
+        index: int | None = None,
+        exact: bool = True,
+        timeout: float | int | None = None,
+    ) -> "AppianTextbox":
+        """Select a suggestion from a searchable Appian textbox.
+
+        ``value`` selects a suggestion by displayed text. ``index`` selects a
+        suggestion by 1-based position. They are mutually exclusive. When
+        ``search_text`` is supplied, it is entered before the selection; omit it
+        after chaining from ``fill(...)``.
+        """
+        if (value is None) == (index is None):
+            raise ValueError("Specify exactly one of 'value' or 'index'.")
+        if index is not None and (isinstance(index, bool) or not isinstance(index, int) or index < 1):
+            raise ValueError("Textbox suggestion index must be an integer of 1 or greater.")
+        if value is not None and not str(value).strip():
+            raise ValueError("Textbox suggestion value cannot be empty or whitespace.")
+        if search_text is not None and not str(search_text).strip():
+            raise ValueError("search_text cannot be empty or whitespace.")
+
+        if search_text is not None:
+            self.fill(search_text)
+
+        textbox = self._wait_until_ready_locator()
+        if not self._is_searchable(textbox):
+            raise ValueError(
+                f"Textbox {self._description()} does not expose searchable suggestions."
+            )
+
+        listbox_id = textbox.get_attribute("aria-controls")
+        assert listbox_id is not None
+        listbox_literal = self._xpath_literal(listbox_id)
+        listbox = self._page.locator(
+            "xpath=//*[@role='listbox' and @id=" + listbox_literal + "]"
+        ).filter(visible=True).first
+        timeout_kwargs = self._timeout_kwargs(timeout)
+        expect(
+            listbox, f"Suggestion list for textbox {self._description()} was not visible."
+        ).to_be_visible(**timeout_kwargs)
+
+        options = listbox.get_by_role("option").filter(visible=True)
+        expect(
+            options.first, f"Textbox {self._description()} did not render suggestions."
+        ).to_be_visible(**timeout_kwargs)
+
+        no_results = listbox.get_by_role("option", name="No results found", exact=True).filter(visible=True)
+        if no_results.count() > 0:
+            raise LookupError(f"No suggestions were found for textbox {self._description()}.")
+
+        if index is not None:
+            count = options.count()
+            if index > count:
+                raise IndexError(
+                    f"Textbox {self._description()} suggestion index {index} is out of range; "
+                    f"{count} visible suggestion(s) were available."
+                )
+            option = options.nth(index - 1)
+        else:
+            option = listbox.get_by_role(
+                "option", name=str(value).strip(), exact=exact
+            ).filter(visible=True).first
+
+        expect(
+            option, f"Textbox {self._description()} suggestion was not visible."
+        ).to_be_visible(**timeout_kwargs)
+        option.click(**timeout_kwargs)
+        self._page.wait_for_appian_action_completed(timeout=timeout or self._timeout)
+        logger.info("Selected Appian textbox suggestion: %s.", self._description())
+        return self
 
     def clear(self) -> None:
         """Wait until the textbox is ready, then clear its value."""

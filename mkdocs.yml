@@ -115,7 +115,6 @@ nav:
           - MenuButton: api/menu-button.md
           - RecordList: api/record-list.md
           - Region: api/region.md
-          - SearchInput: api/search-input.md
           - ComponentUtils: api/component-utils.md
       - Compatibility:
           - Legacy Scope: api/scope.md

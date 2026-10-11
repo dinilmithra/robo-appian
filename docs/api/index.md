@@ -40,7 +40,6 @@ page.button(name="Next").click()
 | [`MenuButton`](menu-button.md) | Menu-button actions |
 | [`RecordList`](record-list.md) | Repeated record content |
 | [`Region`](region.md) | Named regions/scoping |
-| [`SearchInput`](search-input.md) | Search suggestions |
 | [`ComponentUtils`](component-utils.md) | Shared lower-level component utilities |
 
 ## Runtime and framework integration

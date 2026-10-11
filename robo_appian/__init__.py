@@ -44,7 +44,6 @@ from robo_appian.appian import (
 )
 from robo_appian.components import (
     MenuButton,
-    SearchInput,
     Region,
     RecordList,
 )
@@ -83,7 +82,6 @@ __all__ = [
     "AppianLocator",
     "AppianScope",
     "MenuButton",
-    "SearchInput",
     "AppianTable",
     "ComponentUtils",
     "Region",

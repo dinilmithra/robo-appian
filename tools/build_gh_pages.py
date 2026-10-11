@@ -37,7 +37,6 @@ API_MAP = {
     "record-list": ("RecordList", PKG / "components" / "RecordList.py"),
     "region": ("Region", PKG / "components" / "Region.py"),
     "search-dropdown": ("AppianDropdown", PKG / "appian" / "appian_dropdown.py"),
-    "search-input": ("SearchInput", PKG / "components" / "SearchInput.py"),
     "tab": ("AppianTab", PKG / "appian" / "appian_tab.py"),
     "table": ("AppianTable", PKG / "appian" / "appian_table.py"),
     "text": ("Text", PKG / "components" / "Text.py"),

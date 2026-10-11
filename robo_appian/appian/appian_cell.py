@@ -78,8 +78,8 @@ class AppianCell(AppianLocator):
 
     def _textbox_factory(
         self,
-        *,
         label: str | None = None,
+        *,
         placeholder: str | None = None,
         header: str | None = None,
         exact: bool = True,
@@ -262,7 +262,7 @@ class AppianCell(AppianLocator):
             raw = self.locator.locator(
                 "xpath=.//input[(@type='text' or @type='password') and "
                 "not(@data-testid='DatePickerWidget-textInput')] | "
-                ".//textarea[@role='textbox']"
+                ".//textarea[@role='textbox'] | .//input[@role='combobox' and @aria-autocomplete='list' and @aria-controls]"
             )
             component._indexed_locator = self._visible_nth(raw, index)  # type: ignore[attr-defined]
             return component

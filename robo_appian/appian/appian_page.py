@@ -202,8 +202,8 @@ class AppianPage:
 
     def _textbox_factory(
         self,
-        *,
         label: str | None = None,
+        *,
         placeholder: str | None = None,
         header: str | None = None,
         exact: bool = True,
@@ -427,7 +427,7 @@ class AppianPage:
         def indexed(index: int) -> AppianTextbox:
             component = AppianTextbox(page=self, label=f"textbox[{index}]")
             raw = self.locator(
-                "xpath=.//input[(@type='text' or @type='password') and not(@data-testid='DatePickerWidget-textInput')] | .//textarea[@role='textbox']"
+                "xpath=.//input[(@type='text' or @type='password') and not(@data-testid='DatePickerWidget-textInput')] | .//textarea[@role='textbox'] | .//input[@role='combobox' and @aria-autocomplete='list' and @aria-controls]"
             )
             component._indexed_locator = raw.filter(visible=True).nth(index)
             return component
