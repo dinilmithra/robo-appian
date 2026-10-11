@@ -379,7 +379,6 @@ class AppianPage:
             timeout=timeout,
         )
 
-
     def _dialog_factory(
         self,
         *,
@@ -398,10 +397,10 @@ class AppianPage:
     def _page_nth(self, selector: str, index: int):
         return self.locator(selector).filter(visible=True).nth(index)
 
-
     @property
     def dialog(self) -> AppianComponentAccessor[AppianDialog]:
         """Access Appian modal dialogs semantically or by zero-based index."""
+
         def indexed(index: int) -> AppianDialog:
             return AppianDialog(self, index=index)
 

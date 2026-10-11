@@ -29,7 +29,11 @@ class AppianDialog(AppianLocator):
         self._visible = ComponentUtils.normalize_visibility(visible)
         self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
 
-        locator = page.get_by_role("dialog", name=name, exact=exact) if name else page.get_by_role("dialog")
+        locator = (
+            page.get_by_role("dialog", name=name, exact=exact)
+            if name
+            else page.get_by_role("dialog")
+        )
         if self._visible is True:
             locator = locator.filter(visible=True)
         elif self._visible is False:
@@ -46,9 +50,13 @@ class AppianDialog(AppianLocator):
         self._locator = wrapped.locator
 
         if self._visible is True:
-            expect(self._locator).to_be_visible(**ComponentUtils.timeout_kwargs(self._timeout))
+            expect(self._locator).to_be_visible(
+                **ComponentUtils.timeout_kwargs(self._timeout)
+            )
         elif self._visible is False:
-            expect(self._locator).to_be_hidden(**ComponentUtils.timeout_kwargs(self._timeout))
+            expect(self._locator).to_be_hidden(
+                **ComponentUtils.timeout_kwargs(self._timeout)
+            )
 
     def _button_factory(
         self,
@@ -70,11 +78,17 @@ class AppianDialog(AppianLocator):
     @property
     def button(self) -> AppianComponentAccessor[AppianButton]:
         def indexed(index: int) -> AppianButton:
-            component = AppianButton(page=self._page, name=f"button[{index}]", scope=self)
-            component._indexed_locator = self.locator.get_by_role("button").filter(visible=True).nth(index)
+            component = AppianButton(
+                page=self._page, name=f"button[{index}]", scope=self
+            )
+            component._indexed_locator = (
+                self.locator.get_by_role("button").filter(visible=True).nth(index)
+            )
             return component
 
-        return AppianComponentAccessor(self._button_factory, indexed, component_name="button")
+        return AppianComponentAccessor(
+            self._button_factory, indexed, component_name="button"
+        )
 
 
 __all__ = ["AppianDialog"]

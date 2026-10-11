@@ -61,7 +61,9 @@ class AppianTable:
         self._component_exact = exact
         self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
 
-    def __normalize_optional_identifier(self, value: str | None, name: str) -> str | None:
+    def __normalize_optional_identifier(
+        self, value: str | None, name: str
+    ) -> str | None:
         if value is None:
             return None
         if not isinstance(value, str) or not value.strip():
@@ -91,7 +93,7 @@ class AppianTable:
         When ``visible=None``, the returned locator is intentionally not
         filtered by visibility and can therefore contain both visible and
         hidden matching tables.
-        
+
         """
         indexed = getattr(self, "_indexed_locator", None)
         if indexed is not None:
@@ -182,9 +184,7 @@ class AppianTable:
         """
         normalized_row = None if row_name is None else " ".join(str(row_name).split())
         if row_name is not None and not normalized_row:
-            raise ValueError(
-                "AppianTable.cell row_name cannot be empty or whitespace."
-            )
+            raise ValueError("AppianTable.cell row_name cannot be empty or whitespace.")
         if row_number is not None and row_number < 1:
             raise ValueError("AppianTable.cell row_number must be 1 or greater.")
 
@@ -196,9 +196,7 @@ class AppianTable:
                 "AppianTable.cell column_name cannot be empty or whitespace."
             )
         if column_number is not None and column_number < 1:
-            raise ValueError(
-                "AppianTable.cell column_number must be 1 or greater."
-            )
+            raise ValueError("AppianTable.cell column_number must be 1 or greater.")
 
         effective_row_name = normalized_row
         if effective_row_name is None and row_number is None:
@@ -306,7 +304,6 @@ class AppianTable:
             visible=visible,
             exact=exact,
         )
-
 
     def column(
         self,

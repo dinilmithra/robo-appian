@@ -388,8 +388,7 @@ class AppianDropdown:
                 first_text = " ".join(first_option.inner_text().split())
                 placeholder_offset = (
                     1
-                    if not first_text
-                    or first_text.casefold() == "select a value"
+                    if not first_text or first_text.casefold() == "select a value"
                     else 0
                 )
                 option = options.nth(selected_index - 1 + placeholder_offset)
@@ -409,10 +408,7 @@ class AppianDropdown:
                     candidate_text = " ".join(
                         options.nth(option_index).inner_text().split()
                     )
-                    if (
-                        candidate_text
-                        and candidate_text.casefold() != "select a value"
-                    ):
+                    if candidate_text and candidate_text.casefold() != "select a value":
                         option_count += 1
                 raise IndexError(
                     f"Dropdown option index {selected_index} is out of range for "
