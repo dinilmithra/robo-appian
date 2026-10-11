@@ -131,6 +131,24 @@ page.textbox(placeholder="example@example.com").fill("user@example.com")
 page.textbox(header="Item Description").fill("General details")
 ```
 
+Searchable text-entry controls use the same textbox API. `fill()` can be chained into `select()`, or `select()` can receive `search_text` directly:
+
+```python
+page.textbox("Employee").fill("John").select("John Smith")
+page.textbox("Employee").fill("John").select(index=2)
+
+page.textbox("Employee").select(
+    search_text="John",
+    value="John Smith",
+)
+page.textbox("Employee").select(
+    search_text="John",
+    index=2,
+)
+```
+
+Suggestion indexes are **1-based**. Textbox collection indexes such as `page.textbox[0]` remain **zero-based**. Searchable textbox behavior is resolved from semantic HTML/ARIA relationships rather than Appian CSS classes.
+
 ### Waiting for an Appian component to become enabled
 
 Enabled-state queries are immediate unless a timeout is explicitly supplied. This is intentional: `component.is_enabled()` never inherits `WAIT_TIME` or the component's configured timeout.

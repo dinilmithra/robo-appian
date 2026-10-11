@@ -12,6 +12,7 @@ from robo_appian import AppianPage
 
 ```python
 page.textbox(label="Description").fill("Example item")
+page.textbox("Employee").select(search_text="John", index=2)
 page.date(label="Start Date").fill("10/15/2026")
 page.dropdown(label="Status").select("General")
 page.checkbox(label="Include Details").check()

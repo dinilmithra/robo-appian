@@ -1,6 +1,6 @@
 # Appian Textbox
 
-Use `AppianPage.textbox(...)` to work with a text field by its label, placeholder, or nearby header text.
+Use `AppianPage.textbox(...)` for ordinary text entry and searchable text-entry controls. Identify a textbox by its label, placeholder, or nearby header text.
 
 ```python
 textbox = page.textbox(label="Title")
@@ -14,7 +14,7 @@ page.textbox(placeholder="example@example.com").fill("user@example.com")
 page.textbox(header="Item Description").fill("General details")
 ```
 
-`fill()` returns the same textbox, so searchable text fields can use a fluent fill-and-select flow. Searchable fields are detected from semantic input/ARIA attributes; no CSS class names are used.
+`fill(value)` replaces the current text and returns the same `AppianTextbox`, so calls can be chained. For an ordinary textbox, `fill()` performs the normal Appian focus-out and action-completion wait. For a searchable textbox, `fill()` keeps the field active so a following `select()` can choose a rendered suggestion. Searchable controls are recognized from semantic input/ARIA behavior; Appian CSS class names are not used.
 
 ```python
 page.textbox("Employee").fill("John").select("John Smith")
@@ -31,7 +31,22 @@ page.textbox(placeholder="Start typing...").select(
 )
 ```
 
-`value` and `index` are mutually exclusive. `search_text` is optional when `fill()` has already entered the search criteria.
+`select(value=None, *, search_text=None, index=None, exact=True, timeout=None)` requires exactly one of `value` or `index`:
+
+- `value` selects a visible suggestion by displayed text. Matching is exact by default; use `exact=False` for intentional partial matching.
+- `index` selects by **1-based suggestion position**. `index=1` is the first visible suggestion and `index=2` is the second.
+- `search_text` optionally enters the search criteria before selecting. Omit it when `fill()` has already entered the search text.
+- `timeout` is expressed in seconds. `None` uses the component/framework timeout.
+
+`value` and `index` are mutually exclusive. Calling `select()` with neither, with both, with an index below 1, or with blank search/value text raises a clear argument error. A searchable textbox with no results raises `LookupError`; an out-of-range suggestion index raises `IndexError`. After a suggestion is clicked, `select()` waits for Appian action processing to complete and returns the same textbox.
+
+Textbox **component collection indexing remains zero-based**:
+
+```python
+page.textbox[0].fill("John").select(index=2)
+```
+
+Here `[0]` means the first textbox on the page, while `select(index=2)` means the second suggestion.
 
 Common operations include `fill()`, `select()`, `clear()`, `click()`, `is_visible()`, `is_enabled()`, `is_disabled()`, `value()`, and `wait_until_ready()`.
 

@@ -4,7 +4,7 @@ Start with what the user sees on the page.
 
 | I need to... | Use |
 | --- | --- |
-| Enter text | `page.textbox(...)` |
+| Enter text or select a searchable text suggestion | `page.textbox(...)` |
 | Enter a date | `page.date(...)` |
 | Check or uncheck a checkbox | `page.checkbox(...).check()` / `.uncheck()` |
 | Choose a radio option | `page.radio(...).select(...)` |
@@ -34,6 +34,23 @@ Some Appian forms introduce a textbox with nearby heading text instead of a norm
 
 ```python
 page.textbox(header="Item Description").fill("General details")
+```
+
+A searchable text field is still a textbox in the public API. Enter search text and select a suggestion by value or by **1-based** suggestion index:
+
+```python
+page.textbox("Employee").fill("John").select("John Smith")
+page.textbox("Employee").fill("John").select(index=2)
+```
+
+The same flow can be written in one call, including for a field identified only by placeholder:
+
+```python
+page.textbox("Employee").select(search_text="John", value="John Smith")
+page.textbox(placeholder="Start typing...").select(
+    search_text="Example",
+    index=1,
+)
 ```
 
 ## Date

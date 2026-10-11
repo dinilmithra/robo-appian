@@ -17,7 +17,7 @@ Prefer `AppianPage` for normal application tests.
 | API | Use it for |
 | --- | --- |
 | [`AppianButton`](appian-button.md) | Buttons through `page.button(...)` |
-| [`AppianTextbox`](appian-textbox.md) | Text inputs through `page.textbox(...)` |
+| [`AppianTextbox`](appian-textbox.md) | Text entry and searchable text suggestions through `page.textbox(...)` |
 | [`AppianDate`](appian-date.md) | Date inputs through `page.date(...)` |
 | [`AppianCheckbox`](appian-checkbox.md) | Native Appian checkboxes through `page.checkbox(...)` |
 | [`AppianRadioSelect`](appian-radio-select.md) | Labeled radio groups through `page.radio(...)` |

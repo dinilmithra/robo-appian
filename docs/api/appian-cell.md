@@ -63,7 +63,7 @@ Component indexing is **zero-based Python indexing** (`component[0]` is the firs
 cell.dropdown[0].select(index=1)
 
 # first dropdown in the cell; search, then first filtered option
-cell.dropdown[0].select(search_text="123", index="1")
+cell.dropdown[0].select(search_text="123", index=1)
 ```
 
 A nested table can also be resolved semantically or by cell-local index:

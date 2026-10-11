@@ -33,6 +33,7 @@ Python 3.12 is required. `robo-appian` uses `robo-automation` for generic browse
 ```python
 page.textbox(label="Description").fill("Example item")
 page.textbox(placeholder="example@example.com").fill("user@example.com")
+page.textbox("Employee").select(search_text="John", value="John Smith")
 page.date(label="Start Date").fill("10/15/2026")
 page.radio(label="Priority").select("High")
 page.button(name="Next").click()
