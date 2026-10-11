@@ -30,6 +30,27 @@ page.textbox(label="Description").fill("Example")
 page.button(name="Next").click()
 ```
 
+## Example
+
+Use `AppianLocator` when you need to work with one specific area before performing an action:
+
+```python
+from robo_appian import AppianLocator
+
+user_options = AppianLocator(
+    page,
+    attributes={
+        "role": "button",
+        "aria-label": "User options",
+    },
+)
+
+user_options.to_be_visible()
+user_options.click()
+```
+
+For normal form fields and buttons, prefer the simpler `page.textbox(...)`, `page.dropdown(...)`, and `page.button(...)` APIs.
+
 ## API
 
 ::: robo_appian.appian.appian_locator.AppianLocator

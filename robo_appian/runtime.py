@@ -61,7 +61,7 @@ class AppianRuntime:
     """Appian runtime service for browser/session mechanics.
 
     CORE and other Appian consumers can use this class without knowing about
-    BrowserSession, RoboBrowserContext, or PytestPerformanceMonitor.
+    BrowserSession, RoboBrowserContext, or PerformanceMonitor.
     """
 
     def __init__(

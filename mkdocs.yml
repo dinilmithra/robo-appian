@@ -107,6 +107,7 @@ nav:
       - Appian Link: api/appian-link.md
       - Appian Tab: api/appian-tab.md
       - Appian Table: api/appian-table.md
+      - Appian Row: api/appian-row.md
       - Appian Cell: api/appian-cell.md
       - Appian Input Component: api/appian-input-component.md
       - Runtime: api/runtime.md

@@ -468,46 +468,6 @@ class ComponentUtils:
                 raw_scope.press("Tab")
 
     @staticmethod
-    def upload_document(
-        scope: Scope,
-        directory_path: str,
-        file_name: str,
-    ) -> str:
-        """Set a local file on the first Appian upload input.
-
-        The path is expanded and resolved from ``directory_path`` plus
-        ``file_name``. The standard multiple-file widget is preferred; otherwise
-        the first generic file input is used.
-
-        Args:
-            scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
-            directory_path: Local directory containing the upload file.
-            file_name: File name relative to ``directory_path``.
-
-        Returns:
-            str: Absolute path of the file supplied to the browser.
-
-        Raises:
-            FileNotFoundError: If the resolved local file does not exist.
-        """
-        resolved_path = Path(directory_path, file_name).expanduser().resolve()
-        if not resolved_path.is_file():
-            raise FileNotFoundError(f"Upload file not found at: {resolved_path}")
-
-        raw_scope = ComponentUtils.unwrap_scope(scope)
-        widget_input = raw_scope.locator(
-            "div.MultipleFileUploadWidget---upload_field input[type='file']"
-        )
-        if widget_input.count() > 0:
-            widget_input.first.set_input_files(str(resolved_path))
-        else:
-            raw_scope.locator("input[type='file']").first.set_input_files(
-                str(resolved_path)
-            )
-
-        return str(resolved_path)
-
-    @staticmethod
     def find_container(scope: Scope, field_label: str, header_text: str) -> Locator:
         """Build a locator for a region containing a heading and field label.
 

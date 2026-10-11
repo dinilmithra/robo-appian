@@ -1,24 +1,47 @@
 # Action and Failure Snapshots
 
-`robo-appian` inherits snapshot evidence from `robo-automation`. Appian components do not implement their own screenshot pipeline; their underlying browser actions are observed by the common `SnapshotService`.
+Snapshots provide visual evidence of what happened while an automation test was running. They are useful when reviewing test results or investigating a failure.
 
-```ini
+Configure snapshot capture using:
+
+```text
 CAPTURE_ACTION_SNAPSHOTS=N
 CAPTURE_FAILURE_SNAPSHOTS=Y
-SNAPSHOT_PATH=${EVIDENCE_PATH}/actions
+SNAPSHOT_FULL_PAGE=N
+SNAPSHOT_PATH=${ARTIFACTS_ROOT}/snapshots
 ```
 
-When action capture is enabled, each instrumented browser action has only `before` and `after` phases. Failed actions use `after` with `status=failed`. A high-level Appian operation can execute multiple browser actions, so it can produce multiple before/after pairs. State queries such as `is_checked()`, `is_selected(value)`, and immediate state reads are not mutating actions unless they invoke an instrumented browser action internally.
+| Setting | Purpose |
+| --- | --- |
+| `CAPTURE_ACTION_SNAPSHOTS` | Capture screenshots before and after supported automation actions. |
+| `CAPTURE_FAILURE_SNAPSHOTS` | Capture screenshot evidence when a test fails. |
+| `SNAPSHOT_FULL_PAGE` | Capture the full page instead of only the visible area. |
+| `SNAPSHOT_PATH` | Folder where snapshot evidence is stored. The standard project setting is `${ARTIFACTS_ROOT}/snapshots`. |
 
-Failure capture is independently usable when action capture is off. When both flags are on, a pytest failure matching an already captured failed action is deduplicated rather than captured twice.
+## Recommended configuration
 
-Evidence is stored under one root:
+For normal automation execution, failure snapshots provide useful evidence without capturing screenshots for every action:
+
+```text
+CAPTURE_ACTION_SNAPSHOTS=N
+CAPTURE_FAILURE_SNAPSHOTS=Y
+SNAPSHOT_FULL_PAGE=N
+SNAPSHOT_PATH=${ARTIFACTS_ROOT}/snapshots
+```
+
+Enable action snapshots when additional evidence is useful while developing or troubleshooting a test:
+
+```text
+CAPTURE_ACTION_SNAPSHOTS=Y
+```
+
+## Snapshot files
+
+Snapshot evidence is stored under `SNAPSHOT_PATH` and organized by evidence type:
 
 ```text
 ${SNAPSHOT_PATH}/
-├── screenshots/<worker>/<process>/
-├── html/<worker>/<process>/
-└── metadata/<worker>/<process>/
+├── screenshots/
+├── html/
+└── metadata/
 ```
-
-Appian rerenders do not change this contract: component code re-resolves controls as needed, while the common browser action layer captures the actual browser actions.

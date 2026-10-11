@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+from pathlib import Path
+from typing import Any, Mapping, Sequence
 
 from playwright.sync_api import Page, expect
 
@@ -58,6 +59,55 @@ class AppianPage:
     def __dir__(self) -> list[str]:
         """Include RoboPage and underlying page members in introspection."""
         return sorted(set(super().__dir__()) | set(dir(self._robo_page)))
+
+    def upload(
+        self,
+        file_path: str | Path | Sequence[str | Path],
+        *,
+        label: str | None = None,
+        exact: bool = True,
+        visible: bool | None = None,
+        timeout: float | int | None = None,
+    ) -> "AppianPage":
+        """Upload one or more documents.
+
+        Args:
+            file_path: File path, or a sequence of file paths, to upload.
+            label: Displayed label used to identify the upload control when needed.
+            exact: Whether ``label`` must match exactly. Defaults to ``True``.
+            visible: ``True`` for visible controls, ``False`` for hidden controls, or
+                ``None`` to consider either. Upload inputs are commonly hidden, so
+                the default is ``None``.
+            timeout: Maximum wait in seconds. ``None`` uses the configured timeout.
+
+        Returns:
+            AppianPage: This page, allowing fluent continuation.
+
+        Raises:
+            FileNotFoundError: If any supplied file does not exist.
+            ValueError: If no files are supplied.
+        """
+        from robo_appian.utils.ComponentUtils import ComponentUtils
+
+        paths = [file_path] if isinstance(file_path, (str, Path)) else list(file_path)
+        if not paths:
+            raise ValueError("At least one upload file is required.")
+
+        resolved = [Path(item).expanduser().resolve() for item in paths]
+        missing = [path for path in resolved if not path.is_file()]
+        if missing:
+            raise FileNotFoundError(f"Upload file not found at: {missing[0]}")
+
+        if label is not None:
+            control = self._robo_page._page.get_by_label(label, exact=exact)
+        else:
+            control = self._robo_page._page.locator("input[type='file']")
+        if visible is not None:
+            control = control.filter(visible=visible)
+        control = control.first
+        control.set_input_files([str(path) for path in resolved], **ComponentUtils.timeout_kwargs(timeout))
+        self.wait_for_appian_action_completed(timeout=timeout)
+        return self
 
     def wait_for_text_visible(
         self,
@@ -253,17 +303,21 @@ class AppianPage:
 
     def _checkbox_factory(
         self,
+        label: str | None = None,
         *,
-        label: str,
+        header: str | None = None,
         exact: bool = True,
         scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianCheckbox:
-        """Return an Appian checkbox identified by visible label text."""
+        """Return an Appian checkbox identified by its displayed label or header."""
+        target = label if label is not None else header
+        if target is None:
+            raise ValueError("Checkbox label or header is required.")
         return AppianCheckbox(
             page=self,
-            label=label,
+            label=target,
             exact=exact,
             scope=scope,
             visible=visible,
@@ -272,17 +326,21 @@ class AppianPage:
 
     def _radio_factory(
         self,
+        label: str | None = None,
         *,
-        label: str,
+        header: str | None = None,
         exact: bool = True,
         scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianRadioSelect:
-        """Return an Appian radio group identified by its field label."""
+        """Return an Appian radio group identified by its displayed label or header."""
+        target = label if label is not None else header
+        if target is None:
+            raise ValueError("Radio label or header is required.")
         return AppianRadioSelect(
             page=self,
-            label=label,
+            label=target,
             exact=exact,
             scope=scope,
             visible=visible,
@@ -291,17 +349,21 @@ class AppianPage:
 
     def _link_factory(
         self,
+        name: str | None = None,
         *,
-        name: str,
+        header: str | None = None,
         exact: bool = True,
         scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianLink:
-        """Return an Appian link identified by its accessible/visible name."""
+        """Return an Appian link identified by its displayed name or header."""
+        target = name if name is not None else header
+        if target is None:
+            raise ValueError("Link name or header is required.")
         return AppianLink(
             page=self,
-            name=name,
+            name=target,
             exact=exact,
             scope=scope,
             visible=visible,

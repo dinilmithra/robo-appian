@@ -48,8 +48,8 @@ See [Browser Management](browser-management.md) and [Pytest Integration](pytest-
 | `WAIT_TIME` | `90` | Default framework timeout in seconds. |
 | `CAPTURE_ACTION_SNAPSHOTS` | `N` | Capture before/after evidence for instrumented actions. |
 | `CAPTURE_FAILURE_SNAPSHOTS` | `N` | Capture failure evidence independently of action capture. |
-| `ACTION_SNAPSHOT_FULL_PAGE` | `N` | Capture full-page rather than viewport screenshots. |
-| `SNAPSHOT_PATH` | `artifacts/evidence/actions` | Snapshot evidence root; `${VAR}` path references are supported. |
+| `SNAPSHOT_FULL_PAGE` | `N` | Capture the full page instead of only the visible area. |
+| `SNAPSHOT_PATH` | `${ARTIFACTS_ROOT}/snapshots` | Folder where screenshots are saved. |
 | `PYTEST_LOG_LEVEL` | `INFO` | Set the framework/file logging level. |
 | `TESTCASE_LOG_ENABLED` | `Y` | Enable per-testcase logs. |
 | `PERF_MONITOR_ENABLED` | `Y` | Enable common performance monitoring. |
@@ -62,7 +62,7 @@ HEAD_LESS=Y
 WAIT_TIME=90
 CAPTURE_ACTION_SNAPSHOTS=N
 CAPTURE_FAILURE_SNAPSHOTS=Y
-SNAPSHOT_PATH=${EVIDENCE_PATH}/actions
+SNAPSHOT_PATH=${ARTIFACTS_ROOT}/snapshots
 ```
 
 `WAIT_TIME` is expressed in seconds. A semantic component can override the normal action timeout with `timeout=<seconds>`. Enabled-state checks are intentionally different: `component.is_enabled()` is immediate, while `component.is_enabled(timeout=8)` waits up to eight seconds and returns `False` on timeout.

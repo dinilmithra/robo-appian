@@ -40,3 +40,11 @@ By default, robo-appian uses a visible component whose displayed name or label e
 ## Timeout
 
 `timeout` is expressed in seconds. Leave `timeout=None` to use the normal configured wait time, or provide a positive value when this particular action needs a different wait time.
+
+## Identify a radio group by header
+
+```python
+page.radio(header="Priority Details").select("High")
+```
+
+`header` is the displayed heading used to identify the radio group.

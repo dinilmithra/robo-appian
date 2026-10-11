@@ -2,7 +2,7 @@
 
 `AppianPage` is the main page object you use when automating an Appian application.
 
-Most application tests should start here. It gives you simple, readable component APIs such as `textbox()`, `date()`, `dropdown()`, `checkbox()`, `button()`, `dialog()`, and `table()`.
+Most application tests should start here. It gives you simple, readable component APIs such as `textbox()`, `date()`, `dropdown()`, `checkbox()`, `button()`, `dialog()`, `table()`, and `upload()`.
 
 ```python
 from robo_appian import AppianPage
@@ -23,6 +23,35 @@ page.button(name="Next").click()
 ```
 
 Think about the page the same way an end user does: identify the visible field or button text, then choose the matching `AppianPage` component helper.
+
+
+## Upload documents
+
+Use `upload()` to add a document to an Appian upload field.
+
+```python
+page.upload("documents/receipt.pdf")
+```
+
+When a page has more than one upload field, identify the required field by its displayed label:
+
+```python
+page.upload(
+    "documents/receipt.pdf",
+    label="Supporting Document",
+)
+```
+
+Multiple documents can be supplied together when the field supports multiple files:
+
+```python
+page.upload([
+    "documents/receipt.pdf",
+    "documents/approval.pdf",
+])
+```
+
+The upload action waits for Appian processing to complete before continuing.
 
 ## Dialogs
 
@@ -94,6 +123,7 @@ For operations inside a dialog, region, or smaller part of the page, use [`Appia
       show_root_heading: true
       members_order: source
       members:
+        - upload
         - wait_for_text_visible
         - wait_for_appian_action_completed
         - button

@@ -77,9 +77,3 @@ hide:
   </section>
 
 </div>
-
-
-## Common framework capabilities
-
-For normal business automation, use `robo-appian` for page interactions. `robo-automation` supplies the supporting pytest/browser runtime, configuration, logging, and failure evidence. Most automation authors do not need its low-level page or locator APIs. See [Common Framework Features](guides/common-framework-features.md) when you need runtime or diagnostic details.
-

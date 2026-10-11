@@ -21,6 +21,7 @@ Prefer `AppianPage` for normal application tests.
 | [`AppianDate`](appian-date.md) | Date inputs through `page.date(...)` |
 | [`AppianCheckbox`](appian-checkbox.md) | Native Appian checkboxes through `page.checkbox(...)` |
 | [`AppianRadioSelect`](appian-radio-select.md) | Labeled radio groups through `page.radio(...)` |
+| [`AppianRow`](appian-row.md) | Table rows through `table.row(...)` |
 | [`AppianTab`](appian-tab.md) | Linked-card tabs through `page.tab(...)` |
 | [`AppianInputComponent`](appian-input-component.md) | Shared input lifecycle; mainly for framework/component authors |
 

@@ -63,3 +63,13 @@ By default, robo-appian uses a visible component whose displayed name or label e
 ## Timeout
 
 `timeout` is expressed in seconds. Leave `timeout=None` to use the normal configured wait time, or provide a positive value when this particular action needs a different wait time.
+
+## Identify a checkbox group by header
+
+Use `header` when the displayed heading is the clearest way to identify the checkbox group:
+
+```python
+page.checkbox(header="More Details")
+```
+
+`header` is the displayed heading used to identify the checkbox or checkbox group.

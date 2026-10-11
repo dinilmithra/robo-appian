@@ -51,3 +51,11 @@ By default, robo-appian uses a visible component whose displayed name or label e
 ## Timeout
 
 Component `timeout` values are expressed in seconds. `timeout=None` uses the configured default timeout; a positive finite value overrides that timeout for waits/actions performed by the component.
+
+## Identify a link by header
+
+```python
+page.link(header="View Details").click()
+```
+
+`header` is the displayed heading used to identify the link when that is the clearest business-facing name.
