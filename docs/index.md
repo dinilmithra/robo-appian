@@ -12,9 +12,9 @@ hide:
         <span>Python Automation Framework for Appian</span>
       </div>
       <h1>Automate Appian.<br><em>Faster. Reliably.</em></h1>
-      <p>A reusable Python automation framework for Appian UI automation and testing. Built for readable interactions, stable component reuse, and real-world enterprise test suites.</p>
+      <p>A business-readable Python library for automating Appian workflows. Write automation using the labels, buttons, fields, tables, and dialogs a user sees; the framework handles the browser and Appian synchronization behind the scenes.</p>
       <div class="ra-target-actions">
-        <a class="ra-target-btn primary" href="getting-started/installation/">🚀&nbsp; Get Started <span>→</span></a>
+        <a class="ra-target-btn primary" href="getting-started/ba-workflow/">🚀&nbsp; Start a Business Flow <span>→</span></a>
         <a class="ra-target-btn" href="https://github.com/dinilmithra/robo-appian">◉&nbsp; View on GitHub <span>↗</span></a>
       </div>
       <div class="ra-target-install"><span>pip</span><code>pip install robo-appian</code></div>
@@ -67,7 +67,7 @@ hide:
   <section class="ra-target-docs">
     <div class="ra-target-docs-head"><h2>▣ &nbsp; Documentation</h2><a href="getting-started/installation/">Explore all docs&nbsp; →</a></div>
     <div class="ra-target-doc-grid">
-      <a href="getting-started/installation/"><span>↓</span><div><strong>Installation</strong><small>Set up robo-appian in minutes.</small></div><b>→</b></a>
+      <a href="getting-started/ba-workflow/"><span>▶</span><div><strong>Write a Business Flow</strong><small>Turn business steps into readable Appian automation.</small></div><b>→</b></a>
       <a href="getting-started/concepts/"><span>⚙</span><div><strong>Core Concepts</strong><small>Learn the few concepts needed to write readable Appian tests.</small></div><b>→</b></a>
       <a href="api/"><span>&lt;/&gt;</span><div><strong>Core APIs</strong><small>Browse detailed component APIs when you need more control.</small></div><b>→</b></a>
       <a href="getting-started/quick-start/"><span>▧</span><div><strong>Examples</strong><small>Copy simple examples for common Appian controls.</small></div><b>→</b></a>
@@ -81,5 +81,5 @@ hide:
 
 ## Common framework capabilities
 
-`robo-appian` includes the common browser lifecycle, pytest integration, correlation, logging, performance instrumentation, and action-snapshot capabilities supplied by `robo-automation`, exposed through the Appian-facing framework boundary. See [Common Framework Features](guides/common-framework-features.md) for the complete capability map and usage guidance.
+For normal business automation, use `robo-appian` for page interactions. `robo-automation` supplies the supporting pytest/browser runtime, configuration, logging, and failure evidence. Most automation authors do not need its low-level page or locator APIs. See [Common Framework Features](guides/common-framework-features.md) when you need runtime or diagnostic details.
 

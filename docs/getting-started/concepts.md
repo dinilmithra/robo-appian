@@ -1,6 +1,6 @@
-# Core Concepts
+# Concepts for Automation Authors
 
-You only need a few ideas to start using `robo-appian`.
+A Business Analyst only needs a few ideas to start writing Appian automation. Framework internals are not prerequisites.
 
 ## Think like the user
 

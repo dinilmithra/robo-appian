@@ -1,6 +1,6 @@
 # Quick Start
 
-This page shows the shortest path from installation to a readable Appian test.
+This page shows the shortest path from installation to a readable business-flow test. You normally interact with Appian through `robo-appian`; `robo-automation` works underneath it to provide the test runtime.
 
 ## 1. Install robo-appian and a browser
 
@@ -39,6 +39,7 @@ Your application project normally owns the URL and login process. The `page` fix
 
 ## What should I learn next?
 
+- [Writing a Business Flow](ba-workflow.md) shows how to translate business steps into automation.
 - [Your First Test](first-test.md) explains the test structure.
 - [Choosing a Component](component-basics.md) shows which API to use for common controls.
 - [Troubleshooting](troubleshooting.md) starts from common failure symptoms.

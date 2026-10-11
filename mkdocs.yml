@@ -79,13 +79,14 @@ nav:
   - Getting Started:
       - Installation: getting-started/installation.md
       - Quick Start: getting-started/quick-start.md
+      - Writing a Business Flow: getting-started/ba-workflow.md
       - Python Basics: getting-started/python-basics.md
       - Core Concepts: getting-started/concepts.md
       - Your First Test: getting-started/first-test.md
       - Choosing a Component: getting-started/component-basics.md
       - Troubleshooting: getting-started/troubleshooting.md
       - Handling Errors: getting-started/error-handling.md
-  - Advanced / Framework Guides:
+  - Framework / Maintainer Guides:
       - Framework Architecture: guides/framework-architecture.md
       - Common Framework Features: guides/common-framework-features.md
       - Pytest Integration: guides/pytest-integration.md
