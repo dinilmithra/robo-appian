@@ -16,7 +16,7 @@ from robo_automation import RoboLocator, Scope
 logger = logging.getLogger(__name__)
 
 
-class ComponentUtils:
+class ComponentSupport:
     """Shared browser automation operations used by Appian components."""
 
     @staticmethod
@@ -39,7 +39,7 @@ class ComponentUtils:
     @staticmethod
     def timeout_kwargs(value: float | int | None) -> dict[str, float]:
         """Return runtime timeout kwargs for an optional seconds value."""
-        timeout = ComponentUtils.normalize_timeout_seconds(value)
+        timeout = ComponentSupport.normalize_timeout_seconds(value)
         return {} if timeout is None else {"timeout": timeout * 1000}
 
     @staticmethod
@@ -145,7 +145,7 @@ class ComponentUtils:
             text: Text to locate.
             excat_match: Whether the element text must match exactly.
         """
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         link = raw_scope.get_by_text(text, exact=excat_match).filter(visible=True).first
         expect(link).to_be_visible()
         link.click()
@@ -158,7 +158,7 @@ class ComponentUtils:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             title: Title attribute value to locate.
         """
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         link = raw_scope.get_by_title(title).filter(visible=True).first
         expect(link).to_be_visible()
         link.click()
@@ -171,7 +171,7 @@ class ComponentUtils:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             button_id: Literal HTML ID, including IDs that begin with numbers.
         """
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         locator = raw_scope.locator(f'[id="{button_id}"]:not([disabled])')
         active_locator = locator.filter(visible=True).first
         expect(active_locator).to_be_visible()
@@ -192,7 +192,7 @@ class ComponentUtils:
         if not expression:
             raise ValueError("XPath cannot be empty or whitespace.")
 
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         return raw_scope.locator(f"xpath={expression}").filter(visible=True).count() > 0
 
     @staticmethod
@@ -215,8 +215,8 @@ class ComponentUtils:
         if not attribute_name:
             raise ValueError("Attribute cannot be empty or whitespace.")
 
-        value_literal = ComponentUtils.xpath_literal(str(value or ""))
-        return ComponentUtils.is_visible_by_xpath(
+        value_literal = ComponentSupport.xpath_literal(str(value or ""))
+        return ComponentSupport.is_visible_by_xpath(
             scope,
             f"//*[@{attribute_name}={value_literal}]",
         )
@@ -244,8 +244,8 @@ class ComponentUtils:
         if not attribute_name:
             raise ValueError("Attribute cannot be empty or whitespace.")
 
-        value_literal = ComponentUtils.xpath_literal(str(value or ""))
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        value_literal = ComponentSupport.xpath_literal(str(value or ""))
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         components = raw_scope.locator(f"xpath=//*[@{attribute_name}={value_literal}]")
         if visible_only:
             components = components.filter(visible=True)
@@ -305,7 +305,7 @@ class ComponentUtils:
         if not relative_xpath:
             raise ValueError("Descendant XPath cannot be empty or whitespace.")
 
-        component_id_literal = ComponentUtils.xpath_literal(component_id_value)
+        component_id_literal = ComponentSupport.xpath_literal(component_id_value)
         parent_xpath = f"//*[@id={component_id_literal}]"
         descendant = relative_xpath
         if descendant.startswith(".//"):
@@ -313,7 +313,7 @@ class ComponentUtils:
         elif not descendant.startswith("/"):
             descendant = f"//{descendant}"
 
-        return ComponentUtils.get_texts_by_xpath(
+        return ComponentSupport.get_texts_by_xpath(
             scope,
             f"({parent_xpath}){descendant}",
             visible_only=visible_only,
@@ -339,7 +339,7 @@ class ComponentUtils:
         if not expression:
             raise ValueError("XPath cannot be empty or whitespace.")
 
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         matches = raw_scope.locator(f"xpath={expression}")
         if visible_only:
             matches = matches.filter(visible=True)
@@ -371,7 +371,7 @@ class ComponentUtils:
         Returns:
             list[str]: Visible text values from elements matching the XPath expression.
         """
-        return ComponentUtils.get_texts_by_xpath(
+        return ComponentSupport.get_texts_by_xpath(
             scope,
             xpath,
             visible_only=True,
@@ -403,7 +403,7 @@ class ComponentUtils:
         if not attribute_name:
             raise ValueError("Attribute cannot be empty or whitespace.")
 
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         matches = raw_scope.locator(f"xpath={expression}")
         if visible_only:
             matches = matches.filter(visible=True)
@@ -423,7 +423,7 @@ class ComponentUtils:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             message: Optional assertion message used when the wait fails.
         """
-        expect(ComponentUtils.unwrap_scope(scope), message).to_be_visible()
+        expect(ComponentSupport.unwrap_scope(scope), message).to_be_visible()
 
     @staticmethod
     def wait_until_hidden(scope: Scope) -> None:
@@ -432,7 +432,7 @@ class ComponentUtils:
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
         """
-        expect(ComponentUtils.unwrap_scope(scope)).to_be_hidden()
+        expect(ComponentSupport.unwrap_scope(scope)).to_be_hidden()
 
     @staticmethod
     def tab(scope: Scope, occurrence: Optional[int] = None) -> None:
@@ -458,7 +458,7 @@ class ComponentUtils:
         ):
             raise ValueError("Tab occurrence must be a positive integer.")
 
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         for _ in range(occurrence):
             if hasattr(scope, "press_key"):
                 scope.press_key("Tab")
@@ -487,7 +487,7 @@ class ComponentUtils:
             f"/ancestor::*[@role='region']"
             f"[.//*[normalize-space()='{field_label}']][1]"
         )
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         return raw_scope.locator(f"xpath={xpath}")
 
     @staticmethod
@@ -501,7 +501,7 @@ class ComponentUtils:
         Returns:
             Locator: A live locator for the element matching the XPath.
         """
-        raw_scope = ComponentUtils.unwrap_scope(scope)
+        raw_scope = ComponentSupport.unwrap_scope(scope)
         locator = raw_scope.locator(f"xpath={xpath}").filter(visible=True).first
         return locator
 
@@ -516,6 +516,6 @@ class ComponentUtils:
         Returns:
             Locator: A live locator for the element matching the XPath.
         """
-        locator = ComponentUtils.find_locator_by_xpath(scope, xpath)
+        locator = ComponentSupport.find_locator_by_xpath(scope, xpath)
         expect(locator).to_be_visible()
         return locator

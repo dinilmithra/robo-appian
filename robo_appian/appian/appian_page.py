@@ -21,8 +21,10 @@ from .appian_radio_select import AppianRadioSelect
 from .appian_textbox import AppianTextbox
 from .appian_tab import AppianTab
 from .appian_link import AppianLink
+from .appian_menu import AppianMenu
 from .appian_locator import AppianLocator
-from robo_appian.appian.appian_table import AppianTable
+from robo_appian.appian.appian_grid import AppianGrid
+from robo_appian.appian.appian_dataset import AppianDataSet
 
 
 class AppianPage:
@@ -87,7 +89,7 @@ class AppianPage:
             FileNotFoundError: If any supplied file does not exist.
             ValueError: If no files are supplied.
         """
-        from robo_appian.utils.ComponentUtils import ComponentUtils
+        from robo_appian._component_support import ComponentSupport
 
         paths = [file_path] if isinstance(file_path, (str, Path)) else list(file_path)
         if not paths:
@@ -105,7 +107,9 @@ class AppianPage:
         if visible is not None:
             control = control.filter(visible=visible)
         control = control.first
-        control.set_input_files([str(path) for path in resolved], **ComponentUtils.timeout_kwargs(timeout))
+        control.set_input_files(
+            [str(path) for path in resolved], **ComponentSupport.timeout_kwargs(timeout)
+        )
         self.wait_for_appian_action_completed(timeout=timeout)
         return self
 
@@ -144,9 +148,9 @@ class AppianPage:
             ValueError: If ``timeout`` is not a positive finite number.
             TimeoutError: If Appian continues processing beyond the timeout.
         """
-        from robo_appian.utils.ComponentUtils import ComponentUtils
+        from robo_appian._component_support import ComponentSupport
 
-        timeout_kwargs = ComponentUtils.timeout_kwargs(timeout)
+        timeout_kwargs = ComponentSupport.timeout_kwargs(timeout)
         processing = self._robo_page._page.locator(
             "#appian-nprogress, #appian-working-indicator-hidden"
         )
@@ -370,6 +374,19 @@ class AppianPage:
             timeout=timeout,
         )
 
+    def _menu_factory(
+        self,
+        name: str,
+        *,
+        exact: bool = True,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> AppianMenu:
+        """Return an Appian menu identified by its displayed name."""
+        return AppianMenu(
+            self, name=name, exact=exact, visible=visible, timeout=timeout
+        )
+
     def _tab_factory(
         self,
         *,
@@ -389,30 +406,59 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _table_factory(
+    def _grid_factory(
         self,
         *,
         label: str | None = None,
-        header_name: str | None = None,
+        header: str | None = None,
         row_name: str | None = None,
         column_name: str | None = None,
         exact: bool = True,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
-    ) -> AppianTable:
-        """Return an Appian table identified by one or more semantic hints.
+    ) -> AppianGrid:
+        """Return an Appian grid identified by one or more semantic hints.
 
-        At least one of ``label``, ``header_name``, ``row_name``, or
+        At least one of ``label``, ``header``, ``row_name``, or
         ``column_name`` is required. ``visible=True`` selects visible tables,
         ``visible=False`` selects hidden tables, and ``visible=None`` applies
         no visibility filter so both visible and hidden matches are retained.
         """
-        return AppianTable(
+        return AppianGrid(
             self,
             label=label,
-            header_name=header_name,
+            header=header,
             row_name=row_name,
             column_name=column_name,
+            exact=exact,
+            visible=visible,
+            timeout=timeout,
+        )
+
+    def _dataset_factory(
+        self,
+        *,
+        label: str | None = None,
+        header: str | None = None,
+        field: str | None = None,
+        fields: list[str] | None = None,
+        row_name: str | None = None,
+        column_name: str | None = None,
+        row_number: int | None = None,
+        exact: bool = True,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> AppianDataSet:
+        """Return structured Appian grid or list data using business-visible identifiers."""
+        return AppianDataSet(
+            self,
+            label=label,
+            header=header,
+            field=field,
+            fields=fields,
+            row_name=row_name,
+            column_name=column_name,
+            row_number=row_number,
             exact=exact,
             visible=visible,
             timeout=timeout,
@@ -551,6 +597,17 @@ class AppianPage:
         )
 
     @property
+    def menu(self) -> AppianComponentAccessor[AppianMenu]:
+        def indexed(index: int) -> AppianMenu:
+            raise ValueError(
+                'Use page.menu("Menu Name")[index] only after identifying the menu by name.'
+            )
+
+        return AppianComponentAccessor(
+            self._menu_factory, indexed, component_name="menu"
+        )
+
+    @property
     def tab(self) -> AppianComponentAccessor[AppianTab]:
         def indexed(index: int) -> AppianTab:
             component = AppianTab(page=self, name=f"tab[{index}]")
@@ -581,16 +638,27 @@ class AppianPage:
         )
 
     @property
-    def table(self) -> AppianComponentAccessor[AppianTable]:
-        def indexed(index: int) -> AppianTable:
-            component = AppianTable(self, label=f"table[{index}]")
+    def dataset(self) -> AppianComponentAccessor[AppianDataSet]:
+        def indexed(index: int) -> AppianDataSet:
+            raise ValueError(
+                "Use page.dataset(header=...)[index] after identifying the dataset."
+            )
+
+        return AppianComponentAccessor(
+            self._dataset_factory, indexed, component_name="dataset"
+        )
+
+    @property
+    def grid(self) -> AppianComponentAccessor[AppianGrid]:
+        def indexed(index: int) -> AppianGrid:
+            component = AppianGrid(self, label=f"grid[{index}]")
             component._indexed_locator = (
                 self.locator("table").filter(visible=True).nth(index)
             )
             return component
 
         return AppianComponentAccessor(
-            self._table_factory, indexed, component_name="table"
+            self._grid_factory, indexed, component_name="grid"
         )
 
 

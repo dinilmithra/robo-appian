@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 import logging
 from typing import TYPE_CHECKING
@@ -40,8 +40,8 @@ class AppianButton:
         self._name = name
         self._exact = exact
         self._scope = scope
-        self._visible = ComponentUtils.normalize_visibility(visible)
-        self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
+        self._visible = ComponentSupport.normalize_visibility(visible)
+        self._timeout = ComponentSupport.normalize_timeout_seconds(timeout)
 
     @property
     def name(self) -> str:
@@ -60,7 +60,7 @@ class AppianButton:
 
     def _timeout_kwargs(self, timeout: float | int | None = None) -> dict[str, float]:
         effective = self._timeout if timeout is None else timeout
-        return ComponentUtils.timeout_kwargs(effective)
+        return ComponentSupport.timeout_kwargs(effective)
 
     @staticmethod
     def _xpath_literal(value: str) -> str:
@@ -161,7 +161,7 @@ class AppianButton:
             expect(
                 button,
                 f"Button '{self._name}' did not become enabled.",
-            ).to_be_enabled(**ComponentUtils.timeout_kwargs(timeout))
+            ).to_be_enabled(**ComponentSupport.timeout_kwargs(timeout))
             return True
         except AssertionError:
             return False

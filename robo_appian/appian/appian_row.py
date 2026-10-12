@@ -1,4 +1,4 @@
-"""Appian table row component abstraction."""
+"""Appian grid row component abstraction."""
 
 from __future__ import annotations
 
@@ -10,18 +10,18 @@ from robo_appian.appian.appian_cell import AppianCell
 from robo_appian.appian.appian_link import AppianLink
 from robo_appian.appian.appian_locator import AppianLocator
 from robo_appian.appian.appian_page import AppianPage
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 if TYPE_CHECKING:
-    from .appian_table import AppianTable
+    from .appian_grid import AppianGrid
 
 
 class AppianRow:
-    """Represent a semantic row inside an already-resolved Appian table."""
+    """Represent a semantic row inside an already-resolved Appian grid."""
 
     def __init__(
         self,
-        table: "AppianTable",
+        table: "AppianGrid",
         *,
         name: str | None = None,
         row_number: int | None = None,
@@ -39,7 +39,7 @@ class AppianRow:
         self._table = table
         self._name = normalized_name
         self._row_number = row_number
-        self._visible = ComponentUtils.normalize_visibility(visible)
+        self._visible = ComponentSupport.normalize_visibility(visible)
         self._exact = exact
 
     @property
@@ -48,6 +48,13 @@ class AppianRow:
 
     @property
     def locator(self) -> Locator:
+        if hasattr(self._table, "row_locator"):
+            return self._table.row_locator(
+                name=self._name,
+                row_number=self._row_number,
+                visible=self._visible,
+                exact=self._exact,
+            )
         rows = self._table.locator.locator("tbody tr")
         if self._name is not None:
             rows = rows.filter(has_text=self._name)
@@ -56,7 +63,7 @@ class AppianRow:
         if self._row_number is not None:
             return rows.nth(self._row_number - 1)
         if self._exact:
-            literal = ComponentUtils.xpath_literal(self._name or "")
+            literal = ComponentSupport.xpath_literal(self._name or "")
             return rows.locator(
                 "xpath=self::tr[.//*[normalize-space(translate(string(.), '\u00a0', ' '))="
                 + literal
@@ -103,15 +110,22 @@ class AppianRow:
                 "unless the table was created with column_name."
             )
 
-        if column_number is not None:
-            column_index = column_number - 1
-        else:
-            column_index = self._table._column_index(
-                normalized_column or "", exact=exact
+        if hasattr(self._table, "cell_locator"):
+            cell = self._table.cell_locator(
+                self.locator,
+                column_name=normalized_column,
+                column_number=column_number,
+                exact=exact,
             )
-
-        cell = self.locator.locator("td").nth(column_index)
-        normalized_visible = ComponentUtils.normalize_visibility(visible)
+        else:
+            if column_number is not None:
+                column_index = column_number - 1
+            else:
+                column_index = self._table._column_index(
+                    normalized_column or "", exact=exact
+                )
+            cell = self.locator.locator("td").nth(column_index)
+        normalized_visible = ComponentSupport.normalize_visibility(visible)
         if normalized_visible is not None:
             cell = cell.filter(visible=normalized_visible)
         return AppianCell(cell, page=self._table.appian_page)

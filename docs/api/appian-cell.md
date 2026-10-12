@@ -3,7 +3,7 @@
 `AppianCell` represents a resolved table cell. It is also an `AppianLocator`, so normal locator operations remain available, while Appian component factories are automatically scoped to that cell.
 
 ```python
-cell = page.table(label="Items").cell(
+cell = page.grid(label="Items").cell(
     row_name="Item 1001",
     column_number=16,
 )
@@ -26,7 +26,7 @@ cell.tab(name="Details").select()
 Read the user-visible value of a cell with `text()`. Whitespace is normalized, and the same method works for plain text, nested markup, and link text. An empty cell returns `""`.
 
 ```python
-status = page.table(label="Items").cell(
+status = page.grid(label="Items").cell(
     row_name="Item 1001",
     column_name="Status",
 ).text()
@@ -69,7 +69,7 @@ cell.dropdown[0].select(search_text="123", index=1)
 A nested table can also be resolved semantically or by cell-local index:
 
 ```python
-nested = cell.table(label="Nested Items")
+nested = cell.grid(label="Nested Items")
 nested = cell.table[0]
 ```
 

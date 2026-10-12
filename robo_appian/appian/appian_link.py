@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator, expect
 
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 if TYPE_CHECKING:
     from .appian_locator import AppianLocator
@@ -39,8 +39,8 @@ class AppianLink:
         self._name = " ".join(name.split())
         self._exact = exact
         self._scope = scope
-        self._visible = ComponentUtils.normalize_visibility(visible)
-        self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
+        self._visible = ComponentSupport.normalize_visibility(visible)
+        self._timeout = ComponentSupport.normalize_timeout_seconds(timeout)
 
     @property
     def name(self) -> str:
@@ -59,7 +59,7 @@ class AppianLink:
 
     def _timeout_kwargs(self, timeout: float | int | None = None) -> dict[str, float]:
         effective = self._timeout if timeout is None else timeout
-        return ComponentUtils.timeout_kwargs(effective)
+        return ComponentSupport.timeout_kwargs(effective)
 
     def _root(self):
         """Return the framework-compatible scope used for link lookup."""

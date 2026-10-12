@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator
 
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 if TYPE_CHECKING:
     from .appian_page import AppianPage
@@ -26,7 +26,7 @@ class AppianInputComponent:
         timeout: float | int | None = None,
     ) -> None:
         self._page = page
-        self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
+        self._timeout = ComponentSupport.normalize_timeout_seconds(timeout)
 
     @property
     def timeout(self) -> float | None:
@@ -36,7 +36,7 @@ class AppianInputComponent:
     def _timeout_kwargs(self, timeout: float | int | None = None) -> dict[str, float]:
         """Return runtime timeout kwargs using an optional method override."""
         effective = self._timeout if timeout is None else timeout
-        return ComponentUtils.timeout_kwargs(effective)
+        return ComponentSupport.timeout_kwargs(effective)
 
     @staticmethod
     def _focus_out(locator: Locator) -> None:

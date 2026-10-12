@@ -1,4 +1,4 @@
-"""Appian table column component abstraction."""
+"""Appian grid column component abstraction."""
 
 from __future__ import annotations
 
@@ -7,18 +7,18 @@ from typing import TYPE_CHECKING
 from playwright.sync_api import Locator
 
 from robo_appian.appian.appian_cell import AppianCell
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 if TYPE_CHECKING:
-    from .appian_table import AppianTable
+    from .appian_grid import AppianGrid
 
 
 class AppianColumn:
-    """Represent a semantic column inside an already-resolved Appian table."""
+    """Represent a semantic column inside an already-resolved Appian grid."""
 
     def __init__(
         self,
-        table: "AppianTable",
+        table: "AppianGrid",
         *,
         name: str | None = None,
         column_number: int | None = None,
@@ -36,7 +36,7 @@ class AppianColumn:
         self._table = table
         self._name = normalized_name
         self._column_number = column_number
-        self._visible = ComponentUtils.normalize_visibility(visible)
+        self._visible = ComponentSupport.normalize_visibility(visible)
         self._exact = exact
 
     @property
@@ -75,7 +75,7 @@ class AppianColumn:
             exact=exact,
         )
         cell = row.locator.locator("td").nth(self.column_index)
-        normalized_visible = ComponentUtils.normalize_visibility(visible)
+        normalized_visible = ComponentSupport.normalize_visibility(visible)
         if normalized_visible is not None:
             cell = cell.filter(visible=normalized_visible)
         return AppianCell(cell, page=self._table.appian_page)

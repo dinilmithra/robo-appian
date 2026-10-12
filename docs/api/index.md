@@ -38,10 +38,6 @@ page.button(name="Next").click()
 
 | Component | Use it for |
 | --- | --- |
-| [`MenuButton`](menu-button.md) | Menu-button actions |
-| [`RecordList`](record-list.md) | Repeated record content |
-| [`Region`](region.md) | Named regions/scoping |
-| [`ComponentUtils`](component-utils.md) | Shared lower-level component utilities |
 
 ## Runtime and framework integration
 
@@ -52,4 +48,4 @@ page.button(name="Next").click()
 
 ## Compatibility
 
-Some older component helpers still expose compatibility signatures inherited from earlier layers. New Appian code should prefer `AppianPage`, `AppianLocator`, `AppianScope`, and the fluent component APIs above.
+Use `AppianPage`, `AppianLocator`, `AppianScope`, and the fluent Appian component APIs for new automation.

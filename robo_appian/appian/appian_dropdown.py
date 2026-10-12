@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator, expect
 
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 if TYPE_CHECKING:
     from .appian_locator import AppianLocator
@@ -42,8 +42,8 @@ class AppianDropdown:
         self._label = " ".join(label.split())
         self._exact = exact
         self._scope = scope
-        self._visible = ComponentUtils.normalize_visibility(visible)
-        self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
+        self._visible = ComponentSupport.normalize_visibility(visible)
+        self._timeout = ComponentSupport.normalize_timeout_seconds(timeout)
 
     @property
     def label(self) -> str:
@@ -62,7 +62,7 @@ class AppianDropdown:
 
     def _timeout_kwargs(self, timeout: float | int | None = None) -> dict[str, float]:
         effective = self._timeout if timeout is None else timeout
-        return ComponentUtils.timeout_kwargs(effective)
+        return ComponentSupport.timeout_kwargs(effective)
 
     @staticmethod
     def _normalized_label_expression() -> str:
@@ -75,12 +75,12 @@ class AppianDropdown:
             base = base[:-1].rstrip()
 
         text = self._normalized_label_expression()
-        expected = ComponentUtils.xpath_literal(base)
+        expected = ComponentSupport.xpath_literal(base)
         if not self._exact:
             return f"contains({text}, {expected})"
 
-        required = ComponentUtils.xpath_literal(f"{base}*")
-        required_spaced = ComponentUtils.xpath_literal(f"{base} *")
+        required = ComponentSupport.xpath_literal(f"{base}*")
+        required_spaced = ComponentSupport.xpath_literal(f"{base} *")
         return (
             f"({text} = {expected} or {text} = {required} "
             f"or {text} = {required_spaced})"
@@ -141,7 +141,7 @@ class AppianDropdown:
                 return False
             return dropdown.get_attribute("aria-disabled", timeout=0) != "true"
 
-        timeout_kwargs = ComponentUtils.timeout_kwargs(timeout)
+        timeout_kwargs = ComponentSupport.timeout_kwargs(timeout)
         try:
             expect(
                 dropdown,
@@ -204,7 +204,7 @@ class AppianDropdown:
             )
         listbox = self._page.locator(
             "xpath=//*[@role='listbox' and @id="
-            + ComponentUtils.xpath_literal(listbox_id)
+            + ComponentSupport.xpath_literal(listbox_id)
             + "]"
         ).first
         expect(
@@ -234,7 +234,7 @@ class AppianDropdown:
         field_id = field_id.split()[0]
         search_id = f"{field_id}_searchInput"
         search = self._page.locator(
-            "xpath=//input[@id=" + ComponentUtils.xpath_literal(search_id) + "]"
+            "xpath=//input[@id=" + ComponentSupport.xpath_literal(search_id) + "]"
         ).first
         if search.count() == 0:
             return None

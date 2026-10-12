@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from playwright.sync_api import Locator, expect
 
 from robo_appian.errors import RoboAppianError
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 from .appian_input_component import AppianInputComponent
 
@@ -44,7 +44,7 @@ class AppianCheckbox(AppianInputComponent):
         self._label = " ".join(label.split())
         self._exact = exact
         self._scope = scope
-        self._visible = ComponentUtils.normalize_visibility(visible)
+        self._visible = ComponentSupport.normalize_visibility(visible)
 
     @property
     def visible(self) -> bool | None:
@@ -53,7 +53,7 @@ class AppianCheckbox(AppianInputComponent):
 
     @staticmethod
     def _xpath_literal(value: str) -> str:
-        return ComponentUtils.xpath_literal(value)
+        return ComponentSupport.xpath_literal(value)
 
     @staticmethod
     def _normalized_xpath(expression: str) -> str:

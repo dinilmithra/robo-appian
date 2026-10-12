@@ -3,7 +3,7 @@
 The preferred import style is through the package-level API:
 
 ```python
-from robo_appian import AppianPage, AppianTable
+from robo_appian import AppianPage, AppianGrid
 ```
 
 Component helpers encapsulate reusable Appian-specific interaction mechanics. Browser lifecycle belongs to `robo-automation`; Appian component interactions use `AppianPage` and `AppianLocator`.
@@ -71,10 +71,10 @@ Selecting an already active tab is safe; no additional action is performed.
 
 ## Tables
 
-Create a table component from `AppianPage`. At least one of `label`, `header_name`, `row_name`, or `column_name` is required.
+Create a table component from `AppianPage`. At least one of `label`, `header`, `row_name`, or `column_name` is required.
 
 ```python
-items = page.table(
+items = page.grid(
     label="Items",
     row_name="Item 1001",
     column_name="Status",
@@ -92,7 +92,7 @@ page.button(name="Submit", timeout=15).click()
 
 This is useful when a dependent field needs extra time to become ready after an earlier business action.
 
-`AppianTable` is the single table component API. Legacy `Table` helpers are removed.
+`AppianGrid` is the single table component API. Legacy `Table` helpers are removed.
 
 ## Common matching and indexing
 
@@ -151,3 +151,33 @@ if dropdown.is_enabled(timeout=short_wait_seconds):
 ```
 
 An explicit `timeout` is expressed in seconds. `is_enabled(timeout=...)` returns `True` as soon as the live component becomes enabled and returns `False` if the timeout expires; the state-query timeout is not raised as an automation failure. This is useful for dependent Appian controls such as Status and Owner.
+
+
+## Structured data
+
+Use `page.dataset(...)` for business data that can appear in three common patterns.
+
+**Summary/detail data:**
+
+```python
+basic_info = page.dataset(header="Basic Information", row_number=1)
+status = basic_info.data(field="Workflow Status").value
+```
+
+**Repeated/list data:**
+
+```python
+activity = page.dataset(header="Recent Activities", row_number=1)
+action = activity.data(field="Action").value
+```
+
+**Grid data:**
+
+```python
+fund = page.dataset(header="Funds Availability", row_number=1)
+available = fund.data(field="Available Funds").value
+```
+
+Use `page.grid(...)` when the automation specifically needs an Appian grid and its row/cell operations. A dataset can also use the complete row/cell API when appropriate. `row_number` and `column_number` are 1-based business positions; `[0]`, `[1]`, and `.first` are normal result-collection selection.
+
+See [AppianDataSet](../api/appian-dataset.md) for all dataset lookup and access patterns.

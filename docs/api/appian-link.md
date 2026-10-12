@@ -11,10 +11,10 @@ page.link(name="Item Details").click()
 page.link(name="Return").click()
 ```
 
-Links that belong to table rows are handled by `AppianTable`, which owns table/row/cell resolution. Do not build table-row scopes just to use `AppianLink`:
+Links that belong to table rows are handled by `AppianGrid`, which owns table/row/cell resolution. Do not build table-row scopes just to use `AppianLink`:
 
 ```python
-table = page.table(label="Items")
+table = page.grid(label="Items")
 table.row(name="Item 1001").cell(column_name="Owner").link(name="View").click()
 ```
 

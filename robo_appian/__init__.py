@@ -11,6 +11,7 @@ from robo_appian.assertions import (
     assert_text,
     assert_visible,
     wait_visible,
+    wait_hidden,
 )
 from robo_appian.runtime import (
     AppianRuntime,
@@ -34,20 +35,18 @@ from robo_appian.appian import (
     AppianTextbox,
     AppianTab,
     AppianLink,
+    AppianMenu,
     AppianRow,
     AppianCell,
     AppianColumn,
     AppianLocator,
     AppianPage,
     AppianScope,
-    AppianTable,
+    AppianGrid,
+    AppianDataSet,
+    AppianData,
+    AppianDataCollection,
 )
-from robo_appian.components import (
-    MenuButton,
-    Region,
-    RecordList,
-)
-from robo_appian.utils import ComponentUtils
 
 __all__ = [
     "RoboAppianError",
@@ -56,6 +55,7 @@ __all__ = [
     "assert_text",
     "assert_visible",
     "wait_visible",
+    "wait_hidden",
     "AppianRuntime",
     "AppianContext",
     "AutomationContext",
@@ -76,14 +76,14 @@ __all__ = [
     "AppianTextbox",
     "AppianTab",
     "AppianLink",
+    "AppianMenu",
     "AppianRow",
     "AppianCell",
     "AppianColumn",
     "AppianLocator",
     "AppianScope",
-    "MenuButton",
-    "AppianTable",
-    "ComponentUtils",
-    "Region",
-    "RecordList",
+    "AppianGrid",
+    "AppianDataSet",
+    "AppianData",
+    "AppianDataCollection",
 ]

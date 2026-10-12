@@ -76,10 +76,10 @@ robo-appian uses `exact=True` and `visible=True` by default. This means it norma
 page.link(name="Return")  # exact=True, visible=True
 page.link(name="RETURN TO", exact=False)
 page.link(name="Return", visible=False)
-page.table(label="Items", visible=None)  # visible and hidden tables
+page.grid(label="Items", visible=None)  # visible and hidden tables
 ```
 
-For `AppianTable`, at least one of `label`, `header_name`, `row_name`, or `column_name` is required.
+For `AppianGrid`, at least one of `label`, `header`, `row_name`, or `column_name` is required.
 
 ## Semantic filtering and zero-based indexing
 

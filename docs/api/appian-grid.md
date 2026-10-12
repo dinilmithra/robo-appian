@@ -1,29 +1,29 @@
-# Appian Table
+# Appian Grid
 
-Use `page.table(...)` to work with rows and cells in an Appian table.
+Use `page.grid(...)` to work with rows and cells in an Appian grid.
 
 ```python
-items = page.table(label="Items")
+items = page.grid(label="Items")
 ```
 
-A table can be identified by `label`, `header_name`, `row_name`, or `column_name`. Additional identifiers can narrow the match.
+A grid can be identified by `label`, `header`, `row_name`, or `column_name`. Additional identifiers can narrow the match.
 
-`label` matches only the table's own accessible name. `header_name` matches
+`label` matches only the grid's own accessible name. `header` matches
 either a region's accessible name or header text, without requiring a heading
 role. Header text can appear in a heading, nested span, paragraph, strong text,
-or table caption. Text outside the table resolves through its nearest
+or table caption. Text outside the grid resolves through its nearest
 table-containing ancestor; a caption resolves to its own table. Ordinary cell
-text is not treated as a header. A table matched by both region and text paths
+text is not treated as a header. A grid matched by both region and text paths
 is returned only once:
 
 ```python
-details = page.table(header_name="Item Details")
+details = page.grid(header="Item Details")
 ```
 
 ## Count the displayed rows
 
 ```python
-count = page.table(label="Items").row_count()
+count = page.grid(label="Items").row_count()
 ```
 
 `row_count()` returns the number of data rows currently displayed. It does not count the header and does not return the total number of records across other pages.
@@ -33,7 +33,7 @@ count = page.table(label="Items").row_count()
 Rows can be identified by visible text or by a one-based row number:
 
 ```python
-items = page.table(label="Items")
+items = page.grid(label="Items")
 
 row = items.row(name="Item 1001")
 row.click()
@@ -41,7 +41,7 @@ row.click()
 
 ## Work with a cell
 
-A cell can be found directly from the table:
+A cell can be found directly from the grid:
 
 ```python
 cell = items.cell(
@@ -86,13 +86,13 @@ items.cell(
 `exact=True` and `visible=True` are the defaults. Use `exact=False` for an intentional partial match and `visible=None` when visibility should not filter the result.
 
 ```python
-page.table(label="Items", exact=False)
-page.table(label="Items", visible=None)
+page.grid(label="Items", exact=False)
+page.grid(label="Items", visible=None)
 ```
 
 ## API
 
-::: robo_appian.appian.appian_table.AppianTable
+::: robo_appian.appian.appian_grid.AppianGrid
     options:
       show_root_heading: true
       members_order: source

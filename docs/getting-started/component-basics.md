@@ -13,7 +13,7 @@ Start with what the user sees on the page.
 | Search in a searchable dropdown | `AppianDropdown` with `search_text` |
 | Click an Appian link | `AppianLink` via `page.link(...)` |
 | Select an Appian tab | `AppianTab` via `page.tab(...)` |
-| Work with a table/grid | `AppianTable` |
+| Work with a table/grid | `AppianGrid` |
 | Click a link | `AppianLink` |
 
 ## Textbox

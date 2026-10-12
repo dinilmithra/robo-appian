@@ -28,19 +28,16 @@ NAV = [
 ]
 
 API_MAP = {
-    "button": ("Button", PKG / "components" / "Button.py"),
+    "button": ("AppianButton", PKG / "appian" / "appian_button.py"),
     "checkbox": ("AppianCheckbox", PKG / "appian" / "appian_checkbox.py"),
     "appian-checkbox": ("AppianCheckbox", PKG / "appian" / "appian_checkbox.py"),
     "dropdown": ("AppianDropdown", PKG / "appian" / "appian_dropdown.py"),
     "link": ("AppianLink", PKG / "appian" / "appian_link.py"),
-    "menu-button": ("MenuButton", PKG / "components" / "MenuButton.py"),
-    "record-list": ("RecordList", PKG / "components" / "RecordList.py"),
-    "region": ("Region", PKG / "components" / "Region.py"),
     "search-dropdown": ("AppianDropdown", PKG / "appian" / "appian_dropdown.py"),
     "tab": ("AppianTab", PKG / "appian" / "appian_tab.py"),
-    "table": ("AppianTable", PKG / "appian" / "appian_table.py"),
-    "text": ("Text", PKG / "components" / "Text.py"),
-    "component-utils": ("ComponentUtils", PKG / "utils" / "ComponentUtils.py"),
+    "grid": ("AppianGrid", PKG / "appian" / "appian_grid.py"),
+    "dataset": ("AppianDataSet", PKG / "appian" / "appian_dataset.py"),
+    "menu": ("AppianMenu", PKG / "appian" / "appian_menu.py"),
 }
 
 markdown = mistune.create_markdown(

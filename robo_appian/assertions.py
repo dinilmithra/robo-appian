@@ -26,6 +26,23 @@ def wait_visible(
         ) from exc
 
 
+def wait_hidden(
+    locator: Any, *, timeout: float | None = None, message: str = ""
+) -> None:
+    """Wait for a locator to become hidden using the configured Appian timeout."""
+    try:
+        if timeout is None:
+            expect(locator, message or None).to_be_hidden()
+        else:
+            locator.wait_for(state="hidden", timeout=timeout)
+    except (PlaywrightTimeoutError, AssertionError) as exc:
+        raise RoboAppianError(
+            message or "Appian element did not become hidden in time.",
+            code="ROBO_APPIAN_TIMEOUT",
+            details={"operation": "wait_hidden"},
+        ) from exc
+
+
 def assert_text(
     locator: Any, expected: Any, *, message: str = "", **kwargs: Any
 ) -> None:

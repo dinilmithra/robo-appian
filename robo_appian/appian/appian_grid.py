@@ -1,4 +1,4 @@
-"""Generic utilities for interacting with Appian table and grid components."""
+"""Generic utilities for interacting with Appian grid and grid components."""
 
 import logging
 
@@ -6,17 +6,17 @@ from playwright.sync_api import Locator, expect
 from robo_automation import Scope
 
 from robo_appian.appian.appian_cell import AppianCell
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 logger = logging.getLogger(__name__)
 
 
-class AppianTable:
-    """Reusable operations for Appian tables and editable grids.
+class AppianGrid:
+    """Reusable operations for Appian grids and editable grids.
 
-    ``AppianTable`` provides semantic table/grid operations and can
-    be instantiated through ``AppianPage.table(...)`` as a semantic
-    Appian table component. At least one of ``label``, ``header_name``,
+    ``AppianGrid`` provides semantic table/grid operations and can
+    be instantiated through ``AppianPage.grid(...)`` as a semantic
+    Appian grid component. At least one of ``label``, ``header``,
     ``row_name``, or ``column_name`` is required for the component form.
 
     ``visible`` is tri-state: ``True`` selects visible tables, ``False``
@@ -29,7 +29,7 @@ class AppianTable:
         scope: Scope,
         *,
         label: str | None = None,
-        header_name: str | None = None,
+        header: str | None = None,
         row_name: str | None = None,
         column_name: str | None = None,
         visible: bool | str | None = True,
@@ -38,9 +38,7 @@ class AppianTable:
     ) -> None:
         identifiers = {
             "label": self.__normalize_optional_identifier(label, "label"),
-            "header_name": self.__normalize_optional_identifier(
-                header_name, "header_name"
-            ),
+            "header": self.__normalize_optional_identifier(header, "header"),
             "row_name": self.__normalize_optional_identifier(row_name, "row_name"),
             "column_name": self.__normalize_optional_identifier(
                 column_name, "column_name"
@@ -48,18 +46,18 @@ class AppianTable:
         }
         if not any(identifiers.values()):
             raise ValueError(
-                "AppianTable requires at least one of: "
-                "label, header_name, row_name, column_name."
+                "AppianGrid requires at least one of: "
+                "label, header, row_name, column_name."
             )
 
         self._component_scope = scope
         self._component_label = identifiers["label"]
-        self._component_header_name = identifiers["header_name"]
+        self._component_header = identifiers["header"]
         self._component_row_name = identifiers["row_name"]
         self._component_column_name = identifiers["column_name"]
-        self._component_visible = ComponentUtils.normalize_visibility(visible)
+        self._component_visible = ComponentSupport.normalize_visibility(visible)
         self._component_exact = exact
-        self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
+        self._timeout = ComponentSupport.normalize_timeout_seconds(timeout)
 
     def __normalize_optional_identifier(
         self, value: str | None, name: str
@@ -67,7 +65,7 @@ class AppianTable:
         if value is None:
             return None
         if not isinstance(value, str) or not value.strip():
-            raise ValueError(f"AppianTable {name} cannot be empty or whitespace.")
+            raise ValueError(f"AppianGrid {name} cannot be empty or whitespace.")
         return " ".join(value.split())
 
     @property
@@ -84,11 +82,11 @@ class AppianTable:
         return self._timeout
 
     def _timeout_kwargs(self) -> dict[str, float]:
-        return ComponentUtils.timeout_kwargs(self._timeout)
+        return ComponentSupport.timeout_kwargs(self._timeout)
 
     @property
     def locator(self) -> Locator:
-        """Return the live locator for this semantic table component.
+        """Return the live locator for this semantic grid component.
 
         When ``visible=None``, the returned locator is intentionally not
         filtered by visibility and can therefore contain both visible and
@@ -99,7 +97,7 @@ class AppianTable:
         if indexed is not None:
             return indexed
 
-        raw_scope = ComponentUtils.unwrap_scope(self._component_scope)
+        raw_scope = ComponentSupport.unwrap_scope(self._component_scope)
 
         if self._component_label is not None:
             tables = raw_scope.get_by_role(
@@ -107,14 +105,14 @@ class AppianTable:
                 name=self._component_label,
                 exact=self._component_exact,
             )
-        elif self._component_header_name is not None:
+        elif self._component_header is not None:
             region_tables = raw_scope.get_by_role(
                 "region",
-                name=self._component_header_name,
+                name=self._component_header,
                 exact=self._component_exact,
             ).locator("table")
             header = raw_scope.get_by_text(
-                self._component_header_name,
+                self._component_header,
                 exact=self._component_exact,
             )
             header_tables = header.locator(
@@ -179,31 +177,31 @@ class AppianTable:
         """Return a cell directly from this table.
 
         The explicit row/column arguments take precedence. When omitted,
-        ``row_name`` and ``column_name`` supplied when this AppianTable was
+        ``row_name`` and ``column_name`` supplied when this AppianGrid was
         created are reused. Row and column numbers are one-based.
         """
         normalized_row = None if row_name is None else " ".join(str(row_name).split())
         if row_name is not None and not normalized_row:
-            raise ValueError("AppianTable.cell row_name cannot be empty or whitespace.")
+            raise ValueError("AppianGrid.cell row_name cannot be empty or whitespace.")
         if row_number is not None and row_number < 1:
-            raise ValueError("AppianTable.cell row_number must be 1 or greater.")
+            raise ValueError("AppianGrid.cell row_number must be 1 or greater.")
 
         normalized_column = (
             None if column_name is None else " ".join(str(column_name).split())
         )
         if column_name is not None and not normalized_column:
             raise ValueError(
-                "AppianTable.cell column_name cannot be empty or whitespace."
+                "AppianGrid.cell column_name cannot be empty or whitespace."
             )
         if column_number is not None and column_number < 1:
-            raise ValueError("AppianTable.cell column_number must be 1 or greater.")
+            raise ValueError("AppianGrid.cell column_number must be 1 or greater.")
 
         effective_row_name = normalized_row
         if effective_row_name is None and row_number is None:
             effective_row_name = self._component_row_name
         if effective_row_name is None and row_number is None:
             raise ValueError(
-                "AppianTable.cell requires row_name or row_number, "
+                "AppianGrid.cell requires row_name or row_number, "
                 "unless the table was created with row_name."
             )
 
@@ -212,7 +210,7 @@ class AppianTable:
             effective_column_name = self._component_column_name
         if effective_column_name is None and column_number is None:
             raise ValueError(
-                "AppianTable.cell requires column_name or column_number, "
+                "AppianGrid.cell requires column_name or column_number, "
                 "unless the table was created with column_name."
             )
 
@@ -275,7 +273,7 @@ class AppianTable:
         visible: bool | str | None = True,
         exact: bool = True,
     ):
-        """Return a semantic column scoped to this Appian table."""
+        """Return a semantic column scoped to this Appian grid."""
         from robo_appian.appian.appian_column import AppianColumn
 
         return AppianColumn(
@@ -294,7 +292,7 @@ class AppianTable:
         visible: bool | str | None = True,
         exact: bool = True,
     ):
-        """Return a semantic row scoped to this Appian table."""
+        """Return a semantic row scoped to this Appian grid."""
         from robo_appian.appian.appian_row import AppianRow
 
         return AppianRow(
@@ -334,16 +332,16 @@ class AppianTable:
         for an empty table to gain rows.
         """
         table = self.locator
-        effective_timeout = ComponentUtils.normalize_timeout_seconds(timeout)
-        kwargs = ComponentUtils.timeout_kwargs(effective_timeout)
-        expect(table.first, "Appian table was not found.").to_be_attached(**kwargs)
+        effective_timeout = ComponentSupport.normalize_timeout_seconds(timeout)
+        kwargs = ComponentSupport.timeout_kwargs(effective_timeout)
+        expect(table.first, "Appian grid was not found.").to_be_attached(**kwargs)
         rows = table.first.locator(
             "tbody tr:not(:has([data-empty-grid-message='true']))"
         )
-        normalized_visible = ComponentUtils.normalize_visibility(visible)
+        normalized_visible = ComponentSupport.normalize_visibility(visible)
         if normalized_visible is not None:
             rows = rows.filter(visible=normalized_visible)
         return rows.count()
 
 
-__all__ = ["AppianTable"]
+__all__ = ["AppianGrid"]

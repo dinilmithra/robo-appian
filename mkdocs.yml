@@ -106,7 +106,9 @@ nav:
       - Appian Radio Select: api/appian-radio-select.md
       - Appian Link: api/appian-link.md
       - Appian Tab: api/appian-tab.md
-      - Appian Table: api/appian-table.md
+      - Appian Grid: api/appian-grid.md
+      - Appian DataSet: api/appian-dataset.md
+      - Appian Menu: api/appian-menu.md
       - Appian Row: api/appian-row.md
       - Appian Cell: api/appian-cell.md
       - Appian Input Component: api/appian-input-component.md
@@ -114,10 +116,6 @@ nav:
       - Assertions: api/assertions.md
       - Errors: api/errors.md
       - Components:
-          - MenuButton: api/menu-button.md
-          - RecordList: api/record-list.md
-          - Region: api/region.md
-          - ComponentUtils: api/component-utils.md
       - Compatibility:
           - Legacy Scope: api/scope.md
   - Command-Line Interface: api/cli.md

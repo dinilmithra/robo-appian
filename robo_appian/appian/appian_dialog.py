@@ -7,7 +7,7 @@ from playwright.sync_api import expect
 from .appian_button import AppianButton
 from .appian_component_accessor import AppianComponentAccessor
 from .appian_locator import AppianLocator
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 
 class AppianDialog(AppianLocator):
@@ -26,8 +26,8 @@ class AppianDialog(AppianLocator):
         self._page = page
         self._name = name
         self._exact = exact
-        self._visible = ComponentUtils.normalize_visibility(visible)
-        self._timeout = ComponentUtils.normalize_timeout_seconds(timeout)
+        self._visible = ComponentSupport.normalize_visibility(visible)
+        self._timeout = ComponentSupport.normalize_timeout_seconds(timeout)
 
         locator = (
             page.get_by_role("dialog", name=name, exact=exact)
@@ -51,11 +51,11 @@ class AppianDialog(AppianLocator):
 
         if self._visible is True:
             expect(self._locator).to_be_visible(
-                **ComponentUtils.timeout_kwargs(self._timeout)
+                **ComponentSupport.timeout_kwargs(self._timeout)
             )
         elif self._visible is False:
             expect(self._locator).to_be_hidden(
-                **ComponentUtils.timeout_kwargs(self._timeout)
+                **ComponentSupport.timeout_kwargs(self._timeout)
             )
 
     def _button_factory(

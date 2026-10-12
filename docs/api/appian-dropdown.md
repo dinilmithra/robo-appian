@@ -73,7 +73,7 @@ This is different from option indexes, which are one-based.
 ## Inside a table cell
 
 ```python
-page.table(label="Items").cell(
+page.grid(label="Items").cell(
     row_name="Item 1001",
     column_name="Status",
 ).dropdown[0].select(value="Active")

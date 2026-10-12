@@ -1,4 +1,4 @@
-"""Appian table cell component abstraction."""
+"""Appian grid cell component abstraction."""
 
 from __future__ import annotations
 
@@ -19,11 +19,11 @@ from .appian_textbox import AppianTextbox
 
 if TYPE_CHECKING:
     from .appian_page import AppianPage
-    from robo_appian.appian.appian_table import AppianTable
+    from robo_appian.appian.appian_grid import AppianGrid
 
 
 class AppianCell(AppianLocator):
-    """Represent a resolved Appian table cell and its scoped components.
+    """Represent a resolved Appian grid cell and its scoped components.
 
     ``AppianCell`` remains an ``AppianLocator``, so the normal locator surface is
     still available. Appian components can be resolved either semantically or by
@@ -210,24 +210,24 @@ class AppianCell(AppianLocator):
             timeout=timeout,
         )
 
-    def _table_factory(
+    def _grid_factory(
         self,
         *,
         label: str | None = None,
-        header_name: str | None = None,
+        header: str | None = None,
         row_name: str | None = None,
         column_name: str | None = None,
         exact: bool = True,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
-    ) -> "AppianTable":
-        """Return a nested Appian table scoped to this cell."""
-        from robo_appian.appian.appian_table import AppianTable
+    ) -> "AppianGrid":
+        """Return a nested Appian grid scoped to this cell."""
+        from robo_appian.appian.appian_grid import AppianGrid
 
-        return AppianTable(
+        return AppianGrid(
             self,
             label=label,
-            header_name=header_name,
+            header=header,
             row_name=row_name,
             column_name=column_name,
             exact=exact,
@@ -363,18 +363,18 @@ class AppianCell(AppianLocator):
         )
 
     @property
-    def table(self) -> AppianComponentAccessor["AppianTable"]:
-        from robo_appian.appian.appian_table import AppianTable
+    def grid(self) -> AppianComponentAccessor["AppianGrid"]:
+        from robo_appian.appian.appian_grid import AppianGrid
 
-        def indexed(index: int) -> AppianTable:
-            component = AppianTable(self, label=f"table[{index}]")
+        def indexed(index: int) -> AppianGrid:
+            component = AppianGrid(self, label=f"grid[{index}]")
             component._indexed_locator = self._visible_nth(  # type: ignore[attr-defined]
                 self.locator.locator("table"), index
             )
             return component
 
         return AppianComponentAccessor(
-            self._table_factory, indexed, component_name="table"
+            self._grid_factory, indexed, component_name="grid"
         )
 
 

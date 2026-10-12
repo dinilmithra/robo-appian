@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from robo_appian.utils.ComponentUtils import ComponentUtils
+from robo_appian._component_support import ComponentSupport
 
 import logging
 from typing import TYPE_CHECKING
@@ -52,7 +52,7 @@ class AppianTextbox(AppianInputComponent):
         self._header = normalized_header
         self._exact = exact
         self._scope = scope
-        self._visible = ComponentUtils.normalize_visibility(visible)
+        self._visible = ComponentSupport.normalize_visibility(visible)
 
     @property
     def visible(self) -> bool | None:
@@ -374,7 +374,7 @@ class AppianTextbox(AppianInputComponent):
             expect(
                 textbox,
                 f"Textbox {self._description()} did not become enabled.",
-            ).to_be_enabled(**ComponentUtils.timeout_kwargs(timeout))
+            ).to_be_enabled(**ComponentSupport.timeout_kwargs(timeout))
             return True
         except AssertionError:
             return False
