@@ -59,6 +59,7 @@ Use `dialog()` to scope interactions to an Appian modal by its accessible name. 
 
 ```python
 dialog = page.dialog(name="Confirm Action")
+dialog_by_text = page.dialog(text="Are you sure", visible=None)
 dialog.button("Confirm").click()
 ```
 

@@ -18,6 +18,7 @@ class AppianDialog(AppianLocator):
         page,
         *,
         name: str | None = None,
+        text: str | None = None,
         exact: bool = True,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
@@ -25,6 +26,7 @@ class AppianDialog(AppianLocator):
     ) -> None:
         self._page = page
         self._name = name
+        self._text = text
         self._exact = exact
         self._visible = ComponentSupport.normalize_visibility(visible)
         self._timeout = ComponentSupport.normalize_timeout_seconds(timeout)
@@ -34,6 +36,8 @@ class AppianDialog(AppianLocator):
             if name
             else page.get_by_role("dialog")
         )
+        if text is not None:
+            locator = locator.filter(has_text=text)
         if self._visible is True:
             locator = locator.filter(visible=True)
         elif self._visible is False:
@@ -57,6 +61,21 @@ class AppianDialog(AppianLocator):
             expect(self._locator).to_be_hidden(
                 **ComponentSupport.timeout_kwargs(self._timeout)
             )
+
+
+    def wait_until_visible(self) -> "AppianDialog":
+        """Wait until this dialog is visible and return it."""
+        expect(self._locator).to_be_visible(
+            **ComponentSupport.timeout_kwargs(self._timeout)
+        )
+        return self
+
+    def wait_until_hidden(self) -> "AppianDialog":
+        """Wait until this dialog is hidden and return it."""
+        expect(self._locator).to_be_hidden(
+            **ComponentSupport.timeout_kwargs(self._timeout)
+        )
+        return self
 
     def _button_factory(
         self,

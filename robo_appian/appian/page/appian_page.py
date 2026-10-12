@@ -511,13 +511,14 @@ class AppianPage:
         self,
         *,
         name: str | None = None,
+        text: str | None = None,
         exact: bool = True,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianDialog:
-        """Return an Appian modal dialog by accessible name."""
+        """Return an Appian modal dialog by accessible name or displayed text."""
         return AppianDialog(
-            self, name=name, exact=exact, visible=visible, timeout=timeout
+            self, name=name, text=text, exact=exact, visible=visible, timeout=timeout
         )
 
     # Public Appian component accessors. Names intentionally omit the redundant

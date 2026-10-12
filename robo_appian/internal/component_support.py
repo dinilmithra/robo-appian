@@ -134,7 +134,7 @@ class ComponentSupport:
         )
 
     @staticmethod
-    def click_by_text(scope: Scope, text: str, excat_match: bool = False) -> None:
+    def click_by_text(scope: Scope, text: str, excat_match: bool = True) -> None:
         """Click the first visible element whose text matches the requested text.
 
         Use this only when the visible text identifies the clickable element
@@ -143,7 +143,7 @@ class ComponentSupport:
         Args:
             scope: browser automation ``Page`` or ``Locator``. Pass a ``Page`` to search the entire current document; pass a ``Locator`` to restrict the operation to that locator/container.
             text: Text to locate.
-            excat_match: Whether the element text must match exactly.
+            excat_match: Whether the element text must match exactly. Defaults to True.
         """
         raw_scope = ComponentSupport.unwrap_scope(scope)
         link = raw_scope.get_by_text(text, exact=excat_match).filter(visible=True).first
