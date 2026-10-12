@@ -7,7 +7,7 @@ hide:
 ---
 
 <div class="ra-target-home">
-  <p class="ra-seo-intro"><strong>robo-appian</strong> (also searched as <strong>robo appian</strong> or <strong>robo_appian</strong>) is a Python automation library by <strong>Dinil Mithra</strong> for readable, business-friendly Appian application testing and workflow automation.</p>
+  <p class="ra-seo-intro"><strong>robo-appian</strong> is a Python automation library by <strong>Dinil Mithra</strong> for readable, business-friendly Appian application testing and workflow automation.</p>
   <section class="ra-target-hero">
     <div class="ra-target-copy">
       <div class="ra-target-badges">

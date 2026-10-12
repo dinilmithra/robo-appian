@@ -81,7 +81,6 @@ class AppianRow:
         owner = self._table.appian_page
         page = owner if isinstance(owner, AppianPage) else AppianPage.get(owner)
         from robo_appian.appian.page.appian_page import AppianPage
-
         page.wait_for_appian_action_completed()
         return self
 
