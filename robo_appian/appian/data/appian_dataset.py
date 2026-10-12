@@ -5,9 +5,9 @@ from __future__ import annotations
 from playwright.sync_api import Locator
 from robo_automation import Scope
 
-from robo_appian.appian.appian_data import AppianData, AppianDataCollection
-from robo_appian.appian.appian_grid import AppianGrid
-from robo_appian._component_support import ComponentSupport
+from robo_appian.appian.data.appian_data import AppianData, AppianDataCollection
+from robo_appian.appian.data.appian_grid import AppianGrid
+from robo_appian.internal.component_support import ComponentSupport
 
 
 class AppianDataSet:
@@ -134,7 +134,7 @@ class AppianDataSet:
             return grid.row(
                 name=name, row_number=effective, visible=visible, exact=exact
             )
-        from robo_appian.appian.appian_row import AppianRow
+        from robo_appian.appian.data.appian_row import AppianRow
 
         # Adapt list rows through a lightweight grid-compatible locator facade.
         adapter = _ListGridAdapter(self, self._list_rows())

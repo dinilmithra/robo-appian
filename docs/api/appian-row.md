@@ -30,7 +30,7 @@ row.cell(column_name="Employee").textbox[0].fill("John").select("John Smith")
 
 ## API
 
-::: robo_appian.appian.appian_row.AppianRow
+::: robo_appian.appian.data.appian_row.AppianRow
     options:
       show_root_heading: true
       members_order: source

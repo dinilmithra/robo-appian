@@ -6,8 +6,8 @@ from playwright.sync_api import expect
 
 from .appian_button import AppianButton
 from .appian_component_accessor import AppianComponentAccessor
-from .appian_locator import AppianLocator
-from robo_appian._component_support import ComponentSupport
+from ..locator.appian_locator import AppianLocator
+from robo_appian.internal.component_support import ComponentSupport
 
 
 class AppianDialog(AppianLocator):

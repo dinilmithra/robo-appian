@@ -53,7 +53,7 @@ For normal form fields and buttons, prefer the simpler `page.textbox(...)`, `pag
 
 ## API
 
-::: robo_appian.appian.appian_locator.AppianLocator
+::: robo_appian.appian.locator.appian_locator.AppianLocator
     options:
       show_root_heading: true
       members_order: source

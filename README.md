@@ -1,6 +1,6 @@
 # robo-appian
 
-`robo-appian` makes Appian pages easier to automate with readable Python.
+`robo-appian` (robo appian / `robo_appian`) by Dinil Mithra makes Appian pages easier to automate with readable Python. It is a Python automation and testing library for Appian applications.
 
 It is designed for people who know their web application and only need basic Python to start writing automation.
 

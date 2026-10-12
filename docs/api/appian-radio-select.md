@@ -23,7 +23,7 @@ Use [`AppianCheckbox`](appian-checkbox.md) for native checkboxes.
 
 ## API
 
-::: robo_appian.appian.appian_radio_select.AppianRadioSelect
+::: robo_appian.appian.components.appian_radio_select.AppianRadioSelect
     options:
       show_root_heading: true
       members_order: source

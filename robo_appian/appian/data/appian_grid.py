@@ -5,8 +5,8 @@ import logging
 from playwright.sync_api import Locator, expect
 from robo_automation import Scope
 
-from robo_appian.appian.appian_cell import AppianCell
-from robo_appian._component_support import ComponentSupport
+from robo_appian.appian.data.appian_cell import AppianCell
+from robo_appian.internal.component_support import ComponentSupport
 
 logger = logging.getLogger(__name__)
 
@@ -274,7 +274,7 @@ class AppianGrid:
         exact: bool = True,
     ):
         """Return a semantic column scoped to this Appian grid."""
-        from robo_appian.appian.appian_column import AppianColumn
+        from robo_appian.appian.data.appian_column import AppianColumn
 
         return AppianColumn(
             self,
@@ -293,7 +293,7 @@ class AppianGrid:
         exact: bool = True,
     ):
         """Return a semantic row scoped to this Appian grid."""
-        from robo_appian.appian.appian_row import AppianRow
+        from robo_appian.appian.data.appian_row import AppianRow
 
         return AppianRow(
             self,

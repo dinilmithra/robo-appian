@@ -92,7 +92,7 @@ page.grid(label="Items", visible=None)
 
 ## API
 
-::: robo_appian.appian.appian_grid.AppianGrid
+::: robo_appian.appian.data.appian_grid.AppianGrid
     options:
       show_root_heading: true
       members_order: source

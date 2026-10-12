@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TypeAlias
 
-from .appian_locator import AppianLocator
-from .appian_page import AppianPage
+from .locator.appian_locator import AppianLocator
+from .page.appian_page import AppianPage
 
 AppianScope: TypeAlias = AppianPage | AppianLocator
 

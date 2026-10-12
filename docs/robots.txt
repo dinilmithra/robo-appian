@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dinilmithra.github.io/robo-appian/sitemap.xml

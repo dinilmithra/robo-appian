@@ -21,7 +21,7 @@ page.tab(name="Contacts").select()
 assert page.tab(name="Contacts").is_selected()
 ```
 
-::: robo_appian.appian.appian_tab.AppianTab
+::: robo_appian.appian.components.appian_tab.AppianTab
     options:
       show_root_heading: true
       members_order: source

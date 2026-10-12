@@ -14,10 +14,9 @@ DOCS = ROOT / "docs"
 SITE = ROOT / "site"
 PKG = ROOT / "robo_appian"
 
-SITE_NAME = "robo-appian"
-SITE_DESCRIPTION = (
-    "Reusable Appian UI components built on robo-automation and Playwright"
-)
+SITE_NAME = "robo-appian — Python Automation Library for Appian"
+SITE_DESCRIPTION = "robo-appian by Dinil Mithra is a Python library for business-friendly Appian application automation and testing."
+SITE_URL = "https://dinilmithra.github.io/robo-appian/"
 
 NAV = [
     ("Home", "index.html"),
@@ -28,16 +27,28 @@ NAV = [
 ]
 
 API_MAP = {
-    "button": ("AppianButton", PKG / "appian" / "appian_button.py"),
-    "checkbox": ("AppianCheckbox", PKG / "appian" / "appian_checkbox.py"),
-    "appian-checkbox": ("AppianCheckbox", PKG / "appian" / "appian_checkbox.py"),
-    "dropdown": ("AppianDropdown", PKG / "appian" / "appian_dropdown.py"),
-    "link": ("AppianLink", PKG / "appian" / "appian_link.py"),
-    "search-dropdown": ("AppianDropdown", PKG / "appian" / "appian_dropdown.py"),
-    "tab": ("AppianTab", PKG / "appian" / "appian_tab.py"),
-    "grid": ("AppianGrid", PKG / "appian" / "appian_grid.py"),
-    "dataset": ("AppianDataSet", PKG / "appian" / "appian_dataset.py"),
-    "menu": ("AppianMenu", PKG / "appian" / "appian_menu.py"),
+    "button": ("AppianButton", PKG / "appian" / "components" / "appian_button.py"),
+    "checkbox": (
+        "AppianCheckbox",
+        PKG / "appian" / "components" / "appian_checkbox.py",
+    ),
+    "appian-checkbox": (
+        "AppianCheckbox",
+        PKG / "appian" / "components" / "appian_checkbox.py",
+    ),
+    "dropdown": (
+        "AppianDropdown",
+        PKG / "appian" / "components" / "appian_dropdown.py",
+    ),
+    "link": ("AppianLink", PKG / "appian" / "components" / "appian_link.py"),
+    "search-dropdown": (
+        "AppianDropdown",
+        PKG / "appian" / "components" / "appian_dropdown.py",
+    ),
+    "tab": ("AppianTab", PKG / "appian" / "components" / "appian_tab.py"),
+    "grid": ("AppianGrid", PKG / "appian" / "data" / "appian_grid.py"),
+    "dataset": ("AppianDataSet", PKG / "appian" / "data" / "appian_dataset.py"),
+    "menu": ("AppianMenu", PKG / "appian" / "components" / "appian_menu.py"),
 }
 
 markdown = mistune.create_markdown(
@@ -71,6 +82,9 @@ def page_shell(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="{html.escape(desc)}">
+  <meta name="author" content="Dinil Mithra">
+  <meta name="keywords" content="robo-appian, robo appian, robo_appian, robo, Appian, appian, Python Appian automation, Appian test automation, Dinil Mithra">
+  <link rel="canonical" href="{SITE_URL}{path}">
   <meta name="color-scheme" content="light dark">
   <title>{html.escape(title)} · {SITE_NAME}</title>
   <link rel="stylesheet" href="{prefix}assets/styles.css">

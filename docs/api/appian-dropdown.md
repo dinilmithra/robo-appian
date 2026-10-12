@@ -99,7 +99,7 @@ page.dropdown(label="Owner", timeout=8).select(value="Example User")
 
 ## API
 
-::: robo_appian.appian.appian_dropdown.AppianDropdown
+::: robo_appian.appian.components.appian_dropdown.AppianDropdown
     options:
       show_root_heading: true
       members_order: source

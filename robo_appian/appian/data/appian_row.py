@@ -6,11 +6,10 @@ from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator
 
-from robo_appian.appian.appian_cell import AppianCell
-from robo_appian.appian.appian_link import AppianLink
-from robo_appian.appian.appian_locator import AppianLocator
-from robo_appian.appian.appian_page import AppianPage
-from robo_appian._component_support import ComponentSupport
+from robo_appian.appian.data.appian_cell import AppianCell
+from robo_appian.appian.components.appian_link import AppianLink
+from robo_appian.appian.locator.appian_locator import AppianLocator
+from robo_appian.internal.component_support import ComponentSupport
 
 if TYPE_CHECKING:
     from .appian_grid import AppianGrid
@@ -81,6 +80,8 @@ class AppianRow:
         row.click()
         owner = self._table.appian_page
         page = owner if isinstance(owner, AppianPage) else AppianPage.get(owner)
+        from robo_appian.appian.page.appian_page import AppianPage
+
         page.wait_for_appian_action_completed()
         return self
 

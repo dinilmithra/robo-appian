@@ -50,7 +50,7 @@ Here `[0]` means the first textbox on the page, while `select(index=2)` means th
 
 Common operations include `fill()`, `select()`, `clear()`, `click()`, `is_visible()`, `is_enabled()`, `is_disabled()`, `value()`, and `wait_until_ready()`.
 
-::: robo_appian.appian.appian_textbox.AppianTextbox
+::: robo_appian.appian.components.appian_textbox.AppianTextbox
     options:
       show_root_heading: true
       members_order: source

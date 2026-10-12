@@ -65,7 +65,7 @@ if owner.is_enabled(timeout=8):
 
 ## API
 
-::: robo_appian.appian.appian_input_component.AppianInputComponent
+::: robo_appian.appian.components.appian_input_component.AppianInputComponent
     options:
       show_root_heading: true
       members_order: source

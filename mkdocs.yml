@@ -1,5 +1,8 @@
-site_name: robo-appian
-site_description: Appian UI automation components and abstractions
+site_name: robo-appian — Python Automation Library for Appian
+site_description: robo-appian by Dinil Mithra is a Python library for business-friendly Appian application automation and testing.
+site_url: https://dinilmithra.github.io/robo-appian/
+repo_url: https://github.com/dinilmithra/robo-appian
+repo_name: dinilmithra/robo-appian
 copyright: Copyright &copy; 2026 Dinil Mithra
 
 extra:
@@ -115,7 +118,6 @@ nav:
       - Runtime: api/runtime.md
       - Assertions: api/assertions.md
       - Errors: api/errors.md
-      - Components:
       - Compatibility:
           - Legacy Scope: api/scope.md
   - Command-Line Interface: api/cli.md

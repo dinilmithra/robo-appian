@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from robo_appian._component_support import ComponentSupport
+from robo_appian.internal.component_support import ComponentSupport
 
 import logging
 from typing import TYPE_CHECKING
@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING
 from playwright.sync_api import Locator, expect
 
 if TYPE_CHECKING:
-    from .appian_locator import AppianLocator
-    from .appian_page import AppianPage
+    from robo_appian.appian.locator.appian_locator import AppianLocator
+    from robo_appian.appian.page.appian_page import AppianPage
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +126,7 @@ class AppianButton:
 
     def click(self) -> None:
         """Wait for Appian, click the actionable button, then wait for completion."""
-        from .appian_page import AppianPage
+        from robo_appian.appian.page.appian_page import AppianPage
 
         page = AppianPage.get(self._page)
         page.wait_for_appian_action_completed(timeout=self._timeout)

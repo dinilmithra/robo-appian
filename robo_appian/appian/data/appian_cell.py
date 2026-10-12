@@ -6,20 +6,20 @@ from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator
 
-from .appian_button import AppianButton
-from .appian_checkbox import AppianCheckbox
-from .appian_component_accessor import AppianComponentAccessor
-from .appian_date import AppianDate
-from .appian_dropdown import AppianDropdown
-from .appian_link import AppianLink
-from .appian_locator import AppianLocator
-from .appian_radio_select import AppianRadioSelect
-from .appian_tab import AppianTab
-from .appian_textbox import AppianTextbox
+from ..components.appian_button import AppianButton
+from ..components.appian_checkbox import AppianCheckbox
+from ..components.appian_component_accessor import AppianComponentAccessor
+from ..components.appian_date import AppianDate
+from ..components.appian_dropdown import AppianDropdown
+from ..components.appian_link import AppianLink
+from ..locator.appian_locator import AppianLocator
+from ..components.appian_radio_select import AppianRadioSelect
+from ..components.appian_tab import AppianTab
+from ..components.appian_textbox import AppianTextbox
 
 if TYPE_CHECKING:
-    from .appian_page import AppianPage
-    from robo_appian.appian.appian_grid import AppianGrid
+    from robo_appian.appian.page.appian_page import AppianPage
+    from robo_appian.appian.data.appian_grid import AppianGrid
 
 
 class AppianCell(AppianLocator):
@@ -222,7 +222,7 @@ class AppianCell(AppianLocator):
         timeout: float | int | None = None,
     ) -> "AppianGrid":
         """Return a nested Appian grid scoped to this cell."""
-        from robo_appian.appian.appian_grid import AppianGrid
+        from robo_appian.appian.data.appian_grid import AppianGrid
 
         return AppianGrid(
             self,
@@ -364,7 +364,7 @@ class AppianCell(AppianLocator):
 
     @property
     def grid(self) -> AppianComponentAccessor["AppianGrid"]:
-        from robo_appian.appian.appian_grid import AppianGrid
+        from robo_appian.appian.data.appian_grid import AppianGrid
 
         def indexed(index: int) -> AppianGrid:
             component = AppianGrid(self, label=f"grid[{index}]")

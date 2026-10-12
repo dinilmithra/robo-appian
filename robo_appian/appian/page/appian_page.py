@@ -11,20 +11,20 @@ from robo_automation import RoboAutomationError, RoboPage
 
 from robo_appian.errors import RoboAppianNavigationError
 
-from .appian_button import AppianButton
-from .appian_checkbox import AppianCheckbox
-from .appian_component_accessor import AppianComponentAccessor
-from .appian_date import AppianDate
-from .appian_dropdown import AppianDropdown
-from .appian_dialog import AppianDialog
-from .appian_radio_select import AppianRadioSelect
-from .appian_textbox import AppianTextbox
-from .appian_tab import AppianTab
-from .appian_link import AppianLink
-from .appian_menu import AppianMenu
-from .appian_locator import AppianLocator
-from robo_appian.appian.appian_grid import AppianGrid
-from robo_appian.appian.appian_dataset import AppianDataSet
+from ..components.appian_button import AppianButton
+from ..components.appian_checkbox import AppianCheckbox
+from ..components.appian_component_accessor import AppianComponentAccessor
+from ..components.appian_date import AppianDate
+from ..components.appian_dropdown import AppianDropdown
+from ..components.appian_dialog import AppianDialog
+from ..components.appian_radio_select import AppianRadioSelect
+from ..components.appian_textbox import AppianTextbox
+from ..components.appian_tab import AppianTab
+from ..components.appian_link import AppianLink
+from ..components.appian_menu import AppianMenu
+from ..locator.appian_locator import AppianLocator
+from robo_appian.appian.data.appian_grid import AppianGrid
+from robo_appian.appian.data.appian_dataset import AppianDataSet
 
 
 class AppianPage:
@@ -89,7 +89,7 @@ class AppianPage:
             FileNotFoundError: If any supplied file does not exist.
             ValueError: If no files are supplied.
         """
-        from robo_appian._component_support import ComponentSupport
+        from robo_appian.internal.component_support import ComponentSupport
 
         paths = [file_path] if isinstance(file_path, (str, Path)) else list(file_path)
         if not paths:
@@ -148,7 +148,7 @@ class AppianPage:
             ValueError: If ``timeout`` is not a positive finite number.
             TimeoutError: If Appian continues processing beyond the timeout.
         """
-        from robo_appian._component_support import ComponentSupport
+        from robo_appian.internal.component_support import ComponentSupport
 
         timeout_kwargs = ComponentSupport.timeout_kwargs(timeout)
         processing = self._robo_page._page.locator(

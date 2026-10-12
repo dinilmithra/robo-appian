@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from robo_appian._component_support import ComponentSupport
+from robo_appian.internal.component_support import ComponentSupport
 
 import logging
 from typing import TYPE_CHECKING
@@ -12,8 +12,8 @@ from playwright.sync_api import Locator, expect
 from .appian_input_component import AppianInputComponent
 
 if TYPE_CHECKING:
-    from .appian_locator import AppianLocator
-    from .appian_page import AppianPage
+    from robo_appian.appian.locator.appian_locator import AppianLocator
+    from robo_appian.appian.page.appian_page import AppianPage
 
 logger = logging.getLogger(__name__)
 

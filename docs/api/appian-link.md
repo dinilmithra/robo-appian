@@ -32,7 +32,7 @@ link.click()
 
 `click()` activates the link and waits for the resulting Appian action to complete.
 
-::: robo_appian.appian.appian_link.AppianLink
+::: robo_appian.appian.components.appian_link.AppianLink
     options:
       show_source: false
       members_order: source

@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator
 
-from robo_appian.appian.appian_cell import AppianCell
-from robo_appian._component_support import ComponentSupport
+from robo_appian.appian.data.appian_cell import AppianCell
+from robo_appian.internal.component_support import ComponentSupport
 
 if TYPE_CHECKING:
     from .appian_grid import AppianGrid

@@ -42,7 +42,7 @@ Use [`AppianRadioSelect`](appian-radio-select.md) for radio-button groups.
 
 ## API
 
-::: robo_appian.appian.appian_checkbox.AppianCheckbox
+::: robo_appian.appian.components.appian_checkbox.AppianCheckbox
     options:
       show_root_heading: true
       members_order: source

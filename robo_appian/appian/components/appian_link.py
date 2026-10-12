@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING
 
 from playwright.sync_api import Locator, expect
 
-from robo_appian._component_support import ComponentSupport
+from robo_appian.internal.component_support import ComponentSupport
 
 if TYPE_CHECKING:
-    from .appian_locator import AppianLocator
-    from .appian_page import AppianPage
+    from robo_appian.appian.locator.appian_locator import AppianLocator
+    from robo_appian.appian.page.appian_page import AppianPage
 
 
 class AppianLink:

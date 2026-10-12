@@ -77,7 +77,7 @@ Components inside a table cell use `exact=True` and `visible=True` by default. U
 
 ## API
 
-::: robo_appian.appian.appian_cell.AppianCell
+::: robo_appian.appian.data.appian_cell.AppianCell
     options:
       show_root_heading: true
       members_order: source

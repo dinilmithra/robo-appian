@@ -1,10 +1,13 @@
 ---
+title: robo-appian — Python Automation Library for Appian
+description: robo-appian by Dinil Mithra is a business-friendly Python automation and testing library for Appian applications. Also searchable as robo appian and robo_appian.
 hide:
   - navigation
   - toc
 ---
 
 <div class="ra-target-home">
+  <p class="ra-seo-intro"><strong>robo-appian</strong> (also searched as <strong>robo appian</strong> or <strong>robo_appian</strong>) is a Python automation library by <strong>Dinil Mithra</strong> for readable, business-friendly Appian application testing and workflow automation.</p>
   <section class="ra-target-hero">
     <div class="ra-target-copy">
       <div class="ra-target-badges">

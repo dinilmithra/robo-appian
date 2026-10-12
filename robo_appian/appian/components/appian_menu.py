@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from playwright.sync_api import Locator, Page, expect
 
-from robo_appian._component_support import ComponentSupport
+from robo_appian.internal.component_support import ComponentSupport
 
 
 class AppianMenu:

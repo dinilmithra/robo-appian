@@ -118,7 +118,7 @@ For operations inside a dialog, region, or smaller part of the page, use [`Appia
 
 ## API
 
-::: robo_appian.appian.appian_page.AppianPage
+::: robo_appian.appian.page.appian_page.AppianPage
     options:
       show_root_heading: true
       members_order: source
