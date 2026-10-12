@@ -109,7 +109,7 @@ class ComponentSupport:
         expect(visible_locator).to_be_enabled()
 
         logger.info(
-            "Before button/element click: Playwright target is visible and enabled."
+            "Before component click: target is visible and enabled."
         )
 
         try:
@@ -130,7 +130,7 @@ class ComponentSupport:
             return
 
         logger.info(
-            "After button/element click: Playwright click completed successfully."
+            "After component click: click completed successfully."
         )
 
     @staticmethod

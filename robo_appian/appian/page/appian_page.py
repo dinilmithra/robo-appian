@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import time
+from collections.abc import Callable
 from typing import Any, Mapping, Sequence
 
 from playwright.sync_api import Page, expect
@@ -135,6 +137,47 @@ class AppianPage:
             exact=exact,
         )
 
+    def wait_until(
+        self,
+        condition: Callable[[], bool],
+        *,
+        timeout: float | int | None = None,
+        poll_interval: float = 0.2,
+        message: str = "Expected Appian condition was not satisfied in time.",
+    ) -> None:
+        """Wait for a callable Appian condition without fixed sleeps in test code.
+
+        The condition is evaluated immediately and then after short browser-managed
+        polling intervals until it returns ``True`` or the timeout expires.
+        ``timeout`` is expressed in seconds. Callers that need an environment-specific
+        limit should pass that configured value explicitly.
+        """
+        if not callable(condition):
+            raise TypeError("condition must be callable.")
+        if isinstance(poll_interval, bool) or not isinstance(poll_interval, (int, float)):
+            raise TypeError("poll_interval must be a positive number of seconds.")
+        interval = float(poll_interval)
+        if interval <= 0:
+            raise ValueError("poll_interval must be greater than zero.")
+
+        from robo_appian.internal.component_support import ComponentSupport
+
+        normalized = ComponentSupport.normalize_timeout_seconds(timeout)
+        timeout_seconds = normalized if normalized is not None else 30.0
+        deadline = time.monotonic() + timeout_seconds
+        last_error: Exception | None = None
+        while True:
+            try:
+                if condition():
+                    return
+            except (AssertionError, IndexError, LookupError, ValueError) as exc:
+                last_error = exc
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                detail = f" Last observed error: {last_error}" if last_error else ""
+                raise TimeoutError(message + detail)
+            self._robo_page._page.wait_for_timeout(min(interval, remaining) * 1000)
+
     def wait_for_appian_action_completed(
         self, *, timeout: float | int | None = None
     ) -> None:
@@ -232,7 +275,6 @@ class AppianPage:
         *,
         name: str,
         exact: bool = True,
-        scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianButton:
@@ -241,7 +283,6 @@ class AppianPage:
         Args:
             name: Visible or accessible button name.
             exact: Whether the complete normalized button name must match.
-            scope: Optional locator scope used to restrict the button search.
 
         Returns:
             The Appian button component bound to this page.
@@ -250,7 +291,6 @@ class AppianPage:
             page=self,
             name=name,
             exact=exact,
-            scope=scope,
             visible=visible,
             timeout=timeout,
         )
@@ -262,7 +302,6 @@ class AppianPage:
         placeholder: str | None = None,
         header: str | None = None,
         exact: bool = True,
-        scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianTextbox:
@@ -277,7 +316,6 @@ class AppianPage:
             placeholder=placeholder,
             header=header,
             exact=exact,
-            scope=scope,
             visible=visible,
             timeout=timeout,
         )
@@ -287,7 +325,6 @@ class AppianPage:
         text: str,
         *,
         exact: bool = True,
-        scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianText:
@@ -296,7 +333,6 @@ class AppianPage:
             page=self,
             text=text,
             exact=exact,
-            scope=scope,
             visible=visible,
             timeout=timeout,
         )
@@ -306,7 +342,6 @@ class AppianPage:
         *,
         label: str,
         exact: bool = True,
-        scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianDropdown:
@@ -320,7 +355,6 @@ class AppianPage:
             page=self,
             label=label,
             exact=exact,
-            scope=scope,
             visible=visible,
             timeout=timeout,
         )
@@ -331,7 +365,6 @@ class AppianPage:
         *,
         header: str | None = None,
         exact: bool = True,
-        scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianCheckbox:
@@ -343,7 +376,6 @@ class AppianPage:
             page=self,
             label=target,
             exact=exact,
-            scope=scope,
             visible=visible,
             timeout=timeout,
         )
@@ -354,7 +386,6 @@ class AppianPage:
         *,
         header: str | None = None,
         exact: bool = True,
-        scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianRadioSelect:
@@ -366,7 +397,6 @@ class AppianPage:
             page=self,
             label=target,
             exact=exact,
-            scope=scope,
             visible=visible,
             timeout=timeout,
         )
@@ -377,7 +407,6 @@ class AppianPage:
         *,
         header: str | None = None,
         exact: bool = True,
-        scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianLink:
@@ -389,7 +418,6 @@ class AppianPage:
             page=self,
             name=target,
             exact=exact,
-            scope=scope,
             visible=visible,
             timeout=timeout,
         )
@@ -412,7 +440,6 @@ class AppianPage:
         *,
         name: str,
         exact: bool = True,
-        scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianTab:
@@ -421,7 +448,6 @@ class AppianPage:
             page=self,
             name=name,
             exact=exact,
-            scope=scope,
             visible=visible,
             timeout=timeout,
         )
@@ -491,7 +517,6 @@ class AppianPage:
         placeholder: str | None = None,
         header: str | None = None,
         exact: bool = True,
-        scope: AppianLocator | None = None,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
     ) -> AppianDate:
@@ -502,7 +527,6 @@ class AppianPage:
             placeholder=placeholder,
             header=header,
             exact=exact,
-            scope=scope,
             visible=visible,
             timeout=timeout,
         )

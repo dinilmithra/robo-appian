@@ -57,12 +57,16 @@ class AppianDataSet:
         if self.header:
             regions = raw.get_by_role("region", name=self.header, exact=self.exact)
             if regions.count() == 0:
-                heading = raw.get_by_text(self.header, exact=self.exact)
+                heading = raw.get_by_role("heading", name=self.header, exact=self.exact)
+                if heading.count() == 0:
+                    heading = raw.get_by_text(self.header, exact=self.exact)
                 regions = heading.locator("xpath=ancestor::*[@role='region'][1]")
             root = regions
         elif self.label:
             labelled = raw.get_by_text(self.label, exact=self.exact)
-            root = labelled.locator("xpath=ancestor::*[self::div or @role='region'][1]")
+            root = labelled.locator("xpath=ancestor::*[@role='region'][1]")
+            if root.count() == 0:
+                root = labelled.locator("xpath=ancestor::div[1]")
         else:
             root = raw.locator("table, [role='region']")
 
@@ -123,10 +127,16 @@ class AppianDataSet:
         # Select only the innermost section-content containers that actually
         # contain side-by-side business data so wrappers never consume a row
         # number.
+        # A repeated-list business row is a side-by-side group: it has multiple
+        # *direct* child items, each containing presentation content, and at
+        # least one of those items contains colon-suffixed field labels.
+        # Requiring direct children is important: summary/detail sections such
+        # as Basic Information contain many nested presentation fields and must
+        # not be mistaken for one repeated-list row.
         record = (
-            "count(div/div[@role='presentation'][.//p]) >= 2 "
-            "and .//p[not(*) and substring(normalize-space(.), "
-            "string-length(normalize-space(.)))=':']"
+            "count(./div[.//div[@role='presentation']//p]) >= 2 "
+            "and ./div[.//p[substring(normalize-space(string(.)), "
+            "string-length(normalize-space(.)))=':']]"
         )
         return root.locator(f"xpath=.//div[{record} and not(.//div[{record}])]")
 
@@ -362,7 +372,7 @@ class _ListGridAdapter:
             return cells.nth(column_number - 1)
         labels = row.get_by_text(column_name or "", exact=exact)
         if labels.count() == 0:
-            return row.locator("xpath=*[0]")
+            return row.locator("xpath=.//*[false()]")
         group = labels.first.locator(
             "xpath=ancestor::div[div[@role='presentation']][1]"
         )

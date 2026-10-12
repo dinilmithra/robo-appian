@@ -21,7 +21,6 @@ AppianPage
   └─ side panel
 ```
 
-Component helpers that accept a `scope=` argument can use an `AppianLocator` to stay inside that section.
 
 You normally do not create an `AppianLocator` just to fill a regular field. Prefer the simpler page APIs first:
 
