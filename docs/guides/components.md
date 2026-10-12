@@ -29,6 +29,26 @@ page.radio(
 Use the complete question text when possible so common option values such as `Yes` and `No` stay scoped to the correct group.
 
 
+## Displayed text
+
+Use `page.text(...)` for read-only text a BA can see on the page.
+
+```python
+message = page.text("Request submitted successfully")
+assert message.value == "Request submitted successfully"
+```
+
+When the same text appears more than once, results stay in Appian display order:
+
+```python
+approved = page.text("Approved")
+approved.first.value
+approved[0].value
+approved[1].value
+```
+
+Use `exact=False` only when partial matching is intentional. For structured business data such as Basic Information or Recent Activities, prefer `page.dataset(...)`.
+
 ## Text inputs
 
 ```python

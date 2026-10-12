@@ -3,7 +3,7 @@ from .page import AppianPage
 from .locator import AppianLocator
 from .components import (
     AppianButton, AppianCheckbox, AppianInputComponent, AppianRadioSelect,
-    AppianDate, AppianDropdown, AppianDialog, AppianTextbox, AppianTab,
+    AppianDate, AppianDropdown, AppianDialog, AppianTextbox, AppianText, AppianTab,
     AppianLink, AppianMenu,
 )
 from .data import (
@@ -14,7 +14,7 @@ from .types import AppianScope
 __all__ = [
     "AppianPage", "AppianLocator", "AppianButton", "AppianCheckbox",
     "AppianInputComponent", "AppianRadioSelect", "AppianDate", "AppianDropdown",
-    "AppianDialog", "AppianTextbox", "AppianTab", "AppianLink", "AppianMenu",
+    "AppianDialog", "AppianTextbox", "AppianText", "AppianTab", "AppianLink", "AppianMenu",
     "AppianRow", "AppianCell", "AppianColumn", "AppianGrid", "AppianDataSet",
     "AppianData", "AppianDataCollection", "AppianScope",
 ]

@@ -58,9 +58,7 @@ class AppianDate(AppianTextbox):
         cls._focus_out(target)
 
     def _control_predicate(self) -> str:
-        return (
-            "(self::input and @type='text' and " f"@data-testid='{self.DATE_TEST_ID}')"
-        )
+        return self.DATE_CONTROL_PREDICATE
 
 
 __all__ = ["AppianDate"]

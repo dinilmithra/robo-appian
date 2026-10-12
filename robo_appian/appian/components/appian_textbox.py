@@ -22,6 +22,10 @@ class AppianTextbox(AppianInputComponent):
     """Represent an Appian text field bound to a page."""
 
     DATE_TEST_ID = "DatePickerWidget-textInput"
+    DATE_CONTROL_PREDICATE = (
+        "(self::input and @type='text' and "
+        "translate(normalize-space(@placeholder), 'MDY', 'mdy')='mm/dd/yyyy')"
+    )
 
     def __init__(
         self,
@@ -109,7 +113,7 @@ class AppianTextbox(AppianInputComponent):
         """Return the XPath predicate that identifies this component type."""
         return (
             "((self::input and (((@type='text' or @type='password') and "
-            f"not(@data-testid='{self.DATE_TEST_ID}')) or "
+            f"not({self.DATE_CONTROL_PREDICATE})) or "
             "(@role='combobox' and @aria-autocomplete='list' and @aria-controls))) or "
             "(self::textarea and @role='textbox'))"
         )
@@ -121,17 +125,17 @@ class AppianTextbox(AppianInputComponent):
         textbox = root.get_by_role(
             "textbox", name=self._label, exact=self._exact
         ).locator("xpath=self::*[" + self._control_predicate() + "]")
-        if textbox.count() > 0:
-            return textbox.first
 
         # Appian searchable text inputs expose role=combobox while remaining
-        # text-entry controls. Restrict this fallback to actual input elements
-        # with list autocomplete so dropdown/listbox widgets are not captured.
-        return (
+        # text-entry controls. Keep both candidates as live locators instead of
+        # choosing one from an immediate count(). Appian can re-render a field
+        # between actions, and an early count of zero must not permanently send
+        # a normal textbox down the searchable-input path.
+        searchable = (
             root.get_by_role("combobox", name=self._label, exact=self._exact)
             .locator("xpath=self::input[@aria-autocomplete='list' and @aria-controls]")
-            .first
         )
+        return textbox.or_(searchable).first
 
     def _locator_by_label(self) -> Locator:
         assert self._label is not None

@@ -19,6 +19,7 @@ from ..components.appian_dropdown import AppianDropdown
 from ..components.appian_dialog import AppianDialog
 from ..components.appian_radio_select import AppianRadioSelect
 from ..components.appian_textbox import AppianTextbox
+from ..components.appian_text import AppianText
 from ..components.appian_tab import AppianTab
 from ..components.appian_link import AppianLink
 from ..components.appian_menu import AppianMenu
@@ -281,6 +282,25 @@ class AppianPage:
             timeout=timeout,
         )
 
+    def _text_factory(
+        self,
+        text: str,
+        *,
+        exact: bool = True,
+        scope: AppianLocator | None = None,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> AppianText:
+        """Return read-only Appian text identified by its displayed value."""
+        return AppianText(
+            page=self,
+            text=text,
+            exact=exact,
+            scope=scope,
+            visible=visible,
+            timeout=timeout,
+        )
+
     def _dropdown_factory(
         self,
         *,
@@ -534,13 +554,26 @@ class AppianPage:
         def indexed(index: int) -> AppianTextbox:
             component = AppianTextbox(page=self, label=f"textbox[{index}]")
             raw = self.locator(
-                "xpath=.//input[(@type='text' or @type='password') and not(@data-testid='DatePickerWidget-textInput')] | .//textarea[@role='textbox'] | .//input[@role='combobox' and @aria-autocomplete='list' and @aria-controls]"
+                f"xpath=.//*[{component._control_predicate()}]"
             )
             component._indexed_locator = raw.filter(visible=True).nth(index)
             return component
 
         return AppianComponentAccessor(
             self._textbox_factory, indexed, component_name="textbox"
+        )
+
+    @property
+    def text(self) -> AppianComponentAccessor[AppianText]:
+        """Access read-only Appian text by displayed value or zero-based index."""
+
+        def indexed(index: int) -> AppianText:
+            raise ValueError(
+                'Use page.text("Displayed text")[index] after identifying the text.'
+            )
+
+        return AppianComponentAccessor(
+            self._text_factory, indexed, component_name="text"
         )
 
     @property
@@ -627,7 +660,7 @@ class AppianPage:
         def indexed(index: int) -> AppianDate:
             component = AppianDate(page=self, label=f"date[{index}]")
             component._indexed_locator = (
-                self.locator("input[data-testid='DatePickerWidget-textInput']")
+                self.locator(f"xpath=.//*[{component._control_predicate()}]")
                 .filter(visible=True)
                 .nth(index)
             )

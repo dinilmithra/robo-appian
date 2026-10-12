@@ -119,12 +119,16 @@ class AppianDataSet:
 
     def _list_rows(self) -> Locator:
         root = self._root()
-        # Repeated Appian list records are commonly immediate nested sections with dividers.
-        rows = root.locator(
-            "xpath=.//*[@data-testid='SectionLayout2-contentContainer' "
-            "and not(parent::*[@role='region'])]"
+        # Repeated list records can be wrapped in additional Appian sections.
+        # Select only the innermost section-content containers that actually
+        # contain side-by-side business data so wrappers never consume a row
+        # number.
+        record = (
+            "count(div/div[@role='presentation'][.//p]) >= 2 "
+            "and .//p[not(*) and substring(normalize-space(.), "
+            "string-length(normalize-space(.)))=':']"
         )
-        return rows
+        return root.locator(f"xpath=.//div[{record} and not(.//div[{record}])]")
 
     def row(self, *, name=None, row_number=None, visible=True, exact=True):
         """Return a row with the complete AppianRow/AppianCell API."""
@@ -267,31 +271,65 @@ class AppianDataSet:
         if field_number is not None:
             parts = [p.strip() for p in row.inner_text().splitlines() if p.strip()]
             return parts[field_number - 1] if field_number <= len(parts) else ""
-        labels = row.get_by_text(field or "", exact=exact)
-        if labels.count() == 0:
-            return ""
-        label = labels.first
-        group = label.locator(
-            "xpath=ancestor::*[@data-testid='SideBySideItem-wrapper'][1]"
-        )
-        sibling = group.locator(
-            "xpath=following-sibling::*[@data-testid='SideBySideItem-wrapper'][1]"
-        )
-        label_lines = [
-            x.strip().rstrip(":") for x in group.inner_text().splitlines() if x.strip()
-        ]
-        value_lines = [
-            x.strip() for x in sibling.inner_text().splitlines() if x.strip()
-        ]
+
         wanted = " ".join((field or "").split()).rstrip(":")
-        for i, text in enumerate(label_lines):
-            if text == wanted if exact else wanted in text:
-                return (
-                    value_lines[i]
-                    if i < len(value_lines)
-                    else sibling.inner_text().strip()
-                )
-        return sibling.inner_text().strip()
+        if not wanted:
+            return ""
+
+        # Appian repeated-list records commonly render several business labels
+        # (for example Action:, From Workflow Step:, From Workflow Status:) in
+        # one side-by-side item and the corresponding values, in the same order,
+        # in the next item.  Map those displayed lines directly instead of
+        # requiring each label to exist as its own DOM text element.
+        return row.evaluate(
+            r"""(row, args) => {
+                const wanted = (args.wanted || '').replace(/\s+/g, ' ').trim().replace(/:$/, '');
+                const exact = Boolean(args.exact);
+                const clean = value => (value || '')
+                    .replace(/\u00a0/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                const splitLines = text => (text || '')
+                    .split(/\r?\n/)
+                    .map(clean)
+                    .filter(Boolean);
+                const lines = element => {
+                    const rendered = splitLines(element.innerText);
+                    if (rendered.length > 1) return rendered;
+                    const source = splitLines(element.textContent);
+                    return source.length > rendered.length ? source : rendered;
+                };
+                const matches = label => {
+                    const normalized = clean(label).replace(/:$/, '');
+                    return exact
+                        ? normalized === wanted
+                        : normalized.toLowerCase().includes(wanted.toLowerCase());
+                };
+
+                const items = Array.from(
+                    row.children
+                ).filter(item => item.querySelector(':scope > div[role="presentation"] p'));
+                for (let i = 0; i < items.length - 1; i++) {
+                    const labelLines = lines(items[i]).filter(line => line.endsWith(':'));
+                    const labelIndex = labelLines.findIndex(matches);
+                    if (labelIndex < 0) continue;
+
+                    const allValueLines = lines(items[i + 1]);
+                    // Non-field context (for example actor name or timestamp) can
+                    // share these items.  Appian keeps the business values aligned
+                    // at the end of the value item, so pair the last N values with
+                    // the N colon-suffixed labels.
+                    const valueLines = allValueLines.slice(-labelLines.length);
+                    if (labelIndex < valueLines.length) {
+                        return valueLines[labelIndex];
+                    }
+                    return clean(items[i + 1].innerText);
+                }
+                return '';
+            }""",
+            {"wanted": wanted, "exact": exact},
+        )
+
 
 
 class _ListGridAdapter:
@@ -320,16 +358,16 @@ class _ListGridAdapter:
     def cell_locator(self, row, *, column_name=None, column_number=None, exact=True):
         if column_number is not None:
             # Each side-by-side value area acts as a logical cell for list data.
-            cells = row.locator("[data-testid='SideBySideItem-wrapper']")
+            cells = row.locator("xpath=./div[div[@role='presentation']]")
             return cells.nth(column_number - 1)
         labels = row.get_by_text(column_name or "", exact=exact)
         if labels.count() == 0:
             return row.locator("xpath=*[0]")
         group = labels.first.locator(
-            "xpath=ancestor::*[@data-testid='SideBySideItem-wrapper'][1]"
+            "xpath=ancestor::div[div[@role='presentation']][1]"
         )
         return group.locator(
-            "xpath=following-sibling::*[@data-testid='SideBySideItem-wrapper'][1]"
+            "xpath=following-sibling::div[div[@role='presentation']][1]"
         )
 
     def _column_index(self, column_name: str, *, exact: bool = True) -> int:

@@ -260,9 +260,7 @@ class AppianCell(AppianLocator):
                 page=self._page, label=f"textbox[{index}]", scope=self
             )
             raw = self.locator.locator(
-                "xpath=.//input[(@type='text' or @type='password') and "
-                "not(@data-testid='DatePickerWidget-textInput')] | "
-                ".//textarea[@role='textbox'] | .//input[@role='combobox' and @aria-autocomplete='list' and @aria-controls]"
+                f"xpath=.//*[{component._control_predicate()}]"
             )
             component._indexed_locator = self._visible_nth(raw, index)  # type: ignore[attr-defined]
             return component
@@ -353,7 +351,7 @@ class AppianCell(AppianLocator):
         def indexed(index: int) -> AppianDate:
             component = AppianDate(page=self._page, label=f"date[{index}]", scope=self)
             component._indexed_locator = self._visible_nth(  # type: ignore[attr-defined]
-                self.locator.locator("input[data-testid='DatePickerWidget-textInput']"),
+                self.locator.locator(f"xpath=.//*[{component._control_predicate()}]"),
                 index,
             )
             return component
