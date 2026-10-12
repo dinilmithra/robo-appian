@@ -14,7 +14,7 @@ DOCS = ROOT / "docs"
 SITE = ROOT / "site"
 PKG = ROOT / "robo_appian"
 
-SITE_NAME = "robo-appian — Python Automation Library for Appian"
+SITE_NAME = "robo-appian"
 SITE_DESCRIPTION = (
     "robo-appian by Dinil Mithra is a Python library for business-friendly Appian application automation and testing."
 )
