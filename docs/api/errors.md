@@ -36,3 +36,12 @@ except RoboAppianError:
 ```
 
 ::: robo_appian.errors.RoboAppianNavigationError
+
+
+## RoboAppianTimeoutError
+
+`RoboAppianTimeoutError` represents an Appian wait that did not complete in time.
+Its `user_message` is intended for business-facing reports; the original browser
+exception remains available through normal Python exception chaining.
+
+::: robo_appian.errors.RoboAppianTimeoutError

@@ -5,7 +5,11 @@ business rules, workflow names, test data, and assertions belong in the
 consumer project's component layer.
 """
 
-from robo_appian.errors import RoboAppianError, RoboAppianNavigationError
+from robo_appian.errors import (
+    RoboAppianError,
+    RoboAppianNavigationError,
+    RoboAppianTimeoutError,
+)
 from robo_appian.assertions import (
     assert_not_text,
     assert_text,
@@ -52,6 +56,7 @@ from robo_appian.appian import (
 __all__ = [
     "RoboAppianError",
     "RoboAppianNavigationError",
+    "RoboAppianTimeoutError",
     "assert_not_text",
     "assert_text",
     "assert_visible",

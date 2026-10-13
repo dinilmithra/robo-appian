@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 from pathlib import Path
+import logging
 import time
 from collections.abc import Callable
 from typing import Any, Mapping, Sequence
 
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, expect
 
-from robo_automation import RoboAutomationError, RoboPage
+from robo_automation import RoboAutomationError, RoboPage, TimeoutConfig
 
-from robo_appian.errors import RoboAppianNavigationError
+from robo_appian.errors import RoboAppianNavigationError, RoboAppianTimeoutError
 
 from ..components.appian_button import AppianButton
 from ..components.appian_checkbox import AppianCheckbox
@@ -28,6 +29,9 @@ from ..components.appian_menu import AppianMenu
 from ..locator.appian_locator import AppianLocator
 from robo_appian.appian.data.appian_grid import AppianGrid
 from robo_appian.appian.data.appian_dataset import AppianDataSet
+
+
+logger = logging.getLogger(__name__)
 
 
 class AppianPage:
@@ -131,11 +135,27 @@ class AppianPage:
                 browser/context default timeout (normally ``WAIT_TIME``).
             exact: Whether ``text`` must match exactly. Defaults to ``True``.
         """
-        self._robo_page.wait_for_text_visible(
-            text,
-            timeout=timeout,
-            exact=exact,
-        )
+        try:
+            self._robo_page.wait_for_text_visible(
+                text,
+                timeout=timeout,
+                exact=exact,
+            )
+        except PlaywrightTimeoutError as exc:
+            timeout_seconds = (
+                float(timeout)
+                if timeout is not None
+                else float(TimeoutConfig.from_env().wait_time_seconds)
+            )
+            logger.debug(
+                "Underlying browser timeout while waiting for Appian text %r.",
+                text,
+                exc_info=(type(exc), exc, exc.__traceback__),
+            )
+            raise RoboAppianTimeoutError(
+                f'Text "{text}" was not available within {timeout_seconds:g} seconds.',
+                details={"text": text, "timeout_seconds": timeout_seconds, "exact": exact},
+            ) from None
 
     def wait_until(
         self,

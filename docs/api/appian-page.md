@@ -115,6 +115,10 @@ page.wait_for_text_visible("Processing complete", timeout=8)
 page.wait_for_text_visible("partial message", exact=False)
 ```
 
+If the text does not appear in time, robo-appian raises a `RoboAppianTimeoutError`
+with a business-readable message. Consumer reports can show that message prominently
+while retaining the underlying browser traceback for technical diagnostics.
+
 For operations inside a dialog, region, or smaller part of the page, use [`AppianLocator`](appian-locator.md).
 
 ## API

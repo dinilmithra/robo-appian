@@ -29,9 +29,16 @@ class RoboAppianError(RoboAutomationError):
         details: Mapping[str, Any] | None = None,
     ) -> None:
         super().__init__(message, code=code or self.default_code, details=details)
+        self.user_message = str(message).strip()
 
 
 class RoboAppianNavigationError(RoboAppianError):
     """Appian navigation failure translated from robo-automation."""
 
     default_code = "ROBO_APPIAN_NAVIGATION_ERROR"
+
+
+class RoboAppianTimeoutError(RoboAppianError):
+    """Appian wait failure with a business-readable report message."""
+
+    default_code = "ROBO_APPIAN_TIMEOUT"
