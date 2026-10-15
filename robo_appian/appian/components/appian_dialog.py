@@ -5,7 +5,7 @@ from __future__ import annotations
 from playwright.sync_api import expect
 
 from .appian_button import AppianButton
-from .appian_component_accessor import AppianComponentAccessor
+from .appian_component_collection import AppianComponentCollection
 from ..locator.appian_locator import AppianLocator
 from robo_appian.internal.component_support import ComponentSupport
 
@@ -62,7 +62,6 @@ class AppianDialog(AppianLocator):
                 **ComponentSupport.timeout_kwargs(self._timeout)
             )
 
-
     def wait_until_visible(self) -> "AppianDialog":
         """Wait until this dialog is visible and return it."""
         expect(self._locator).to_be_visible(
@@ -77,7 +76,7 @@ class AppianDialog(AppianLocator):
         )
         return self
 
-    def _button_factory(
+    def button(
         self,
         name: str,
         *,
@@ -95,7 +94,7 @@ class AppianDialog(AppianLocator):
         )
 
     @property
-    def button(self) -> AppianComponentAccessor[AppianButton]:
+    def buttons(self) -> AppianComponentCollection[AppianButton]:
         def indexed(index: int) -> AppianButton:
             component = AppianButton(
                 page=self._page, name=f"button[{index}]", scope=self
@@ -105,9 +104,7 @@ class AppianDialog(AppianLocator):
             )
             return component
 
-        return AppianComponentAccessor(
-            self._button_factory, indexed, component_name="button"
-        )
+        return AppianComponentCollection(indexed, name="button")
 
 
 __all__ = ["AppianDialog"]

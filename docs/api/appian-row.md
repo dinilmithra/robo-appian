@@ -25,7 +25,7 @@ row.cell(column_name="Employee")
 Components inside a cell can use the normal component APIs:
 
 ```python
-row.cell(column_name="Employee").textbox[0].fill("John").select("John Smith")
+row.cell(column_name="Employee").textboxes[0].fill("John").select("John Smith")
 ```
 
 ## API

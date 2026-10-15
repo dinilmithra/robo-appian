@@ -64,8 +64,8 @@ The dropdown waits for the requested option to become available when Appian is s
 Component indexes are zero-based Python indexes:
 
 ```python
-page.dropdown[0].select(value="Active")
-page.dropdown(label="Status")[0].select(value="Active")
+page.dropdowns[0].select(value="Active")
+page.dropdown(label="Status").select(value="Active")
 ```
 
 This is different from option indexes, which are one-based.
@@ -76,7 +76,7 @@ This is different from option indexes, which are one-based.
 page.grid(label="Items").cell(
     row_name="Item 1001",
     column_name="Status",
-).dropdown[0].select(value="Active")
+).dropdowns[0].select(value="Active")
 ```
 
 ## Waiting for a dependent dropdown

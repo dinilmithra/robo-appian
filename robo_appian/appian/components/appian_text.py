@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+import logging
 
-from playwright.sync_api import Locator, expect
+from playwright.sync_api import Locator, TimeoutError as PlaywrightTimeoutError, expect
+from robo_automation import TimeoutConfig
 
+from robo_appian.errors import RoboAppianTimeoutError
 from robo_appian.internal.component_support import ComponentSupport
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from robo_appian.appian.locator.appian_locator import AppianLocator
@@ -107,7 +112,11 @@ class AppianText:
                 f"{count} text values matched '{self._text}'. "
                 "Use [0], [1], or .first to select one."
             )
-        return " ".join((locator.inner_text(**self._timeout_kwargs()) or "").replace("\u00a0", " ").split())
+        return " ".join(
+            (locator.inner_text(**self._timeout_kwargs()) or "")
+            .replace("\u00a0", " ")
+            .split()
+        )
 
     def is_visible(self) -> bool:
         """Return whether at least one matching text component is visible."""
@@ -115,16 +124,35 @@ class AppianText:
 
     def wait_until_visible(self, timeout: float | int | None = None) -> "AppianText":
         """Wait until matching text is visible and return this component."""
-        expect(self._matches().first, f"Appian text '{self._text}' was not visible.").to_be_visible(
-            **self._timeout_kwargs(timeout)
-        )
+        wait_options = self._timeout_kwargs(timeout)
+        try:
+            self._locator().first.wait_for(state="visible", **wait_options)
+        except PlaywrightTimeoutError as exc:
+            timeout_seconds = (
+                wait_options["timeout"] / 1000
+                if "timeout" in wait_options
+                else float(TimeoutConfig.from_env().wait_time_seconds)
+            )
+            logger.debug(
+                "Underlying browser timeout while waiting for Appian text %r.",
+                self._text,
+                exc_info=(type(exc), exc, exc.__traceback__),
+            )
+            raise RoboAppianTimeoutError(
+                f'Text "{self._text}" was not available within {timeout_seconds:g} seconds.',
+                details={
+                    "text": self._text,
+                    "timeout_seconds": timeout_seconds,
+                    "exact": self._exact,
+                },
+            ) from None
         return self
 
     def wait_until_hidden(self, timeout: float | int | None = None) -> "AppianText":
         """Wait until matching text is hidden and return this component."""
-        expect(self._matches().first, f"Appian text '{self._text}' remained visible.").to_be_hidden(
-            **self._timeout_kwargs(timeout)
-        )
+        expect(
+            self._matches().first, f"Appian text '{self._text}' remained visible."
+        ).to_be_hidden(**self._timeout_kwargs(timeout))
         return self
 
 

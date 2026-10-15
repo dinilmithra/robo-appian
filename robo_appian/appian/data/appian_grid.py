@@ -149,6 +149,24 @@ class AppianGrid:
 
         return tables
 
+    def is_visible(self) -> bool:
+        """Return whether the first matching grid is currently visible.
+
+        This is an immediate check; it does not wait for a grid to appear.
+        """
+        return self.locator.first.is_visible()
+
+    def wait_until_visible(self, timeout: float | int | None = None) -> "AppianGrid":
+        """Wait for the first matching grid to become visible and return it.
+
+        The optional timeout overrides this grid's configured timeout in seconds.
+        """
+        effective_timeout = self._timeout if timeout is None else timeout
+        expect(self.locator.first, "Appian grid was not visible.").to_be_visible(
+            **ComponentSupport.timeout_kwargs(effective_timeout)
+        )
+        return self
+
     @property
     def appian_page(self):
         """Return the AppianPage used to create this table when available."""

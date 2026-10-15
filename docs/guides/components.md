@@ -116,14 +116,14 @@ This is useful when a dependent field needs extra time to become ready after an 
 
 ## Common matching and indexing
 
-The page and cell component accessors share the same matching model:
+Page and cell lookup methods use the same matching defaults. Plural collections choose components by position:
 
 ```python
 page.button(name="Save")                         # exact=True, visible=True
 page.button(name="Sav", exact=False)             # partial match
 page.dropdown(label="Status", visible=None)       # include visible/hidden matches
-page.dropdown[0].select(value="Active")           # first dropdown on page
-page.dropdown(label="Status")[0].select(value="Active")
+page.dropdowns[0].select(value="Active")           # first dropdown on page
+page.dropdown(label="Status").select(value="Active")
 ```
 
 Component collection indexing is zero-based. The same indexing convention is available for components inside a table cell.
@@ -154,7 +154,7 @@ page.textbox("Employee").select(
 )
 ```
 
-Suggestion indexes are **1-based**. Textbox collection indexes such as `page.textbox[0]` remain **zero-based**.
+Suggestion indexes are **1-based**. Textbox collection indexes such as `page.textboxes[0]` remain **zero-based**.
 
 ### Waiting for an Appian component to become enabled
 
@@ -201,3 +201,8 @@ available = fund.data(field="Available Funds").value
 Use `page.grid(...)` when the automation specifically needs an Appian grid and its row/cell operations. A dataset can also use the complete row/cell API when appropriate. `row_number` and `column_number` are 1-based business positions; `[0]`, `[1]`, and `.first` are normal result-collection selection.
 
 See [AppianDataSet](../api/appian-dataset.md) for all dataset lookup and access patterns.
+
+
+### Appian linked cards
+
+`page.link(name="...")` also supports Appian linked cards. robo-appian finds the requested visible business text using the normal `exact` rule, then resolves the nearest parent link component (`role="link"`) and performs the action on that component. This lets a BA use the displayed card title even when Appian adds descriptive text to the card. `exact=True` remains an exact visible-text match; use `exact=False` only for intentional partial text matching.

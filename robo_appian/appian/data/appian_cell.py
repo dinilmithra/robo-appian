@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING, TypeVar
 
 from playwright.sync_api import Locator
 
 from ..components.appian_button import AppianButton
 from ..components.appian_checkbox import AppianCheckbox
-from ..components.appian_component_accessor import AppianComponentAccessor
+from ..components.appian_component_collection import AppianComponentCollection
 from ..components.appian_date import AppianDate
 from ..components.appian_dropdown import AppianDropdown
 from ..components.appian_link import AppianLink
@@ -22,15 +23,162 @@ if TYPE_CHECKING:
     from robo_appian.appian.data.appian_grid import AppianGrid
 
 
+ComponentType = TypeVar("ComponentType")
+
+
+class _AppianNamedAccessor(AppianComponentCollection[ComponentType]):
+    def __init__(
+        self,
+        factory: Callable[..., ComponentType],
+        collection: AppianComponentCollection[ComponentType],
+        *,
+        name: str,
+    ) -> None:
+        super().__init__(collection.__getitem__, name=name)
+        self._factory = factory
+
+    def __call__(
+        self,
+        *,
+        name: str,
+        exact: bool = True,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> ComponentType:
+        return self._factory(name=name, exact=exact, visible=visible, timeout=timeout)
+
+
+class _AppianLabeledAccessor(AppianComponentCollection[ComponentType]):
+    def __init__(
+        self,
+        factory: Callable[..., ComponentType],
+        collection: AppianComponentCollection[ComponentType],
+        *,
+        name: str,
+    ) -> None:
+        super().__init__(collection.__getitem__, name=name)
+        self._factory = factory
+
+    def __call__(
+        self,
+        *,
+        label: str,
+        exact: bool = True,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> ComponentType:
+        return self._factory(label=label, exact=exact, visible=visible, timeout=timeout)
+
+
+class _AppianDateAccessor(AppianComponentCollection[AppianDate]):
+    def __init__(self, cell: AppianCell) -> None:
+        super().__init__(cell.dates.__getitem__, name="date")
+        self._cell = cell
+
+    def __call__(
+        self,
+        *,
+        label: str | None = None,
+        placeholder: str | None = None,
+        header: str | None = None,
+        exact: bool = True,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> AppianDate:
+        return self._cell._date_factory(
+            label=label,
+            placeholder=placeholder,
+            header=header,
+            exact=exact,
+            visible=visible,
+            timeout=timeout,
+        )
+
+
+class _AppianGridAccessor(AppianComponentCollection["AppianGrid"]):
+    def __init__(self, cell: AppianCell) -> None:
+        super().__init__(cell.grids.__getitem__, name="grid")
+        self._cell = cell
+
+    def __call__(
+        self,
+        *,
+        label: str | None = None,
+        header: str | None = None,
+        row_name: str | None = None,
+        column_name: str | None = None,
+        exact: bool = True,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> "AppianGrid":
+        return self._cell._grid_factory(
+            label=label,
+            header=header,
+            row_name=row_name,
+            column_name=column_name,
+            exact=exact,
+            visible=visible,
+            timeout=timeout,
+        )
+
+
+class _AppianTextboxAccessor(AppianComponentCollection[AppianTextbox]):
+    def __init__(self, cell: AppianCell) -> None:
+        super().__init__(cell.textboxes.__getitem__, name="textbox")
+        self._cell = cell
+
+    def __call__(
+        self,
+        label: str | None = None,
+        *,
+        placeholder: str | None = None,
+        header: str | None = None,
+        exact: bool = True,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> AppianTextbox:
+        return self._cell._textbox_factory(
+            label=label,
+            placeholder=placeholder,
+            header=header,
+            exact=exact,
+            visible=visible,
+            timeout=timeout,
+        )
+
+
+class _AppianDropdownAccessor(AppianComponentCollection[AppianDropdown]):
+    def __init__(self, cell: AppianCell) -> None:
+        super().__init__(cell.dropdowns.__getitem__, name="dropdown")
+        self._cell = cell
+
+    def __call__(
+        self,
+        *,
+        label: str,
+        exact: bool = True,
+        visible: bool | str | None = True,
+        timeout: float | int | None = None,
+    ) -> AppianDropdown:
+        return self._cell._dropdown_factory(
+            label=label,
+            exact=exact,
+            visible=visible,
+            timeout=timeout,
+        )
+
+
 class AppianCell(AppianLocator):
     """Represent a resolved Appian grid cell and its scoped components.
 
     ``AppianCell`` remains an ``AppianLocator``, so the normal locator surface is
-    still available. Appian components can be resolved either semantically or by
-    zero-based index when a table cell does not expose a field label/name::
+    still available. Component accessors accept semantic identifiers or resolve
+    unlabeled components by zero-based position::
 
         cell.dropdown(label="CAN").select(value="12345")
         cell.dropdown[0].select(value="12345")
+        cell.textbox[0].fill("Example")
+        cell.date[0].fill("10/14/2026")
         cell.button[0].click()
 
     Index access is intentionally zero-based Python indexing. Component-specific
@@ -58,6 +206,11 @@ class AppianCell(AppianLocator):
     # ------------------------------------------------------------------
     # Semantic factories used by the public short accessors
     # ------------------------------------------------------------------
+    @property
+    def button(self) -> _AppianNamedAccessor[AppianButton]:
+        """Return a callable, zero-based button accessor scoped to this cell."""
+        return _AppianNamedAccessor(self._button_factory, self.buttons, name="button")
+
     def _button_factory(
         self,
         *,
@@ -75,6 +228,11 @@ class AppianCell(AppianLocator):
             visible=visible,
             timeout=timeout,
         )
+
+    @property
+    def textbox(self) -> _AppianTextboxAccessor:
+        """Return a callable, zero-based textbox accessor scoped to this cell."""
+        return _AppianTextboxAccessor(self)
 
     def _textbox_factory(
         self,
@@ -98,6 +256,11 @@ class AppianCell(AppianLocator):
             timeout=timeout,
         )
 
+    @property
+    def dropdown(self) -> _AppianDropdownAccessor:
+        """Return a callable, zero-based dropdown accessor scoped to this cell."""
+        return _AppianDropdownAccessor(self)
+
     def _dropdown_factory(
         self,
         *,
@@ -114,6 +277,13 @@ class AppianCell(AppianLocator):
             scope=self,
             visible=visible,
             timeout=timeout,
+        )
+
+    @property
+    def checkbox(self) -> _AppianLabeledAccessor[AppianCheckbox]:
+        """Return a callable, zero-based checkbox accessor scoped to this cell."""
+        return _AppianLabeledAccessor(
+            self._checkbox_factory, self.checkboxes, name="checkbox"
         )
 
     def _checkbox_factory(
@@ -134,6 +304,11 @@ class AppianCell(AppianLocator):
             timeout=timeout,
         )
 
+    @property
+    def radio(self) -> _AppianLabeledAccessor[AppianRadioSelect]:
+        """Return a callable, zero-based radio accessor scoped to this cell."""
+        return _AppianLabeledAccessor(self._radio_factory, self.radios, name="radio")
+
     def _radio_factory(
         self,
         *,
@@ -151,6 +326,11 @@ class AppianCell(AppianLocator):
             visible=visible,
             timeout=timeout,
         )
+
+    @property
+    def link(self) -> _AppianNamedAccessor[AppianLink]:
+        """Return a callable, zero-based link accessor scoped to this cell."""
+        return _AppianNamedAccessor(self._link_factory, self.links, name="link")
 
     def _link_factory(
         self,
@@ -170,6 +350,11 @@ class AppianCell(AppianLocator):
             timeout=timeout,
         )
 
+    @property
+    def tab(self) -> _AppianNamedAccessor[AppianTab]:
+        """Return a callable, zero-based tab accessor scoped to this cell."""
+        return _AppianNamedAccessor(self._tab_factory, self.tabs, name="tab")
+
     def _tab_factory(
         self,
         *,
@@ -187,6 +372,11 @@ class AppianCell(AppianLocator):
             visible=visible,
             timeout=timeout,
         )
+
+    @property
+    def date(self) -> _AppianDateAccessor:
+        """Return a callable, zero-based date accessor scoped to this cell."""
+        return _AppianDateAccessor(self)
 
     def _date_factory(
         self,
@@ -209,6 +399,11 @@ class AppianCell(AppianLocator):
             visible=visible,
             timeout=timeout,
         )
+
+    @property
+    def grid(self) -> _AppianGridAccessor:
+        """Return a callable, zero-based nested grid accessor scoped to this cell."""
+        return _AppianGridAccessor(self)
 
     def _grid_factory(
         self,
@@ -236,10 +431,10 @@ class AppianCell(AppianLocator):
         )
 
     # ------------------------------------------------------------------
-    # Short callable/indexable accessors
+    # Indexed component collections
     # ------------------------------------------------------------------
     @property
-    def button(self) -> AppianComponentAccessor[AppianButton]:
+    def buttons(self) -> AppianComponentCollection[AppianButton]:
         def indexed(index: int) -> AppianButton:
             component = AppianButton(
                 page=self._page, name=f"button[{index}]", scope=self
@@ -249,28 +444,22 @@ class AppianCell(AppianLocator):
             )
             return component
 
-        return AppianComponentAccessor(
-            self._button_factory, indexed, component_name="button"
-        )
+        return AppianComponentCollection(indexed, name="button")
 
     @property
-    def textbox(self) -> AppianComponentAccessor[AppianTextbox]:
+    def textboxes(self) -> AppianComponentCollection[AppianTextbox]:
         def indexed(index: int) -> AppianTextbox:
             component = AppianTextbox(
                 page=self._page, label=f"textbox[{index}]", scope=self
             )
-            raw = self.locator.locator(
-                f"xpath=.//*[{component._control_predicate()}]"
-            )
+            raw = self.locator.locator(f"xpath=.//*[{component._control_predicate()}]")
             component._indexed_locator = self._visible_nth(raw, index)  # type: ignore[attr-defined]
             return component
 
-        return AppianComponentAccessor(
-            self._textbox_factory, indexed, component_name="textbox"
-        )
+        return AppianComponentCollection(indexed, name="textbox")
 
     @property
-    def dropdown(self) -> AppianComponentAccessor[AppianDropdown]:
+    def dropdowns(self) -> AppianComponentCollection[AppianDropdown]:
         def indexed(index: int) -> AppianDropdown:
             component = AppianDropdown(
                 page=self._page,
@@ -282,12 +471,10 @@ class AppianCell(AppianLocator):
             )
             return component
 
-        return AppianComponentAccessor(
-            self._dropdown_factory, indexed, component_name="dropdown"
-        )
+        return AppianComponentCollection(indexed, name="dropdown")
 
     @property
-    def checkbox(self) -> AppianComponentAccessor[AppianCheckbox]:
+    def checkboxes(self) -> AppianComponentCollection[AppianCheckbox]:
         def indexed(index: int) -> AppianCheckbox:
             component = AppianCheckbox(
                 page=self._page,
@@ -299,12 +486,10 @@ class AppianCell(AppianLocator):
             )
             return component
 
-        return AppianComponentAccessor(
-            self._checkbox_factory, indexed, component_name="checkbox"
-        )
+        return AppianComponentCollection(indexed, name="checkbox")
 
     @property
-    def radio(self) -> AppianComponentAccessor[AppianRadioSelect]:
+    def radios(self) -> AppianComponentCollection[AppianRadioSelect]:
         def indexed(index: int) -> AppianRadioSelect:
             component = AppianRadioSelect(
                 page=self._page,
@@ -318,12 +503,10 @@ class AppianCell(AppianLocator):
             component._indexed_locator = self._visible_nth(groups, index)  # type: ignore[attr-defined]
             return component
 
-        return AppianComponentAccessor(
-            self._radio_factory, indexed, component_name="radio"
-        )
+        return AppianComponentCollection(indexed, name="radio")
 
     @property
-    def link(self) -> AppianComponentAccessor[AppianLink]:
+    def links(self) -> AppianComponentCollection[AppianLink]:
         def indexed(index: int) -> AppianLink:
             component = AppianLink(page=self._page, name=f"link[{index}]", scope=self)
             component._indexed_locator = self._visible_nth(  # type: ignore[attr-defined]
@@ -331,12 +514,10 @@ class AppianCell(AppianLocator):
             )
             return component
 
-        return AppianComponentAccessor(
-            self._link_factory, indexed, component_name="link"
-        )
+        return AppianComponentCollection(indexed, name="link")
 
     @property
-    def tab(self) -> AppianComponentAccessor[AppianTab]:
+    def tabs(self) -> AppianComponentCollection[AppianTab]:
         def indexed(index: int) -> AppianTab:
             component = AppianTab(page=self._page, name=f"tab[{index}]", scope=self)
             state = self.locator.get_by_text(AppianTab._STATE_PATTERN)
@@ -344,10 +525,10 @@ class AppianCell(AppianLocator):
             component._indexed_locator = self._visible_nth(tabs, index)  # type: ignore[attr-defined]
             return component
 
-        return AppianComponentAccessor(self._tab_factory, indexed, component_name="tab")
+        return AppianComponentCollection(indexed, name="tab")
 
     @property
-    def date(self) -> AppianComponentAccessor[AppianDate]:
+    def dates(self) -> AppianComponentCollection[AppianDate]:
         def indexed(index: int) -> AppianDate:
             component = AppianDate(page=self._page, label=f"date[{index}]", scope=self)
             component._indexed_locator = self._visible_nth(  # type: ignore[attr-defined]
@@ -356,12 +537,10 @@ class AppianCell(AppianLocator):
             )
             return component
 
-        return AppianComponentAccessor(
-            self._date_factory, indexed, component_name="date"
-        )
+        return AppianComponentCollection(indexed, name="date")
 
     @property
-    def grid(self) -> AppianComponentAccessor["AppianGrid"]:
+    def grids(self) -> AppianComponentCollection["AppianGrid"]:
         from robo_appian.appian.data.appian_grid import AppianGrid
 
         def indexed(index: int) -> AppianGrid:
@@ -371,9 +550,7 @@ class AppianCell(AppianLocator):
             )
             return component
 
-        return AppianComponentAccessor(
-            self._grid_factory, indexed, component_name="grid"
-        )
+        return AppianComponentCollection(indexed, name="grid")
 
 
 __all__ = ["AppianCell"]

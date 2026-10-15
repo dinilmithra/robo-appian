@@ -73,12 +73,12 @@ Cells expose the same Appian component style used elsewhere:
 items.cell(
     row_name="Item 1001",
     column_name="Action",
-).button[0].click()
+).buttons[0].click()
 
 items.cell(
     row_name="Item 1001",
     column_name="Status",
-).dropdown[0].select(value="Active")
+).dropdowns[0].select(value="Active")
 ```
 
 ## Matching options
@@ -90,6 +90,25 @@ page.grid(label="Items", exact=False)
 page.grid(label="Items", visible=None)
 ```
 
+Check whether a matching grid is visible now:
+
+```python
+items = page.grid(label="Items")
+if items.is_visible():
+    print("Items grid is visible")
+```
+
+`is_visible()` returns a boolean immediately; it does not wait for the grid.
+
+To wait for the grid, use `wait_until_visible()` instead. Its optional timeout
+is in seconds; without one, it uses the grid's configured timeout.
+
+```python
+items = page.grid(label="Items")
+items.wait_until_visible()
+items.wait_until_visible(timeout=8)
+```
+
 ## API
 
 ::: robo_appian.appian.data.appian_grid.AppianGrid
@@ -97,6 +116,8 @@ page.grid(label="Items", visible=None)
       show_root_heading: true
       members_order: source
       members:
+        - is_visible
+        - wait_until_visible
         - cell
         - appian_column
         - row

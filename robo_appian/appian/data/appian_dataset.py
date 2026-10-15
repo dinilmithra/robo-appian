@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from playwright.sync_api import Locator
+from playwright.sync_api import Locator, expect
 from robo_automation import Scope
 
 from robo_appian.appian.data.appian_data import AppianData, AppianDataCollection
@@ -111,6 +111,21 @@ class AppianDataSet:
 
     def _root(self) -> Locator:
         return getattr(self, "_indexed_locator", None) or self.locator.first
+
+    def is_visible(self) -> bool:
+        """Return whether the selected dataset is currently visible."""
+        return self._root().is_visible()
+
+    def wait_until_visible(self, timeout: float | int | None = None) -> "AppianDataSet":
+        """Wait for the selected dataset to become visible and return it.
+
+        The optional timeout overrides this dataset's configured timeout in seconds.
+        """
+        effective_timeout = self.timeout if timeout is None else timeout
+        expect(self._root(), "Appian dataset was not visible.").to_be_visible(
+            **ComponentSupport.timeout_kwargs(effective_timeout)
+        )
+        return self
 
     def _grid(self) -> AppianGrid | None:
         root = self._root()
@@ -339,7 +354,6 @@ class AppianDataSet:
             }""",
             {"wanted": wanted, "exact": exact},
         )
-
 
 
 class _ListGridAdapter:

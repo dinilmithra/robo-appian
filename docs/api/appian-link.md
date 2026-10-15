@@ -9,6 +9,7 @@ page.link(name="View Details").click()
 page.link(name="Item 1001").click()
 page.link(name="Item Details").click()
 page.link(name="Return").click()
+page.link(name="Dashboard").click()  # top navigation link
 ```
 
 Links that belong to table rows are handled by `AppianGrid`, which owns table/row/cell resolution. Do not build table-row scopes just to use `AppianLink`:
@@ -59,3 +60,8 @@ page.link(header="View Details").click()
 ```
 
 `header` is the displayed heading used to identify the link when that is the clearest business-facing name.
+
+
+### Appian linked cards
+
+`page.link(name="...")` also supports Appian linked cards. robo-appian finds the requested visible business text using the normal `exact` rule, then resolves the nearest parent link component (`role="link"`) and performs the action on that component. This lets a BA use the displayed card title even when Appian adds descriptive text to the card. `exact=True` remains an exact visible-text match; use `exact=False` only for intentional partial text matching.

@@ -43,7 +43,7 @@ page.textbox(placeholder="Start typing...").select(
 Textbox **component collection indexing remains zero-based**:
 
 ```python
-page.textbox[0].fill("John").select(index=2)
+page.textboxes[0].fill("John").select(index=2)
 ```
 
 Here `[0]` means the first textbox on the page, while `select(index=2)` means the second suggestion.

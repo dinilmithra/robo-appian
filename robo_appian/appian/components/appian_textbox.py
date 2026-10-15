@@ -131,10 +131,9 @@ class AppianTextbox(AppianInputComponent):
         # choosing one from an immediate count(). Appian can re-render a field
         # between actions, and an early count of zero must not permanently send
         # a normal textbox down the searchable-input path.
-        searchable = (
-            root.get_by_role("combobox", name=self._label, exact=self._exact)
-            .locator("xpath=self::input[@aria-autocomplete='list' and @aria-controls]")
-        )
+        searchable = root.get_by_role(
+            "combobox", name=self._label, exact=self._exact
+        ).locator("xpath=self::input[@aria-autocomplete='list' and @aria-controls]")
         return textbox.or_(searchable).first
 
     def _locator_by_label(self) -> Locator:

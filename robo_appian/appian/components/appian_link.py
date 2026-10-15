@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
 from playwright.sync_api import Locator, expect
 
 from robo_appian.internal.component_support import ComponentSupport
@@ -75,7 +74,22 @@ class AppianLink:
         root = self._root()
         links = root.get_by_role("link", name=self._name, exact=self._exact)
         buttons = root.get_by_role("button", name=self._name, exact=self._exact)
-        locator = links.or_(buttons)
+
+        # Appian linked cards often put role="link" on a parent container while
+        # the visible business title is rendered by a child element.  The
+        # parent's accessible name can therefore include both the title and a
+        # description.  Keep ``exact`` tied to the text the BA supplied: find
+        # that visible text first, then promote it to the nearest semantic link
+        # component.  This supports linked cards without weakening exact=True
+        # into an accessible-name prefix/substring match.
+        text_matches = root.get_by_text(self._name, exact=self._exact)
+        containing_links = text_matches.locator(
+            "xpath=ancestor-or-self::*[@role='link' or self::a][1]"
+        )
+
+        # Retain direct semantic lookup for ordinary links and link-like button
+        # actions.  Linked-card lookup is the additional parent-component path.
+        locator = links.or_(buttons).or_(containing_links)
         if self._visible is not None:
             locator = locator.filter(visible=self._visible)
         return locator.first

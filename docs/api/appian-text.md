@@ -42,4 +42,7 @@ An optional timeout is expressed in seconds:
 page.text("Request saved", timeout=10).wait_until_visible()
 ```
 
+If the text does not appear in time, `wait_until_visible()` raises
+`RoboAppianTimeoutError` with the text and effective timeout.
+
 `page.text(...)` is intended for read-only displayed text. Use `page.textbox(...)` when the BA needs to enter or select a value in a text field, and use `page.dataset(...)` for structured label/value, list, or grid data.

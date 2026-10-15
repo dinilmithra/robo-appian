@@ -29,7 +29,7 @@ def test_submit_request(page: AppianPage) -> None:
     page.date("Start Date").fill("10/15/2026")
     page.dropdown("Status").select("Ready")
     page.button("Submit").click()
-    page.wait_for_text_visible("Request submitted", exact=True)
+    page.text("Request submitted", exact=True).wait_until_visible()
 ```
 
 The intent should be understandable without knowing the page HTML.
@@ -55,7 +55,7 @@ page.textbox("Employee").fill("John").select("John Smith")
 page.textbox("Employee").fill("John").select(index=2)
 ```
 
-Suggestion indexes are 1-based. Component collection indexes such as `page.textbox[0]` are zero-based.
+Suggestion indexes are 1-based. Component collection indexes such as `page.textboxes[0]` are zero-based.
 
 ## Prefer business names over technical selectors
 
@@ -79,7 +79,7 @@ Normal component actions already perform the Appian synchronization required by 
 Use explicit waits when the business flow itself requires waiting for a visible result:
 
 ```python
-page.wait_for_text_visible("Request submitted", exact=True)
+page.text("Request submitted", exact=True).wait_until_visible()
 ```
 
 ## Keep test data separate from the flow

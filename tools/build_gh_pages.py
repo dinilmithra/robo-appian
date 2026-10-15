@@ -15,9 +15,7 @@ SITE = ROOT / "site"
 PKG = ROOT / "robo_appian"
 
 SITE_NAME = "robo-appian"
-SITE_DESCRIPTION = (
-    "robo-appian by Dinil Mithra is a Python library for business-friendly Appian application automation and testing."
-)
+SITE_DESCRIPTION = "robo-appian by Dinil Mithra is a Python library for business-friendly Appian application automation and testing."
 SITE_URL = "https://dinilmithra.github.io/robo-appian/"
 
 NAV = [
@@ -31,11 +29,23 @@ NAV = [
 API_MAP = {
     "button": ("AppianButton", PKG / "appian" / "components" / "appian_button.py"),
     "text": ("AppianText", PKG / "appian" / "components" / "appian_text.py"),
-    "checkbox": ("AppianCheckbox", PKG / "appian" / "components" / "appian_checkbox.py"),
-    "appian-checkbox": ("AppianCheckbox", PKG / "appian" / "components" / "appian_checkbox.py"),
-    "dropdown": ("AppianDropdown", PKG / "appian" / "components" / "appian_dropdown.py"),
+    "checkbox": (
+        "AppianCheckbox",
+        PKG / "appian" / "components" / "appian_checkbox.py",
+    ),
+    "appian-checkbox": (
+        "AppianCheckbox",
+        PKG / "appian" / "components" / "appian_checkbox.py",
+    ),
+    "dropdown": (
+        "AppianDropdown",
+        PKG / "appian" / "components" / "appian_dropdown.py",
+    ),
     "link": ("AppianLink", PKG / "appian" / "components" / "appian_link.py"),
-    "search-dropdown": ("AppianDropdown", PKG / "appian" / "components" / "appian_dropdown.py"),
+    "search-dropdown": (
+        "AppianDropdown",
+        PKG / "appian" / "components" / "appian_dropdown.py",
+    ),
     "tab": ("AppianTab", PKG / "appian" / "components" / "appian_tab.py"),
     "grid": ("AppianGrid", PKG / "appian" / "data" / "appian_grid.py"),
     "dataset": ("AppianDataSet", PKG / "appian" / "data" / "appian_dataset.py"),

@@ -66,7 +66,7 @@ dialog.button("Confirm").click()
 Dialog collection indexing is zero-based, consistent with other component collections:
 
 ```python
-page.dialog[0].button("Confirm").click()
+page.dialogs[0].button("Confirm").click()
 ```
 
 ## Exact matching and visibility
@@ -82,17 +82,17 @@ page.grid(label="Items", visible=None)  # visible and hidden tables
 
 For `AppianGrid`, at least one of `label`, `header`, `row_name`, or `column_name` is required.
 
-## Semantic filtering and zero-based indexing
+## Semantic lookup and zero-based indexing
 
-Each short component accessor can be called with semantic identifiers or indexed as a collection. Filtering can be followed by indexing when multiple matching components exist. Component indexes are normal zero-based Python indexes.
+Use singular methods with business labels and names. Use plural collections for zero-based component positions, such as an unlabeled field in a resolved cell. To choose among matching read-only text or dataset values, index the result of the singular lookup, such as `page.text("Approved")[0]` or `page.dataset(header="Recent Activities")[0]`.
 
 ```python
-page.dropdown[0].select(value="Active")
-page.dropdown(label="Status")[0].select(value="Active")
-page.button(name="Edit", exact=True)[1].click()
+page.dropdowns[0].select(value="Active")
+page.dropdown(label="Status").select(value="Active")
+page.buttons[1].click()
 ```
 
-This component index is separate from APIs with their own domain indexing. For example, dropdown option `index=1` means the first real option (excluding `Select a Value`), while `page.dropdown[0]` means the first dropdown component.
+This component index is separate from APIs with their own domain indexing. For example, dropdown option `index=1` means the first real option (excluding `Select a Value`), while `page.dropdowns[0]` means the first dropdown component.
 
 ## Wait for Appian processing
 
@@ -107,12 +107,12 @@ The method returns when Appian's global processing indicators are absent. If pro
 
 ## Wait for visible text
 
-Use `wait_for_text_visible()` when the next step depends on text becoming visible. Matching is exact by default. The default timeout uses the configured framework timeout (`WAIT_TIME`); pass `timeout` in seconds to override it for the call.
+Use `page.text(...).wait_until_visible()` when the next step depends on text becoming visible. Matching is exact by default. The default timeout uses the configured framework timeout (`WAIT_TIME`); pass `timeout` in seconds to override it for the call.
 
 ```python
-page.wait_for_text_visible("Ready")
-page.wait_for_text_visible("Processing complete", timeout=8)
-page.wait_for_text_visible("partial message", exact=False)
+page.text("Ready").wait_until_visible()
+page.text("Processing complete", timeout=8).wait_until_visible()
+page.text("partial message", exact=False).wait_until_visible()
 ```
 
 If the text does not appear in time, robo-appian raises a `RoboAppianTimeoutError`
@@ -129,7 +129,6 @@ For operations inside a dialog, region, or smaller part of the page, use [`Appia
       members_order: source
       members:
         - upload
-        - wait_for_text_visible
         - wait_for_appian_action_completed
         - button
         - dialog

@@ -106,6 +106,19 @@ row_number=1   first displayed business row
 .first         same result as [0]
 ```
 
+## Check or wait for visibility
+
+`is_visible()` checks immediately. `wait_until_visible()` waits for the dataset
+and returns it for continued use. A timeout override is expressed in seconds.
+
+```python
+funds = page.dataset(header="Funds Availability")
+if funds.is_visible():
+    print("Funds are displayed")
+funds.wait_until_visible(timeout=8)
+funds.first.wait_until_visible()
+```
+
 ## Reading data values
 
 `data()` identifies a business field. When exactly one value matches, read it directly with `.value`:

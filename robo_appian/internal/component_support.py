@@ -108,9 +108,7 @@ class ComponentSupport:
         expect(visible_locator).to_be_visible()
         expect(visible_locator).to_be_enabled()
 
-        logger.info(
-            "Before component click: target is visible and enabled."
-        )
+        logger.info("Before component click: target is visible and enabled.")
 
         try:
             visible_locator.click()
@@ -129,9 +127,7 @@ class ComponentSupport:
             logger.info("Forced Playwright click completed after pointer interception.")
             return
 
-        logger.info(
-            "After component click: click completed successfully."
-        )
+        logger.info("After component click: click completed successfully.")
 
     @staticmethod
     def click_by_text(scope: Scope, text: str, excat_match: bool = True) -> None:

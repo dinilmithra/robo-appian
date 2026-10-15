@@ -34,43 +34,47 @@ status = page.grid(label="Items").cell(
 
 ## Index-based components inside unlabeled cells
 
-Appian cells do not always render a field label or accessible component name. For those cells, the short component accessors are both callable and zero-based indexable. Indexing is scoped strictly to the resolved cell.
+Appian cells do not always render a field label or accessible component name. Use a plural collection's `.first` or zero-based Python index for those cells. Indexing is scoped to the resolved cell.
 
 ```python
-cell.dropdown[0].select(value="Active")
-cell.button[0].click()
-cell.checkbox[0].check()
-cell.radio[0].select("High")
-cell.link[0].click()
-cell.textbox[0].fill("Approved")
-cell.date[0].fill("10/09/2026")
-cell.tab[0].select()
+# First component in the resolved cell
+cell.dropdowns.first.select(value="Active")
+cell.buttons.first.click()
+
+# Explicit component position when a cell contains more than one
+cell.dropdowns[0].select(value="Active")
+cell.buttons[0].click()
+cell.checkboxes[0].check()
+cell.radios[0].select("High")
+cell.links[0].click()
+cell.textboxes[0].fill("Approved")
+cell.dates[0].fill("10/09/2026")
+cell.tabs[0].select()
 ```
 
-The same short accessors remain callable when semantic identification is available:
+Use singular lookup methods when a label or name is available:
 
 ```python
 cell.dropdown(label="Status").select(value="Active")
-cell.dropdown(label="Status")[0].select(value="Active")
 cell.button(name="Approve").click()
 cell.checkbox(label="Include").check()
 ```
 
-Component indexing is **zero-based Python indexing** (`component[0]` is the first component in the cell). This is separate from APIs that deliberately use one-based domain indexing, such as dropdown option selection:
+Component indexing is **zero-based Python indexing** (`cell.dropdowns[0]` is the first dropdown in the cell). Use a plural collection to choose a component; dropdown option selection remains one-based:
 
 ```python
 # first dropdown in the cell; then first option in that dropdown
-cell.dropdown[0].select(index=1)
+cell.dropdowns[0].select(index=1)
 
 # first dropdown in the cell; search, then first filtered option
-cell.dropdown[0].select(search_text="123", index=1)
+cell.dropdowns[0].select(search_text="123", index=1)
 ```
 
 A nested table can also be resolved semantically or by cell-local index:
 
 ```python
 nested = cell.grid(label="Nested Items")
-nested = cell.table[0]
+nested = cell.grids[0]
 ```
 
 Components inside a table cell use `exact=True` and `visible=True` by default. Use `exact=False` only when you intentionally want a partial name or label match. In normal business automation, keep `visible=True`. When more than one matching component exists in the cell, use component indexing to choose the required one.

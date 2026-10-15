@@ -3,20 +3,19 @@
 from __future__ import annotations
 
 from pathlib import Path
-import logging
 import time
 from collections.abc import Callable
 from typing import Any, Mapping, Sequence
 
-from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, expect
+from playwright.sync_api import Page, expect
 
-from robo_automation import RoboAutomationError, RoboPage, TimeoutConfig
+from robo_automation import RoboAutomationError, RoboPage
 
-from robo_appian.errors import RoboAppianNavigationError, RoboAppianTimeoutError
+from robo_appian.errors import RoboAppianNavigationError
 
 from ..components.appian_button import AppianButton
 from ..components.appian_checkbox import AppianCheckbox
-from ..components.appian_component_accessor import AppianComponentAccessor
+from ..components.appian_component_collection import AppianComponentCollection
 from ..components.appian_date import AppianDate
 from ..components.appian_dropdown import AppianDropdown
 from ..components.appian_dialog import AppianDialog
@@ -29,10 +28,6 @@ from ..components.appian_menu import AppianMenu
 from ..locator.appian_locator import AppianLocator
 from robo_appian.appian.data.appian_grid import AppianGrid
 from robo_appian.appian.data.appian_dataset import AppianDataSet
-
-
-logger = logging.getLogger(__name__)
-
 
 class AppianPage:
     """Transparent Appian wrapper around ``RoboPage``.
@@ -120,43 +115,6 @@ class AppianPage:
         self.wait_for_appian_action_completed(timeout=timeout)
         return self
 
-    def wait_for_text_visible(
-        self,
-        text: str,
-        *,
-        timeout: float | int | None = None,
-        exact: bool = True,
-    ) -> None:
-        """Wait until matching text is visible.
-
-        Args:
-            text: Visible text to wait for.
-            timeout: Maximum wait in seconds. ``None`` uses the configured
-                browser/context default timeout (normally ``WAIT_TIME``).
-            exact: Whether ``text`` must match exactly. Defaults to ``True``.
-        """
-        try:
-            self._robo_page.wait_for_text_visible(
-                text,
-                timeout=timeout,
-                exact=exact,
-            )
-        except PlaywrightTimeoutError as exc:
-            timeout_seconds = (
-                float(timeout)
-                if timeout is not None
-                else float(TimeoutConfig.from_env().wait_time_seconds)
-            )
-            logger.debug(
-                "Underlying browser timeout while waiting for Appian text %r.",
-                text,
-                exc_info=(type(exc), exc, exc.__traceback__),
-            )
-            raise RoboAppianTimeoutError(
-                f'Text "{text}" was not available within {timeout_seconds:g} seconds.',
-                details={"text": text, "timeout_seconds": timeout_seconds, "exact": exact},
-            ) from None
-
     def wait_until(
         self,
         condition: Callable[[], bool],
@@ -174,7 +132,9 @@ class AppianPage:
         """
         if not callable(condition):
             raise TypeError("condition must be callable.")
-        if isinstance(poll_interval, bool) or not isinstance(poll_interval, (int, float)):
+        if isinstance(poll_interval, bool) or not isinstance(
+            poll_interval, (int, float)
+        ):
             raise TypeError("poll_interval must be a positive number of seconds.")
         interval = float(poll_interval)
         if interval <= 0:
@@ -290,7 +250,7 @@ class AppianPage:
                 details=getattr(exc, "details", None),
             ) from exc
 
-    def _button_factory(
+    def button(
         self,
         *,
         name: str,
@@ -315,7 +275,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _textbox_factory(
+    def textbox(
         self,
         label: str | None = None,
         *,
@@ -340,7 +300,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _text_factory(
+    def text(
         self,
         text: str,
         *,
@@ -357,7 +317,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _dropdown_factory(
+    def dropdown(
         self,
         *,
         label: str,
@@ -379,7 +339,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _checkbox_factory(
+    def checkbox(
         self,
         label: str | None = None,
         *,
@@ -400,7 +360,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _radio_factory(
+    def radio(
         self,
         label: str | None = None,
         *,
@@ -421,7 +381,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _link_factory(
+    def link(
         self,
         name: str | None = None,
         *,
@@ -442,7 +402,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _menu_factory(
+    def menu(
         self,
         name: str,
         *,
@@ -455,7 +415,7 @@ class AppianPage:
             self, name=name, exact=exact, visible=visible, timeout=timeout
         )
 
-    def _tab_factory(
+    def tab(
         self,
         *,
         name: str,
@@ -472,7 +432,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _grid_factory(
+    def grid(
         self,
         *,
         label: str | None = None,
@@ -501,7 +461,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _dataset_factory(
+    def dataset(
         self,
         *,
         label: str | None = None,
@@ -530,7 +490,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _date_factory(
+    def date(
         self,
         *,
         label: str | None = None,
@@ -551,7 +511,7 @@ class AppianPage:
             timeout=timeout,
         )
 
-    def _dialog_factory(
+    def dialog(
         self,
         *,
         name: str | None = None,
@@ -565,24 +525,18 @@ class AppianPage:
             self, name=name, text=text, exact=exact, visible=visible, timeout=timeout
         )
 
-    # Public Appian component accessors. Names intentionally omit the redundant
-    # ``appian_`` prefix because the containing object is already AppianPage.
-    def _page_nth(self, selector: str, index: int):
-        return self.locator(selector).filter(visible=True).nth(index)
-
+    # Plural component collections use zero-based position in display order.
     @property
-    def dialog(self) -> AppianComponentAccessor[AppianDialog]:
+    def dialogs(self) -> AppianComponentCollection[AppianDialog]:
         """Access Appian modal dialogs semantically or by zero-based index."""
 
         def indexed(index: int) -> AppianDialog:
             return AppianDialog(self, index=index)
 
-        return AppianComponentAccessor(
-            self._dialog_factory, indexed, component_name="dialog"
-        )
+        return AppianComponentCollection(indexed, name="dialog")
 
     @property
-    def button(self) -> AppianComponentAccessor[AppianButton]:
+    def buttons(self) -> AppianComponentCollection[AppianButton]:
         def indexed(index: int) -> AppianButton:
             component = AppianButton(page=self, name=f"button[{index}]")
             component._indexed_locator = (
@@ -590,39 +544,20 @@ class AppianPage:
             )
             return component
 
-        return AppianComponentAccessor(
-            self._button_factory, indexed, component_name="button"
-        )
+        return AppianComponentCollection(indexed, name="button")
 
     @property
-    def textbox(self) -> AppianComponentAccessor[AppianTextbox]:
+    def textboxes(self) -> AppianComponentCollection[AppianTextbox]:
         def indexed(index: int) -> AppianTextbox:
             component = AppianTextbox(page=self, label=f"textbox[{index}]")
-            raw = self.locator(
-                f"xpath=.//*[{component._control_predicate()}]"
-            )
+            raw = self.locator(f"xpath=.//*[{component._control_predicate()}]")
             component._indexed_locator = raw.filter(visible=True).nth(index)
             return component
 
-        return AppianComponentAccessor(
-            self._textbox_factory, indexed, component_name="textbox"
-        )
+        return AppianComponentCollection(indexed, name="textbox")
 
     @property
-    def text(self) -> AppianComponentAccessor[AppianText]:
-        """Access read-only Appian text by displayed value or zero-based index."""
-
-        def indexed(index: int) -> AppianText:
-            raise ValueError(
-                'Use page.text("Displayed text")[index] after identifying the text.'
-            )
-
-        return AppianComponentAccessor(
-            self._text_factory, indexed, component_name="text"
-        )
-
-    @property
-    def dropdown(self) -> AppianComponentAccessor[AppianDropdown]:
+    def dropdowns(self) -> AppianComponentCollection[AppianDropdown]:
         def indexed(index: int) -> AppianDropdown:
             component = AppianDropdown(page=self, label=f"dropdown[{index}]")
             component._indexed_locator = (
@@ -630,12 +565,10 @@ class AppianPage:
             )
             return component
 
-        return AppianComponentAccessor(
-            self._dropdown_factory, indexed, component_name="dropdown"
-        )
+        return AppianComponentCollection(indexed, name="dropdown")
 
     @property
-    def checkbox(self) -> AppianComponentAccessor[AppianCheckbox]:
+    def checkboxes(self) -> AppianComponentCollection[AppianCheckbox]:
         def indexed(index: int) -> AppianCheckbox:
             component = AppianCheckbox(page=self, label=f"checkbox[{index}]")
             component._indexed_locator = (
@@ -643,12 +576,10 @@ class AppianPage:
             )
             return component
 
-        return AppianComponentAccessor(
-            self._checkbox_factory, indexed, component_name="checkbox"
-        )
+        return AppianComponentCollection(indexed, name="checkbox")
 
     @property
-    def radio(self) -> AppianComponentAccessor[AppianRadioSelect]:
+    def radios(self) -> AppianComponentCollection[AppianRadioSelect]:
         def indexed(index: int) -> AppianRadioSelect:
             component = AppianRadioSelect(page=self, label=f"radio[{index}]")
             groups = self.locator(
@@ -657,12 +588,10 @@ class AppianPage:
             component._indexed_locator = groups.filter(visible=True).nth(index)
             return component
 
-        return AppianComponentAccessor(
-            self._radio_factory, indexed, component_name="radio"
-        )
+        return AppianComponentCollection(indexed, name="radio")
 
     @property
-    def link(self) -> AppianComponentAccessor[AppianLink]:
+    def links(self) -> AppianComponentCollection[AppianLink]:
         def indexed(index: int) -> AppianLink:
             component = AppianLink(page=self, name=f"link[{index}]")
             component._indexed_locator = (
@@ -670,23 +599,10 @@ class AppianPage:
             )
             return component
 
-        return AppianComponentAccessor(
-            self._link_factory, indexed, component_name="link"
-        )
+        return AppianComponentCollection(indexed, name="link")
 
     @property
-    def menu(self) -> AppianComponentAccessor[AppianMenu]:
-        def indexed(index: int) -> AppianMenu:
-            raise ValueError(
-                'Use page.menu("Menu Name")[index] only after identifying the menu by name.'
-            )
-
-        return AppianComponentAccessor(
-            self._menu_factory, indexed, component_name="menu"
-        )
-
-    @property
-    def tab(self) -> AppianComponentAccessor[AppianTab]:
+    def tabs(self) -> AppianComponentCollection[AppianTab]:
         def indexed(index: int) -> AppianTab:
             component = AppianTab(page=self, name=f"tab[{index}]")
             state = self.get_by_text(AppianTab._STATE_PATTERN)
@@ -698,10 +614,10 @@ class AppianPage:
             )
             return component
 
-        return AppianComponentAccessor(self._tab_factory, indexed, component_name="tab")
+        return AppianComponentCollection(indexed, name="tab")
 
     @property
-    def date(self) -> AppianComponentAccessor[AppianDate]:
+    def dates(self) -> AppianComponentCollection[AppianDate]:
         def indexed(index: int) -> AppianDate:
             component = AppianDate(page=self, label=f"date[{index}]")
             component._indexed_locator = (
@@ -711,23 +627,10 @@ class AppianPage:
             )
             return component
 
-        return AppianComponentAccessor(
-            self._date_factory, indexed, component_name="date"
-        )
+        return AppianComponentCollection(indexed, name="date")
 
     @property
-    def dataset(self) -> AppianComponentAccessor[AppianDataSet]:
-        def indexed(index: int) -> AppianDataSet:
-            raise ValueError(
-                "Use page.dataset(header=...)[index] after identifying the dataset."
-            )
-
-        return AppianComponentAccessor(
-            self._dataset_factory, indexed, component_name="dataset"
-        )
-
-    @property
-    def grid(self) -> AppianComponentAccessor[AppianGrid]:
+    def grids(self) -> AppianComponentCollection[AppianGrid]:
         def indexed(index: int) -> AppianGrid:
             component = AppianGrid(self, label=f"grid[{index}]")
             component._indexed_locator = (
@@ -735,9 +638,7 @@ class AppianPage:
             )
             return component
 
-        return AppianComponentAccessor(
-            self._grid_factory, indexed, component_name="grid"
-        )
+        return AppianComponentCollection(indexed, name="grid")
 
 
 __all__ = ["AppianPage"]
