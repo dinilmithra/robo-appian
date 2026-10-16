@@ -140,3 +140,14 @@ Those remain in the consuming project. `robo-appian` owns reusable Appian intera
 **Next:** [Understand the framework architecture →](concepts.md)
 
 </div>
+
+## Contributor project environment
+
+Run `python tools/setup_venv.py` from the library checkout. Setup uses an external
+Poetry 2.5.1 for dependency synchronization, then installs Poetry 2.5.1 inside
+`robo-appian/.venv` for publishing. It verifies the local module with
+`.venv/Scripts/python.exe -m poetry --version` on Windows (or `.venv/bin/python`
+on Unix) and checks installed dependency compatibility. An external Poetry
+installation is required initially; `--bootstrap-poetry` permits a temporary
+bootstrap when it is unavailable. The `--with-docs` and `--browser` options are
+preserved.

@@ -155,7 +155,13 @@ def _poetry_version_ok(command: list[str]) -> bool:
 
 def _find_existing_poetry(bootstrap_python: Path) -> list[str] | None:
     """Find an existing Poetry installation without performing network access."""
-    poetry_exe = shutil.which("poetry")
+    # The project environment may be recreated or synchronized below. Its
+    # Poetry executable must not be used to manage its own removal.
+    external_path = os.pathsep.join(
+        entry for entry in os.environ.get("PATH", "").split(os.pathsep)
+        if not Path(entry.strip('"') or ".").resolve().is_relative_to(VENV_DIR.resolve())
+    )
+    poetry_exe = shutil.which("poetry", path=external_path)
     if poetry_exe:
         command = [poetry_exe]
         if _poetry_version_ok(command):
@@ -210,6 +216,26 @@ def _create_poetry_bootstrap(bootstrap_dir: Path, timeout: int) -> list[str]:
     return poetry_command
 
 
+def _install_project_poetry(python: Path, timeout: int) -> None:
+    """Retain the pinned Poetry module in this project's publishing environment.
+
+    Run after sync: Poetry sync removes packages not declared in the lockfile,
+    including a previous project-local Poetry installation.
+    """
+    env = os.environ.copy()
+    env["VIRTUAL_ENV"] = str(VENV_DIR)
+    env["PATH"] = str(python.parent) + os.pathsep + env.get("PATH", "")
+    env["POETRY_VIRTUALENVS_CREATE"] = "false"
+    env["POETRY_VIRTUALENVS_IN_PROJECT"] = "true"
+    _run([
+        str(python), "-m", "pip", "install", "--disable-pip-version-check",
+        "--no-input", "--retries", "1", "--timeout", str(max(timeout, 1)),
+        f"poetry=={POETRY_VERSION}",
+    ], env=env)
+    _run([str(python), "-m", "poetry", "--version"], env=env)
+    _run([str(python), "-m", "pip", "check"], env=env)
+
+
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse setup options."""
     parser = argparse.ArgumentParser(
@@ -241,7 +267,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--bootstrap-timeout",
         type=int,
         default=30,
-        help="Network timeout in seconds used only with --bootstrap-poetry (default: 30).",
+        help="Network timeout in seconds for Poetry bootstrap and project installation (default: 30).",
     )
     return parser.parse_args(argv)
 
@@ -284,7 +310,9 @@ def main(argv: list[str] | None = None) -> int:
         # Do not destroy a usable project environment until Poetry itself has been
         # resolved successfully. This keeps a blocked bootstrap/network operation
         # from removing an existing .venv.
-        if VENV_DIR.exists():
+        if Path(sys.prefix).resolve() == VENV_DIR.resolve():
+            print(f"Reusing active virtual environment: {VENV_DIR}")
+        elif VENV_DIR.exists():
             print(f"Removing existing virtual environment: {VENV_DIR}")
             shutil.rmtree(VENV_DIR)
 
@@ -307,6 +335,7 @@ def main(argv: list[str] | None = None) -> int:
     if not python.exists():
         raise RuntimeError(f"Poetry did not create the expected environment: {python}")
 
+    _install_project_poetry(python, args.bootstrap_timeout)
     _verify_local_install(python)
 
     if args.browser:
@@ -325,8 +354,8 @@ def main(argv: list[str] | None = None) -> int:
         "the current project. Imports are verified to resolve from the local source tree."
     )
     print(
-        "Poetry is external to robo-appian/.venv; the project environment contains only "
-        "project/runtime/development dependencies."
+        f"Poetry {POETRY_VERSION} is installed in robo-appian/.venv and verified "
+        "through its Python interpreter for library publishing."
     )
     return 0
 
