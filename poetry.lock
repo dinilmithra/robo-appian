@@ -1830,33 +1830,33 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<8)"]
 
 [[package]]
 name = "robo-automation"
-version = "0.1.15"
+version = "0.1.16"
 description = "Reusable Playwright and pytest automation framework utilities"
 optional = false
 python-versions = "<3.13,>=3.12"
 groups = ["main"]
 files = [
-    {file = "robo_automation-0.1.15-py3-none-any.whl", hash = "sha256:f7633937697e5383d0694d9b67353f7cfcfa02ed028274ba5e87a20be18845bd"},
-    {file = "robo_automation-0.1.15.tar.gz", hash = "sha256:aaeacdf6b4c3f704b7cc5058f11ce5135416483a0410be568002a5ba1173d6a1"},
+    {file = "robo_automation-0.1.16-py3-none-any.whl", hash = "sha256:dbdece8434aea54ac6ce2ce2de3ac362c811bd25b35edf93e2ebca290ae40b86"},
+    {file = "robo_automation-0.1.16.tar.gz", hash = "sha256:7001052f8c0b6706ef57c29ee1b1b906baac2711df64e2afd8248aa0ee0cda4e"},
 ]
 
 [package.dependencies]
 playwright = "1.63.0"
 psutil = "7.2.2"
 pytest = "9.1.1"
-robo-email = "0.1.8"
-robo-html = "0.1.10"
+robo-email = "0.1.9"
+robo-html = "0.1.11"
 
 [[package]]
 name = "robo-email"
-version = "0.1.8"
+version = "0.1.9"
 description = "Reusable HTML email report rendering and local delivery utilities"
 optional = false
 python-versions = "<3.13,>=3.12"
 groups = ["main"]
 files = [
-    {file = "robo_email-0.1.8-py3-none-any.whl", hash = "sha256:66f9527cb0de8b5a7bd96db2822e3841983a9851df572315ef533f970718e7df"},
-    {file = "robo_email-0.1.8.tar.gz", hash = "sha256:2d37700b0fedc49447f4194d562bf3276fed4163ed7db244d38702057ca06783"},
+    {file = "robo_email-0.1.9-py3-none-any.whl", hash = "sha256:7393abaa2818482d59924ba2f8c438af2e5226ceefbef915b7dffe8941b51673"},
+    {file = "robo_email-0.1.9.tar.gz", hash = "sha256:07745f7e8eca1e7e0593ce6095a1481540e604f0f8062fac23d89666efe4d386"},
 ]
 
 [package.dependencies]
@@ -1864,14 +1864,14 @@ matplotlib = "3.11.2"
 
 [[package]]
 name = "robo-html"
-version = "0.1.10"
+version = "0.1.11"
 description = "Reusable HTML report rendering utilities for automation projects"
 optional = false
 python-versions = "<3.13,>=3.12"
 groups = ["main"]
 files = [
-    {file = "robo_html-0.1.10-py3-none-any.whl", hash = "sha256:46405ce31bdadafbc8d1d00dd3a41f28f275841a658b1b756c538d6eeb44f604"},
-    {file = "robo_html-0.1.10.tar.gz", hash = "sha256:68835b938e39840b73315d46a8be4d425eead5af82a0b1a10dd21ffde667a209"},
+    {file = "robo_html-0.1.11-py3-none-any.whl", hash = "sha256:d513ea9dd9338a9e8fd34169bff703fd67b96f2e80bb2e0e576ba43f81edcfe8"},
+    {file = "robo_html-0.1.11.tar.gz", hash = "sha256:dc6d6b06069bc9d0a545b66e81fca8c68d481435bfb9eb3734d65d99a08d1d3c"},
 ]
 
 [[package]]
@@ -1962,4 +1962,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "d487e8f948a953de87f3da5ddc6b5fe594379e83cdeb03bca84699e5f5410f8c"
+content-hash = "9d049e9eb003c3ecc3a0b252d36a10721945025df25fb178487ff53cd8c43d7e"
