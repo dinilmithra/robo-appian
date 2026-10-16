@@ -1,4 +1,4 @@
-"""Command-line utilities for robo-appian setup."""
+"""Command-line utilities for robo-appian setup and recording."""
 
 from __future__ import annotations
 
@@ -46,10 +46,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Browser to install. Omit or use 'all' to install the full set.",
     )
 
+    from .recorder.cli import configure_parser, run_command
+
+    recorder_parser = subparsers.add_parser(
+        "recorder", help="Record, review, validate and generate semantic automation."
+    )
+    configure_parser(recorder_parser)
+
     args = parser.parse_args(argv)
     if args.command == "install-browser":
         return install_browser(args.browser)
-    return 2
+    return run_command(args)
 
 
 if __name__ == "__main__":

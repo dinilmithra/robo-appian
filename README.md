@@ -92,3 +92,30 @@ from robo_appian import AppianPage, AppianRuntime, RoboAppianError
 advanced consumer fixtures. It intentionally hides lower browser and
 performance implementation classes. Normal test authors usually only need the
 `page` fixture and component APIs shown above.
+
+## Semantic browser recorder
+
+The library now includes `robo_appian.recorder`: live semantic inspection,
+recording normalization, explicit step review and deterministic pytest generation.
+Use the sibling `robo-recorder` project's README for installation, the local demo,
+supported mappings and live-browser validation steps. Recorder mechanics stay in
+this library; generated tests do not depend on CORE testcase patterns.
+
+### Recorder commands
+
+The recorder CLI and demo are owned by this library; no `robo-recorder` package
+is required to capture, review or generate tests.
+
+```powershell
+robo-appian recorder record --url "https://your-appian-host/suite/sites/your-site" --output .\recordings\request
+robo-appian recorder review .\recordings\request\recording.json
+robo-appian recorder validate .\recordings\request\recording.json
+robo-appian recorder generate .\recordings\request\recording.json --output .\tests\generated\test_request.py
+```
+
+Use `python -m robo_appian.cli recorder --help` if the console command is not on
+PATH. `robo-appian recorder demo` opens the library-bundled local example.
+Playback still requires consumer fixtures and application Login/Logout hooks;
+see the sibling `robo-recorder` project for an example. Existing browser-install
+commands remain available. The old `robo-recorder` CLI forwards to these same
+library functions.

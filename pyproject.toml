@@ -32,6 +32,10 @@ Issues = "https://github.com/dinilmithra/robo-appian/issues"
 Developer = "https://www.linkedin.com/in/dinilmithra/"
 
 [tool.poetry]
+include = [
+    { path = "robo_appian/recorder/recorder.js", format = ["sdist", "wheel"] },
+    { path = "robo_appian/recorder/demo.html", format = ["sdist", "wheel"] },
+]
 version = "0.1.31"
 packages = [{ include = "robo_appian" }]
 exclude = ["scripts/**", "tools/**"]
