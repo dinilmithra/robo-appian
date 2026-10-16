@@ -167,6 +167,20 @@ class AppianGrid:
         )
         return self
 
+    def wait_until_ready(self, timeout: float | int | None = None) -> "AppianGrid":
+        """Wait for a matching grid using its configured visibility constraint.
+
+        Visible grids must be visible. Hidden and unfiltered grids must be
+        attached; the live locator retains the requested visibility filter.
+        """
+        if self._component_visible is True:
+            return self.wait_until_visible(timeout=timeout)
+        effective_timeout = self._timeout if timeout is None else timeout
+        expect(self.locator.first, "Appian grid was not attached.").to_be_attached(
+            **ComponentSupport.timeout_kwargs(effective_timeout)
+        )
+        return self
+
     @property
     def appian_page(self):
         """Return the AppianPage used to create this table when available."""

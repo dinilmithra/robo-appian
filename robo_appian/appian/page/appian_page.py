@@ -199,6 +199,10 @@ class AppianPage:
         """Return Appian wrappers for open pages in the current context."""
         return [type(self).get(page) for page in self._robo_page.open_pages()]
 
+    def new_page(self) -> "AppianPage":
+        """Open a page in this context, even if the original page was closed."""
+        return type(self).get(self._robo_page._page.context.new_page())
+
     def get_by_attributes(
         self,
         attributes: Mapping[str, Any],
@@ -442,15 +446,23 @@ class AppianPage:
         exact: bool = True,
         visible: bool | str | None = True,
         timeout: float | int | None = None,
+        wait: bool = True,
     ) -> AppianGrid:
-        """Return an Appian grid identified by one or more semantic hints.
+        """Wait for and return an Appian grid identified by semantic hints.
 
         At least one of ``label``, ``header``, ``row_name``, or
         ``column_name`` is required. ``visible=True`` selects visible tables,
         ``visible=False`` selects hidden tables, and ``visible=None`` applies
         no visibility filter so both visible and hidden matches are retained.
+
+        By default the matching grid must be ready before returning: visible
+        for ``visible=True``, attached for ``False`` or ``None``. Set
+        ``wait=False`` for an immediate optional-grid probe. Timeout is in
+        seconds; None uses the browser/context default.
         """
-        return AppianGrid(
+        if not isinstance(wait, bool):
+            raise TypeError("wait must be a bool.")
+        grid = AppianGrid(
             self,
             label=label,
             header=header,
@@ -460,6 +472,7 @@ class AppianPage:
             visible=visible,
             timeout=timeout,
         )
+        return grid.wait_until_ready() if wait else grid
 
     def dataset(
         self,

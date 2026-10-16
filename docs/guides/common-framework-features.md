@@ -48,6 +48,8 @@ See [Browser Management](browser-management.md) and [Pytest Integration](pytest-
 | `WAIT_TIME` | `90` | Default framework timeout in seconds. |
 | `CAPTURE_ACTION_SNAPSHOTS` | `N` | Capture before/after evidence for instrumented actions. |
 | `CAPTURE_FAILURE_SNAPSHOTS` | `N` | Capture failure evidence independently of action capture. |
+| `CAPTURE_SNAPSHOT_IMAGES` | `Y` | Include PNG images in enabled action/failure snapshots; `N` skips PNG images. |
+| `CAPTURE_SNAPSHOT_HTML` | `Y` | Include live HTML DOM in enabled action/failure snapshots. |
 | `SNAPSHOT_FULL_PAGE` | `N` | Capture the full page instead of only the visible area. |
 | `SNAPSHOT_PATH` | `${ARTIFACTS_ROOT}/snapshots` | Folder where screenshots are saved. |
 | `PYTEST_LOG_LEVEL` | `INFO` | Set the framework/file logging level. |

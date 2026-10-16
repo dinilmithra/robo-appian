@@ -12,11 +12,12 @@ import pytest
 from typing import Any, Optional
 
 from robo_automation import RoboPage
+from robo_automation.browser import browser_fixture_scope
 from robo_appian.appian import AppianPage
 from robo_appian.runtime import AppianRuntime
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope=browser_fixture_scope)
 def appian_runtime(
     browser: Any,
     performance_monitor: Optional[Any],
@@ -24,7 +25,8 @@ def appian_runtime(
 ) -> AppianRuntime:
     """Expose Appian-level runtime services to consumer projects.
 
-    Consumers should depend on this fixture instead of robo-automation browser
+    The fixture follows robo_browser_scope to keep its browser alive for the
+    same lifetime. Consumers should depend on this fixture instead of browser
     or performance classes directly.
     """
     return AppianRuntime(

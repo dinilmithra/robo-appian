@@ -1,6 +1,7 @@
 # Appian Grid
 
-Use `page.grid(...)` to work with rows and cells in an Appian grid.
+Use `page.grid(...)` to work with rows and cells in an Appian grid. The factory
+waits for the matching grid before returning it, so callers can use it directly.
 
 ```python
 items = page.grid(label="Items")
@@ -93,19 +94,27 @@ page.grid(label="Items", visible=None)
 Check whether a matching grid is visible now:
 
 ```python
-items = page.grid(label="Items")
+items = page.grid(label="Items", wait=False)
 if items.is_visible():
     print("Items grid is visible")
 ```
 
-`is_visible()` returns a boolean immediately; it does not wait for the grid.
+`is_visible()` itself returns immediately. Use `wait=False` on the factory to
+probe an optional grid without waiting. By default `page.grid()` already waits.
 
-To wait for the grid, use `wait_until_visible()` instead. Its optional timeout
-is in seconds; without one, it uses the grid's configured timeout.
+The default `visible=True` waits for a visible table. `visible=False` waits for
+an attached hidden table, and `visible=None` waits for an attached table with
+either visibility. A missing table never counts as a ready hidden grid.
+
+Timeout values are in seconds. The grid uses the supplied `timeout`, or the
+configured browser/context timeout when omitted (90 seconds in CORE). This
+waits for the grid, not for a particular row to be added.
+
+You can explicitly wait on a previously obtained component after a UI transition:
 
 ```python
-items = page.grid(label="Items")
-items.wait_until_visible()
+items = page.grid(label="Items", wait=False)
+items.wait_until_ready()
 items.wait_until_visible(timeout=8)
 ```
 
@@ -118,6 +127,7 @@ items.wait_until_visible(timeout=8)
       members:
         - is_visible
         - wait_until_visible
+        - wait_until_ready
         - cell
         - appian_column
         - row
