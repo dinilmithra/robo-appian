@@ -36,7 +36,7 @@ include = [
     { path = "robo_appian/recorder/recorder.js", format = ["sdist", "wheel"] },
     { path = "robo_appian/recorder/demo.html", format = ["sdist", "wheel"] },
 ]
-version = "0.1.32"
+version = "0.1.33"
 packages = [{ include = "robo_appian" }]
 exclude = ["scripts/**", "tools/**"]
 
